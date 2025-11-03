@@ -235,6 +235,12 @@ app.get("/api/orders", async (_req, res) => {
   }
 });
 
+// --- Consultar producto por ID ---
+app.get("/api/products/:id", async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  if (!product) return res.status(404).json({ error: "Producto no encontrado" });
+  res.json(product);
+});
 
 // --- Server ---
 const PORT = process.env.PORT || 3000;

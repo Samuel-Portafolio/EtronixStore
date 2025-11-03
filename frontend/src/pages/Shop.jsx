@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
@@ -113,14 +114,13 @@ export default function Shop() {
                     Stock: {p.stock}
                   </p>
                 </div>
-                
-                <button
-                  onClick={() => addToCart(p)}
-                  disabled={p.stock === 0}
-                  className="mt-4 w-full rounded-lg bg-primary text-black py-3 font-semibold hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+                <Link
+                  to={`/products/${p._id}`}
+                  className="mt-4 w-full rounded-lg bg-primary text-black py-3 font-semibold hover:bg-opacity-90 transition-colors"
                 >
-                  {p.stock === 0 ? 'Sin stock' : 'Agregar al carrito'}
-                </button>
+                  Ver Detalles
+                </Link>
               </div>
             ))}
           </div>
