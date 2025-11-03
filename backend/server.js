@@ -242,6 +242,33 @@ app.get("/api/products/:id", async (req, res) => {
   res.json(product);
 });
 
+// --- Actualizar estado de orden ---
+app.patch("/api/orders/:id", async (req, res) => {
+  try {
+    const { status } = req.body;
+    
+    const validStatuses = ["pending", "paid", "failed", "processing", "shipped", "delivered"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: "Estado inválido" });
+    }
+    
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true, runValidators: true }
+    );
+    
+    if (!order) {
+      return res.status(404).json({ error: "Orden no encontrada" });
+    }
+    
+    res.json(order);
+  } catch (err) {
+    console.error("Error updating order:", err);
+    res.status(500).json({ error: "Error actualizando la orden" });
+  }
+});
+
 // --- Server ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
 export default function Shop() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,17 +21,25 @@ export default function Shop() {
         setLoading(false);
       }
     })();
+
+    // Cargar carrito desde localStorage
+    const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
+    setCart(savedCart);
   }, []);
 
   const addToCart = (p) => {
     setCart((prev) => {
       const found = prev.find((x) => x._id === p._id);
       if (found) {
-        return prev.map((x) =>
+        const updated = prev.map((x) =>
           x._id === p._id ? { ...x, quantity: x.quantity + 1 } : x
         );
+        localStorage.setItem('cart', JSON.stringify(updated));
+        return updated;
       }
-      return [...prev, { ...p, quantity: 1 }];
+      const newCart = [...prev, { ...p, quantity: 1 }];
+      localStorage.setItem('cart', JSON.stringify(newCart));
+      return newCart;
     });
   };
 
@@ -38,44 +47,26 @@ export default function Shop() {
     setCart((prev) => {
       const found = prev.find((x) => x._id === id);
       if (found && found.quantity > 1) {
-        return prev.map((x) =>
+        const updated = prev.map((x) =>
           x._id === id ? { ...x, quantity: x.quantity - 1 } : x
         );
+        localStorage.setItem('cart', JSON.stringify(updated));
+        return updated;
       }
-      return prev.filter((x) => x._id !== id);
+      const filtered = prev.filter((x) => x._id !== id);
+      localStorage.setItem('cart', JSON.stringify(filtered));
+      return filtered;
     });
   };
 
   const total = cart.reduce((acc, i) => acc + i.price * i.quantity, 0);
   const totalItems = cart.reduce((a, i) => a + i.quantity, 0);
 
-  const checkout = async () => {
+  const goToCheckout = () => {
     if (!cart.length) return;
-    
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/preference`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: cart.map((i) => ({
-            title: i.title,
-            unit_price: i.price,
-            quantity: i.quantity,
-            productId: i._id,
-          })),
-          buyer: { name: "Cliente Demo", email: "cliente@demo.com" },
-        }),
-      });
-      const data = await res.json();
-      if (data?.init_point) {
-        window.location.href = data.init_point;
-      } else {
-        alert("No se pudo iniciar el pago");
-      }
-    } catch (error) {
-      console.error("Error en checkout:", error);
-      alert("Error al procesar el pago");
-    }
+    // Guardar carrito en localStorage y navegar al checkout
+    localStorage.setItem('cart', JSON.stringify(cart));
+    navigate('/checkout');
   };
 
   return (
@@ -115,12 +106,21 @@ export default function Shop() {
                   </p>
                 </div>
 
-                <Link
-                  to={`/products/${p._id}`}
-                  className="mt-4 w-full rounded-lg bg-primary text-black py-3 font-semibold hover:bg-opacity-90 transition-colors"
-                >
-                  Ver Detalles
-                </Link>
+                <div className="mt-4 space-y-2">
+                  <button
+                    onClick={() => addToCart(p)}
+                    disabled={p.stock === 0}
+                    className="w-full rounded-lg bg-primary text-black py-3 font-semibold hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {p.stock === 0 ? 'Sin stock' : 'Agregar al Carrito'}
+                  </button>
+                  <Link
+                    to={`/products/${p._id}`}
+                    className="block w-full text-center rounded-lg border border-primary text-primary py-2 font-semibold hover:bg-primary hover:text-black transition-colors"
+                  >
+                    Ver Detalles
+                  </Link>
+                </div>
               </div>
             ))}
           </div>
@@ -183,10 +183,10 @@ export default function Shop() {
               </div>
               
               <button
-                onClick={checkout}
+                onClick={goToCheckout}
                 className="rounded-lg bg-primary text-black py-3 px-8 font-bold hover:bg-opacity-90 transition-colors"
               >
-                Pagar con Mercado Pago
+                Continuar con la Compra
               </button>
             </div>
           </div>

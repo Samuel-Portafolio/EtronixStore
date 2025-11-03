@@ -9,11 +9,13 @@ import Pending from "./pages/Pending.jsx";
 import Admin from "./pages/Admin.jsx";
 import Home from "./pages/Home.jsx";
 import Shop from "./pages/Shop.jsx";
+import Checkout from "./pages/Checkout.jsx";
 import "./index.css";
 
 const router = createBrowserRouter([
   { path: "/", element: <Home /> },
   { path: "/shop", element: <Shop /> },
+  { path: "/checkout", element: <Checkout /> },
   { path: "/admin", element: <Admin /> },
   { path: "/success", element: <Success /> },
   { path: "/failure", element: <Failure /> },

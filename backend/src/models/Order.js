@@ -11,11 +11,19 @@ const orderSchema = new mongoose.Schema(
       },
     ],
     buyer: {
-      name: String,
+      name: { type: String, required: true },
       email: String,
+      phone: { type: String, required: true },
+      address: { type: String, required: true },
+      city: { type: String, required: true },
+      notes: String,
     },
     total: Number,
-    status: { type: String, enum: ["pending", "paid", "failed"], default: "pending" },
+    status: { 
+      type: String, 
+      enum: ["pending", "paid", "failed", "processing", "shipped", "delivered"], 
+      default: "pending" 
+    },
     external_reference: String, // para enlazar con Mercado Pago
     mp_preference_id: String,
     mp_payment_id: String,
