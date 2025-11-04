@@ -1,6 +1,4 @@
 import { useSearchParams, Link } from "react-router-dom";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 
 export default function Success() {
   const [params] = useSearchParams();
@@ -8,8 +6,6 @@ export default function Success() {
   
   return (
     <div className="min-h-screen flex flex-col">
-      <Header cartCount={0} />
-      
       <main className="flex-1 flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark shadow-lg p-8 text-center">
           <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -42,8 +38,6 @@ export default function Success() {
           </div>
         </div>
       </main>
-      
-      <Footer />
     </div>
   );
 }

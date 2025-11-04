@@ -108,37 +108,26 @@ export default function Admin() {
   };
 
   return (
-    <div className="min-h-screen bg-bg-light dark:bg-bg-dark">
+  <div className="min-h-screen bg-background-light dark:bg-background-dark">
       {/* Audio para notificación */}
       <audio ref={audioRef} src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjKM0/LRgzgKGGS46+mjUhENUKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0" />
 
-      {/* Header */}
-      <header className="bg-card-light dark:bg-card-dark border-b border-border-light dark:border-border-dark sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      {/* Encabezado interno de la página (no global) */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-text-light dark:text-text-dark">
-              Panel de Administración
-            </h1>
-            <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-              Última actualización: {new Date().toLocaleTimeString("es-CO")}
-            </p>
+            <h1 className="text-2xl font-bold text-text-light dark:text-text-dark">Panel de Administración</h1>
+            <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Última actualización: {new Date().toLocaleTimeString("es-CO")}</p>
           </div>
           <div className="flex items-center gap-4">
-            <button
-              onClick={fetchOrders}
-              className="px-4 py-2 rounded-lg bg-primary text-black font-semibold hover:bg-opacity-90 transition-colors"
-            >
-              🔄 Actualizar
-            </button>
-            <Link to="/shop" className="text-sm text-primary hover:underline">
-              ← Volver a la tienda
-            </Link>
+            <button onClick={fetchOrders} className="px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-opacity-90 transition-colors">🔄 Actualizar</button>
+            <Link to="/shop" className="text-sm text-primary hover:underline">← Volver a la tienda</Link>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Main */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
+  <main className="max-w-7xl mx-auto px-4 pb-12">
         {/* Estadísticas */}
         <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
           <div className="bg-card-light dark:bg-card-dark rounded-lg border border-border-light dark:border-border-dark p-4">
@@ -236,7 +225,7 @@ export default function Admin() {
                       <select
                         value={order.status}
                         onChange={(e) => updateOrderStatus(order._id, e.target.value)}
-                        className="text-xs px-2 py-1 rounded border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark text-text-light dark:text-text-dark"
+                        className="text-xs px-2 py-1 rounded border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark"
                       >
                         <option value="pending">Pendiente</option>
                         <option value="paid">Pagado</option>
@@ -251,7 +240,7 @@ export default function Admin() {
 
                 <div className="grid md:grid-cols-2 gap-6">
                   {/* Información del cliente */}
-                  <div className="bg-bg-light dark:bg-bg-dark rounded-lg p-4">
+                  <div className="bg-background-light dark:bg-background-dark rounded-lg p-4">
                     <h3 className="text-sm font-bold text-text-light dark:text-text-dark mb-3 flex items-center gap-2">
                       👤 Información del Cliente
                     </h3>
@@ -315,7 +304,7 @@ export default function Admin() {
                   </div>
 
                   {/* Productos */}
-                  <div className="bg-bg-light dark:bg-bg-dark rounded-lg p-4">
+                  <div className="bg-background-light dark:bg-background-dark rounded-lg p-4">
                     <h3 className="text-sm font-bold text-text-light dark:text-text-dark mb-3 flex items-center gap-2">
                       📦 Productos
                     </h3>

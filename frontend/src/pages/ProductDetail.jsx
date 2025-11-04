@@ -1,15 +1,13 @@
 // frontend/src/pages/ProductDetail.jsx
 import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+import { useParams, Link } from "react-router-dom";
 
 export default function ProductDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('specs');
+  const [toast, setToast] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -25,7 +23,7 @@ export default function ProductDetail() {
     })();
   }, [id]);
 
-  const addToCartAndRedirect = () => {
+  const addToCart = () => {
     // Guardar en localStorage para que Shop.jsx lo tome
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const found = cart.find(x => x._id === product._id);
@@ -37,13 +35,15 @@ export default function ProductDetail() {
     }
     
     localStorage.setItem('cart', JSON.stringify(cart));
-    navigate('/shop');
+    // Notificar actualización del carrito
+    window.dispatchEvent(new Event('cartUpdated'));
+    setToast('✓ Producto agregado al carrito');
+    setTimeout(() => setToast(""), 2000);
   };
 
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header cartCount={0} />
         <div className="flex-1 flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
@@ -54,7 +54,6 @@ export default function ProductDetail() {
   if (!product) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header cartCount={0} />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <p className="text-xl mb-4">Producto no encontrado</p>
@@ -69,8 +68,6 @@ export default function ProductDetail() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header cartCount={0} />
-      
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-8 py-8">
         {/* Breadcrumb */}
         <div className="mb-6 text-sm">
@@ -126,10 +123,13 @@ export default function ProductDetail() {
             </div>
 
             <button
-              onClick={addToCartAndRedirect}
+              onClick={addToCart}
               disabled={product.stock === 0}
-              className="w-full bg-primary text-white py-4 rounded-lg font-bold text-lg hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+              className="w-full bg-indigo-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-4 flex items-center justify-center gap-2"
             >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
               {product.stock === 0 ? 'Sin stock' : 'Agregar al carrito'}
             </button>
 
@@ -246,7 +246,12 @@ export default function ProductDetail() {
         </div>
       </main>
 
-      <Footer />
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
+          {toast}
+        </div>
+      )}
     </div>
   );
 }

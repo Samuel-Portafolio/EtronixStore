@@ -5,17 +5,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#1337ec",
-        "background-light": "#f6f6f8",
-        "background-dark": "#101322",
-        "text-light": "#0d101b",
-        "text-dark": "#f6f6f8",
-        "text-secondary-light": "#4c599a",
-        "text-secondary-dark": "#a1a7c4",
+        // Paleta profesional, sobria y accesible
+        primary: "#4f46e5", // Indigo 600
+        "background-light": "#f8fafc", // Slate 50
+        "background-dark": "#0f172a", // Slate 900
+        "text-light": "#0f172a", // Slate 900
+        "text-dark": "#f8fafc", // Slate 50
+        "text-secondary-light": "#64748b", // Slate 500
+        "text-secondary-dark": "#94a3b8", // Slate 400
         "card-light": "#ffffff",
-        "card-dark": "#1a1e33",
-        "border-light": "#e7e9f3",
-        "border-dark": "#2d3358"
+        "card-dark": "#111827", // Gray 900
+        "border-light": "#e5e7eb", // Gray 200
+        "border-dark": "#334155" // Slate 700
       },
       fontFamily: {
         display: ["Space Grotesk", "sans-serif"]

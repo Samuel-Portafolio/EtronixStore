@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+import { EmptyCart } from "../components/EmptyState";
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -127,13 +126,17 @@ export default function Checkout() {
   };
 
   if (cart.length === 0) {
-    return null; // Mientras redirige
+    return (
+      <div className="min-h-screen flex flex-col bg-background-light dark:bg-background-dark">
+        <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-8 py-8 w-full">
+          <EmptyCart />
+        </main>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-light dark:bg-bg-dark">
-      <Header cartCount={totalItems} />
-      
+    <div className="min-h-screen flex flex-col bg-background-light dark:bg-background-dark">
       <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-8 py-8 w-full">
         <h1 className="text-3xl font-bold text-text-light dark:text-text-dark mb-8">
           Finalizar Compra
@@ -161,7 +164,7 @@ export default function Checkout() {
                     errors.name 
                       ? 'border-red-500' 
                       : 'border-border-light dark:border-border-dark'
-                  } bg-bg-light dark:bg-bg-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary`}
+                  } bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary`}
                   placeholder="Juan Pérez"
                 />
                 {errors.name && (
@@ -183,7 +186,7 @@ export default function Checkout() {
                     errors.phone 
                       ? 'border-red-500' 
                       : 'border-border-light dark:border-border-dark'
-                  } bg-bg-light dark:bg-bg-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary`}
+                  } bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary`}
                   placeholder="3001234567"
                 />
                 {errors.phone && (
@@ -205,7 +208,7 @@ export default function Checkout() {
                     errors.email 
                       ? 'border-red-500' 
                       : 'border-border-light dark:border-border-dark'
-                  } bg-bg-light dark:bg-bg-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary`}
+                  } bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary`}
                   placeholder="correo@ejemplo.com"
                 />
                 {errors.email && (
@@ -227,7 +230,7 @@ export default function Checkout() {
                     errors.address 
                       ? 'border-red-500' 
                       : 'border-border-light dark:border-border-dark'
-                  } bg-bg-light dark:bg-bg-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary`}
+                  } bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary`}
                   placeholder="Calle 123 #45-67, Apto 101"
                 />
                 {errors.address && (
@@ -249,7 +252,7 @@ export default function Checkout() {
                     errors.city 
                       ? 'border-red-500' 
                       : 'border-border-light dark:border-border-dark'
-                  } bg-bg-light dark:bg-bg-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary`}
+                  } bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary`}
                   placeholder="Bogotá"
                 />
                 {errors.city && (
@@ -267,7 +270,7 @@ export default function Checkout() {
                   value={formData.notes}
                   onChange={handleInputChange}
                   rows="3"
-                  className="w-full px-4 py-3 rounded-lg border border-border-light dark:border-border-dark bg-bg-light dark:bg-bg-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                  className="w-full px-4 py-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                   placeholder="Ej: Entregar después de las 2pm, portería del edificio, etc."
                 />
               </div>
@@ -284,7 +287,7 @@ export default function Checkout() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 py-3 rounded-lg bg-primary text-black font-bold hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 py-3 rounded-lg bg-primary text-white font-bold hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Procesando...' : 'Continuar al Pago'}
                 </button>
@@ -350,7 +353,6 @@ export default function Checkout() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }
