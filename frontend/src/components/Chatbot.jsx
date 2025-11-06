@@ -134,23 +134,15 @@ export default function Chatbot() {
           className="fixed bottom-6 right-6 w-16 h-16 bg-linear-to-br from-indigo-600 to-purple-600 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-all duration-300 z-50 group"
           aria-label="Abrir chat"
         >
-          <svg 
-            className="w-8 h-8 text-white" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" 
-            />
+          {/* Robot Icon */}
+          <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C11.45 2 11 2.45 11 3V4.07C8.69 4.38 6.92 6.15 6.61 8.46L5 8.46C4.45 8.46 4 8.91 4 9.46V12.54C4 13.09 4.45 13.54 5 13.54H6.61C6.92 15.85 8.69 17.62 11 17.93V20H9C8.45 20 8 20.45 8 21C8 21.55 8.45 22 9 22H15C15.55 22 16 21.55 16 21C16 20.45 15.55 20 15 20H13V17.93C15.31 17.62 17.08 15.85 17.39 13.54H19C19.55 13.54 20 13.09 20 12.54V9.46C20 8.91 19.55 8.46 19 8.46H17.39C17.08 6.15 15.31 4.38 13 4.07V3C13 2.45 12.55 2 12 2M12 6C14.21 6 16 7.79 16 10V13C16 15.21 14.21 17 12 17C9.79 17 8 15.21 8 13V10C8 7.79 9.79 6 12 6M10 10C9.45 10 9 10.45 9 11C9 11.55 9.45 12 10 12C10.55 12 11 11.55 11 11C11 10.45 10.55 10 10 10M14 10C13.45 10 13 10.45 13 11C13 11.55 13.45 12 14 12C14.55 12 15 11.55 15 11C15 10.45 14.55 10 14 10Z"/>
           </svg>
           {/* Pulso animado */}
           <span className="absolute inset-0 rounded-full bg-indigo-600 animate-ping opacity-20"></span>
         </button>
       )}
+
 
       {/* Ventana del chat */}
       {isOpen && (
@@ -158,9 +150,10 @@ export default function Chatbot() {
           {/* Header */}
           <div className="bg-linear-to-r from-indigo-600 to-purple-600 px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center p-1.5">
+                {/* Robot Icon */}
+                <svg className="w-full h-full text-indigo-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C11.45 2 11 2.45 11 3V4.07C8.69 4.38 6.92 6.15 6.61 8.46L5 8.46C4.45 8.46 4 8.91 4 9.46V12.54C4 13.09 4.45 13.54 5 13.54H6.61C6.92 15.85 8.69 17.62 11 17.93V20H9C8.45 20 8 20.45 8 21C8 21.55 8.45 22 9 22H15C15.55 22 16 21.55 16 21C16 20.45 15.55 20 15 20H13V17.93C15.31 17.62 17.08 15.85 17.39 13.54H19C19.55 13.54 20 13.09 20 12.54V9.46C20 8.91 19.55 8.46 19 8.46H17.39C17.08 6.15 15.31 4.38 13 4.07V3C13 2.45 12.55 2 12 2M12 6C14.21 6 16 7.79 16 10V13C16 15.21 14.21 17 12 17C9.79 17 8 15.21 8 13V10C8 7.79 9.79 6 12 6M10 10C9.45 10 9 10.45 9 11C9 11.55 9.45 12 10 12C10.55 12 11 11.55 11 11C11 10.45 10.55 10 10 10M14 10C13.45 10 13 10.45 13 11C13 11.55 13.45 12 14 12C14.55 12 15 11.55 15 11C15 10.45 14.55 10 14 10Z"/>
                 </svg>
               </div>
               <div>

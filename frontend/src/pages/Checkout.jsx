@@ -3,14 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { initMercadoPago, CardPayment } from '@mercadopago/sdk-react';
 import { EmptyCart } from "../components/EmptyState";
 
-initMercadoPago(import.meta.env.VITE_MP_PUBLIC_KEY || 'TEST-d22313f9-9182-45cd-ba40-032ba771a9ba');
-
 export default function Checkout() {
   const navigate = useNavigate();
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
-  const [orderId, setOrderId] = useState(null);
+  const [mpInitialized, setMpInitialized] = useState(false);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -22,6 +20,21 @@ export default function Checkout() {
   });
 
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    // Inicializar MercadoPago
+    try {
+      const publicKey = import.meta.env.VITE_MP_PUBLIC_KEY;
+      if (publicKey) {
+        initMercadoPago(publicKey, { locale: 'es-CO' });
+        setMpInitialized(true);
+      } else {
+        console.error('VITE_MP_PUBLIC_KEY no está configurada');
+      }
+    } catch (error) {
+      console.error('Error inicializando MercadoPago:', error);
+    }
+  }, []);
 
   useEffect(() => {
     const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -81,65 +94,57 @@ export default function Checkout() {
       return;
     }
     
-    setLoading(true);
-    
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/preference`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: cart.map((item) => ({
-            title: item.title,
-            unit_price: item.price,
-            quantity: item.quantity,
-            productId: item._id,
-          })),
-          buyer: formData
-        }),
-      });
-      
-      const data = await res.json();
-      
-      if (data?.orderId) {
-        setOrderId(data.orderId);
-        setShowPayment(true);
-        setLoading(false);
-      } else {
-        alert("No se pudo crear la orden.");
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Error al procesar la orden.");
-      setLoading(false);
-    }
+    // Simplemente mostrar el formulario de pago sin crear orden
+    setShowPayment(true);
   };
 
-  const onSubmitPayment = async (paymentFormData) => {
+  const onSubmitPayment = async (formData) => {
     try {
       setLoading(true);
       
-      console.log("Datos del pago a enviar:", {
-        orderId,
-        transaction_amount: total,
-        formData: paymentFormData
-      });
+      console.log("Datos del pago recibidos del CardPayment:", formData);
+      
+      // Validar que tenemos los datos necesarios
+      if (!formData.payment_method_id) {
+        console.error("payment_method_id es null o undefined");
+        alert("Error: No se detectó el método de pago. Por favor recarga la página e intenta nuevamente.");
+        setLoading(false);
+        return;
+      }
       
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/process`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...paymentFormData,
-          orderId: orderId,
+          token: formData.token,
+          issuer_id: formData.issuer_id,
+          payment_method_id: formData.payment_method_id,
           transaction_amount: total,
-          description: `Orden #${orderId}`,
+          installments: formData.installments || 1,
+          description: `Compra en Etronix Store`,
           payer: {
-            email: formData.email,
-            identification: paymentFormData.payer?.identification || {
-              type: "CC",
-              number: "12345678"
-            }
-          }
+            email: formData.payer?.email || formData.email || formData.buyer?.email,
+            identification: formData.payer?.identification,
+            first_name: formData.payer?.first_name,
+            last_name: formData.payer?.last_name
+          },
+          buyer: {
+            name: formData.payer?.first_name && formData.payer?.last_name 
+              ? `${formData.payer.first_name} ${formData.payer.last_name}` 
+              : formData.payer?.email?.split('@')[0] || formData.buyer?.email?.split('@')[0] || "Cliente",
+            phone: "N/A",
+            email: formData.payer?.email || formData.email || formData.buyer?.email,
+            address: "N/A",
+            city: "N/A",
+            notes: ""
+          },
+          items: cart.map((item) => ({
+            productId: item._id,
+            title: item.title,
+            price: item.price,
+            unit_price: item.price,
+            quantity: item.quantity,
+          }))
         }),
       });
 
@@ -149,15 +154,16 @@ export default function Checkout() {
       
       if (result.success && result.status === "approved") {
         localStorage.removeItem('cart');
-        navigate(`/success?order=${orderId}`);
+        navigate(`/success?order=${result.orderId}`);
       } else {
-        // Mostrar mensaje más descriptivo según el status
         let errorMsg = "El pago fue rechazado.";
         
         if (result.status === "rejected") {
           errorMsg = `Pago rechazado: ${result.message || "Intenta con otra tarjeta o método de pago."}`;
         } else if (result.status === "pending" || result.status === "in_process") {
           errorMsg = "El pago está en proceso. Por favor verifica el estado más tarde.";
+        } else if (result.error) {
+          errorMsg = `Error: ${result.error}`;
         }
         
         alert(errorMsg);
@@ -175,9 +181,29 @@ export default function Checkout() {
     console.error("Error type:", error?.type);
     console.error("Error cause:", error?.cause);
     console.error("Error message:", error?.message);
-    // No mostrar alerta para errores menores de validación
-    if (error?.type === 'critical') {
-      alert(`Error: ${error?.message || "Ocurrió un error al procesar el pago."}`);
+    
+    // Mensajes de error más específicos
+    let errorMessage = "Ocurrió un error al procesar el pago.";
+    
+    if (error?.message) {
+      if (error.message.includes("Secure Fields")) {
+        errorMessage = "Error de configuración del sistema de pago. Por favor, recarga la página e intenta nuevamente.";
+      } else if (error.message.includes("amount")) {
+        errorMessage = "Error con el monto del pago. Por favor, verifica tu carrito.";
+      } else {
+        errorMessage = error.message;
+      }
+    }
+    
+    // Solo mostrar alerta para errores críticos
+    if (error?.type === 'critical' || error?.message?.includes("Secure Fields")) {
+      alert(errorMessage);
+      // Recargar la página si hay error de Secure Fields
+      if (error?.message?.includes("Secure Fields")) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      }
     }
     setLoading(false);
   };
@@ -380,14 +406,25 @@ export default function Checkout() {
                 Total a pagar: <span className="text-2xl font-bold text-primary-600">${total.toLocaleString("es-CO")}</span>
               </p>
               
-              <CardPayment
-                initialization={{
-                  amount: total
-                }}
-                onSubmit={onSubmitPayment}
-                onError={onErrorPayment}
-                locale="es-CO"
-              />
+              {!mpInitialized ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600 dark:text-gray-400">Cargando sistema de pago...</p>
+                </div>
+              ) : total > 0 ? (
+                <CardPayment
+                  initialization={{
+                    amount: Number(total),
+                    payer: {
+                      email: formData.email
+                    }
+                  }}
+                  onSubmit={onSubmitPayment}
+                  onError={onErrorPayment}
+                />
+              ) : (
+                <p className="text-red-500">Error: El total debe ser mayor a 0</p>
+              )}
               
               <button
                 type="button"

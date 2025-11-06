@@ -251,58 +251,108 @@ app.post("/api/payments/preference", paymentLimiter, validate(createOrderSchema)
 // --- Procesar pago directo (Checkout Bricks) ---
 app.post("/api/payments/process", paymentLimiter, async (req, res) => {
   try {
-    const { token, orderId, payer, transaction_amount, description } = req.body;
+    const { token, items, buyer, transaction_amount, description, payment_method_id, issuer_id, payer, installments } = req.body;
 
-    if (!orderId) {
-      return res.status(400).json({ error: "orderId es requerido" });
+    logger.info("Datos recibidos en /api/payments/process:", {
+      has_token: !!token,
+      has_items: !!items,
+      has_buyer: !!buyer,
+      payment_method_id,
+      issuer_id,
+      transaction_amount,
+      payer_email: payer?.email
+    });
+
+    if (!items || !buyer) {
+      return res.status(400).json({ error: "items y buyer son requeridos" });
     }
 
-    const order = await Order.findById(orderId);
-    if (!order) {
-      return res.status(404).json({ error: "Orden no encontrada" });
+    if (!payment_method_id) {
+      logger.error("payment_method_id es null o undefined");
+      return res.status(400).json({ 
+        error: "payment_method_id es requerido. Asegúrate de completar todos los datos del formulario." 
+      });
     }
+
+    // Calcular el total esperado
+    const expectedTotal = items.reduce(
+      (acc, i) => acc + Number(i.unit_price || i.price) * Number(i.quantity || 1),
+      0
+    );
 
     // Validar que el monto coincida
-    if (transaction_amount !== order.total) {
+    if (Math.abs(transaction_amount - expectedTotal) > 0.01) {
       return res.status(400).json({ 
-        error: "El monto no coincide con el total de la orden" 
+        error: "El monto no coincide con el total de los productos" 
       });
     }
 
     const paymentClient = new Payment(client);
     
     const paymentData = {
-      token,
       transaction_amount: Number(transaction_amount),
-      description: description || `Orden #${orderId}`,
-      installments: 1,
-      payment_method_id: req.body.payment_method_id || "visa",
+      description: description || `Compra en Etronix Store`,
+      payment_method_id: payment_method_id,
+      installments: Number(installments) || 1,
       payer: {
-        email: payer?.email || order.buyer.email || "test@test.com",
-        identification: payer?.identification || {
-          type: "CC",
-          number: "12345678"
-        }
-      },
-      external_reference: String(orderId),
+        email: payer?.email || buyer.email || "test@test.com"
+      }
     };
 
-    logger.info(`Procesando pago para orden ${orderId}`, paymentData);
+    // Agregar nombre si existe
+    if (payer?.first_name) {
+      paymentData.payer.first_name = payer.first_name;
+    }
+    if (payer?.last_name) {
+      paymentData.payer.last_name = payer.last_name;
+    }
+
+    // Agregar token si existe (para tarjetas)
+    if (token) {
+      paymentData.token = token;
+    }
+
+    // Agregar issuer_id si existe
+    if (issuer_id) {
+      paymentData.issuer_id = issuer_id;
+    }
+
+    // Agregar identificación si existe
+    if (payer?.identification) {
+      paymentData.payer.identification = payer.identification;
+    }
+
+    logger.info(`Procesando pago con MercadoPago`, { 
+      amount: transaction_amount, 
+      email: payer?.email || buyer.email,
+      payment_method: payment_method_id,
+      has_token: !!token,
+      issuer_id
+    });
 
     const payment = await paymentClient.create({ body: paymentData });
     const paymentBody = payment?.body || payment;
 
-    logger.info(`Pago creado: ${paymentBody.id}, status: ${paymentBody.status}`);
+    logger.info(`Pago creado: ${paymentBody.id}, status: ${paymentBody.status}, detail: ${paymentBody.status_detail}`);
 
-    // Actualizar orden
-    order.mp_payment_id = String(paymentBody.id);
-    
     if (paymentBody.status === "approved") {
-      order.status = "paid";
-      await order.save();
+      // CREAR LA ORDEN SOLO SI EL PAGO FUE APROBADO
+      const order = await Order.create({
+        items: items.map(item => ({
+          productId: item.productId || item._id,
+          title: item.title,
+          quantity: item.quantity,
+          unit_price: item.unit_price || item.price
+        })),
+        buyer,
+        total: expectedTotal,
+        status: "paid",
+        mp_payment_id: String(paymentBody.id)
+      });
+
       await decreaseStock(order);
       
-      logger.info(`Orden ${order._id} marcada como PAID`);
+      logger.info(`Orden ${order._id} creada con status PAID`);
       
       return res.json({
         success: true,
@@ -311,8 +361,7 @@ app.post("/api/payments/process", paymentLimiter, async (req, res) => {
         paymentId: paymentBody.id
       });
     } else if (paymentBody.status === "rejected") {
-      order.status = "failed";
-      await order.save();
+      logger.warn(`Pago rechazado: ${paymentBody.status_detail}`);
       
       return res.json({
         success: false,
@@ -321,8 +370,7 @@ app.post("/api/payments/process", paymentLimiter, async (req, res) => {
       });
     } else {
       // pending, in_process, etc.
-      order.status = "processing";
-      await order.save();
+      logger.info(`Pago en proceso: ${paymentBody.status}`);
       
       return res.json({
         success: false,
@@ -336,6 +384,7 @@ app.post("/api/payments/process", paymentLimiter, async (req, res) => {
     res.status(e?.status || 500).json({
       error: "Error procesando el pago",
       details: e?.message || e?.error || e,
+      cause: e?.cause
     });
   }
 });
