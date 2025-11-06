@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
+import AdminLogin from "../components/AdminLogin";
 
 export default function Admin() {
   const [orders, setOrders] = useState([]);
@@ -7,14 +8,70 @@ export default function Admin() {
   const [filter, setFilter] = useState("all"); // all, pending, paid, failed
   const [lastOrderCount, setLastOrderCount] = useState(0);
   const audioRef = useRef(null);
+  
+  // Estado de autenticación
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [adminCode, setAdminCode] = useState('');
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  // Verificar autenticación al cargar
+  useEffect(() => {
+    const savedCode = localStorage.getItem('adminCode');
+    const loginTime = localStorage.getItem('adminLoginTime');
+    
+    if (savedCode && loginTime) {
+      // Verificar que la sesión no haya expirado (24 horas)
+      const now = Date.now();
+      const elapsed = now - parseInt(loginTime);
+      const twentyFourHours = 24 * 60 * 60 * 1000;
+      
+      if (elapsed < twentyFourHours) {
+        setAdminCode(savedCode);
+        setIsAuthenticated(true);
+      } else {
+        // Sesión expirada
+        handleLogout();
+      }
+    }
+    setCheckingAuth(false);
+  }, []);
+
+  const handleLoginSuccess = (code) => {
+    setAdminCode(code);
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminCode');
+    localStorage.removeItem('adminLoginTime');
+    setIsAuthenticated(false);
+    setAdminCode('');
+    setOrders([]);
+  };
 
   const fetchOrders = async () => {
+    if (!adminCode) return;
+    
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
+        headers: {
+          'x-admin-code': adminCode
+        }
+      });
+      
+      if (res.status === 401 || res.status === 403) {
+        // Código inválido - hacer logout
+        handleLogout();
+        return;
+      }
+      
       const data = await res.json();
       
+      // Manejar nueva estructura con paginación
+      const ordersList = data.orders || data;
+      
       // Detectar nuevos pedidos
-      if (lastOrderCount > 0 && data.length > lastOrderCount) {
+      if (lastOrderCount > 0 && ordersList.length > lastOrderCount) {
         // Hay nuevos pedidos, reproducir sonido
         if (audioRef.current) {
           audioRef.current.play().catch(e => console.log("Audio error:", e));
@@ -22,14 +79,14 @@ export default function Admin() {
         // Mostrar notificación del navegador
         if (Notification.permission === "granted") {
           new Notification("¡Nuevo pedido!", {
-            body: `Tienes ${data.length - lastOrderCount} pedido(s) nuevo(s)`,
+            body: `Tienes ${ordersList.length - lastOrderCount} pedido(s) nuevo(s)`,
             icon: "/favicon.ico"
           });
         }
       }
       
-      setOrders(data);
-      setLastOrderCount(data.length);
+      setOrders(ordersList);
+      setLastOrderCount(ordersList.length);
     } catch (err) {
       console.error("Error fetching orders:", err);
     } finally {
@@ -38,6 +95,8 @@ export default function Admin() {
   };
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+    
     // Solicitar permiso para notificaciones
     if (Notification.permission === "default") {
       Notification.requestPermission();
@@ -49,7 +108,7 @@ export default function Admin() {
     const interval = setInterval(fetchOrders, 30000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isAuthenticated, adminCode]);
 
   const statusColors = {
     pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
@@ -70,10 +129,15 @@ export default function Admin() {
   };
 
   const updateOrderStatus = async (orderId, newStatus) => {
+    if (!adminCode) return;
+    
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/${orderId}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-admin-code": adminCode
+        },
         body: JSON.stringify({ status: newStatus }),
       });
 
@@ -84,6 +148,9 @@ export default function Admin() {
             order._id === orderId ? { ...order, status: newStatus } : order
           )
         );
+      } else if (res.status === 401 || res.status === 403) {
+        alert("Sesión expirada. Por favor inicia sesión nuevamente.");
+        handleLogout();
       } else {
         alert("Error actualizando el estado");
       }
@@ -107,6 +174,20 @@ export default function Admin() {
     delivered: orders.filter(o => o.status === "delivered").length,
   };
 
+  // Mostrar pantalla de carga mientras verifica autenticación
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Mostrar login si no está autenticado
+  if (!isAuthenticated) {
+    return <AdminLogin onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
   <div className="min-h-screen bg-background-light dark:bg-background-dark">
       {/* Audio para notificación */}
@@ -121,6 +202,13 @@ export default function Admin() {
           </div>
           <div className="flex items-center gap-4">
             <button onClick={fetchOrders} className="px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-opacity-90 transition-colors">🔄 Actualizar</button>
+            <button 
+              onClick={handleLogout}
+              className="px-4 py-2 rounded-lg border border-red-500 text-red-500 font-semibold hover:bg-red-500 hover:text-white transition-colors flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined text-lg">logout</span>
+              Cerrar Sesión
+            </button>
             <Link to="/shop" className="text-sm text-primary hover:underline">← Volver a la tienda</Link>
           </div>
         </div>

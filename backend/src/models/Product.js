@@ -36,4 +36,10 @@ const productSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Índices para mejorar rendimiento de consultas
+productSchema.index({ sku: 1 }, { unique: true, sparse: true });
+productSchema.index({ category: 1 });
+productSchema.index({ title: "text", description: "text" });
+productSchema.index({ price: 1 });
+
 export default mongoose.model("Product", productSchema);

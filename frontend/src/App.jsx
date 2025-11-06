@@ -53,9 +53,6 @@ export default function App() {
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">Etronix</h1>
           <div className="flex items-center gap-4">
-            <Link to="/admin" className="text-sm text-gray-600 hover:text-black">
-            Admin 
-            </Link>
             Carrito: <b>{cart.reduce((a, i) => a + i.quantity, 0)}</b> — <b>${total.toLocaleString("es-CO")}</b>
           </div>
         </div>

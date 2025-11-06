@@ -1,34 +1,113 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import ProductDetail from "./pages/ProductDetail.jsx";
-import Success from "./pages/Success.jsx";
-import Failure from "./pages/Failure.jsx";
-import Pending from "./pages/Pending.jsx";
-import Admin from "./pages/Admin.jsx";
-import Home from "./pages/Home.jsx";
-import Shop from "./pages/Shop.jsx";
-import Checkout from "./pages/Checkout.jsx";
-import FAQPage from "./pages/FAQPage.jsx";
-import About from "./pages/About.jsx";
 import Layout from "./components/Layout.jsx";
 import "./index.css";
+
+// Lazy loading para todas las páginas
+const Home = lazy(() => import("./pages/Home.jsx"));
+const Shop = lazy(() => import("./pages/Shop.jsx"));
+const Checkout = lazy(() => import("./pages/Checkout.jsx"));
+const Admin = lazy(() => import("./pages/Admin.jsx"));
+const Success = lazy(() => import("./pages/Success.jsx"));
+const Failure = lazy(() => import("./pages/Failure.jsx"));
+const Pending = lazy(() => import("./pages/Pending.jsx"));
+const FAQPage = lazy(() => import("./pages/FAQPage.jsx"));
+const About = lazy(() => import("./pages/About.jsx"));
+const ProductDetail = lazy(() => import("./pages/ProductDetail.jsx"));
+
+// Componente de carga
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+  </div>
+);
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
     children: [
-      { index: true, element: <Home /> },
-      { path: "shop", element: <Shop /> },
-      { path: "checkout", element: <Checkout /> },
-      { path: "admin", element: <Admin /> },
-      { path: "success", element: <Success /> },
-      { path: "failure", element: <Failure /> },
-      { path: "pending", element: <Pending /> },
-      { path: "faq", element: <FAQPage /> },
-      { path: "about", element: <About /> },
-      { path: "products/:id", element: <ProductDetail /> },
+      { 
+        index: true, 
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <Home />
+          </Suspense>
+        )
+      },
+      { 
+        path: "shop", 
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <Shop />
+          </Suspense>
+        )
+      },
+      { 
+        path: "checkout", 
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <Checkout />
+          </Suspense>
+        )
+      },
+      { 
+        path: "admin", 
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <Admin />
+          </Suspense>
+        )
+      },
+      { 
+        path: "success", 
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <Success />
+          </Suspense>
+        )
+      },
+      { 
+        path: "failure", 
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <Failure />
+          </Suspense>
+        )
+      },
+      { 
+        path: "pending", 
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <Pending />
+          </Suspense>
+        )
+      },
+      { 
+        path: "faq", 
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <FAQPage />
+          </Suspense>
+        )
+      },
+      { 
+        path: "about", 
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <About />
+          </Suspense>
+        )
+      },
+      { 
+        path: "products/:id", 
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <ProductDetail />
+          </Suspense>
+        )
+      },
     ],
   },
 ]);

@@ -18,26 +18,26 @@ export default function Sidebar({ open = false, onClose }) {
     if (onClose) onClose();
   };
 
-  const itemBase = 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors';
-  const itemInactive = 'text-gray-700 hover:bg-gray-100';
-  const itemActive = 'bg-gray-100 text-gray-900';
+  const itemBase = 'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all';
+  const itemInactive = 'text-secondary-700 hover:bg-primary-50 hover:text-primary-700';
+  const itemActive = 'bg-primary-600 text-white shadow-sm';
 
   return (
     <aside
       className={`
-        fixed top-16 left-0 z-50 h-[calc(100vh-64px)] w-72 bg-white border-r border-gray-200 shadow-xl
+        fixed top-16 left-0 z-50 h-[calc(100vh-64px)] w-72 bg-white border-r border-secondary-200 shadow-xl
         transform transition-transform duration-300
         ${open ? 'translate-x-0' : '-translate-x-full'}
       `}
       aria-label="Menú lateral"
     >
-      <nav className="p-4 space-y-6 overflow-y-auto h-full">
+      <nav className="p-6 space-y-8 overflow-y-auto h-full">
         <div>
-          <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-2">Navegación</p>
-          <ul className="space-y-1">
+          <p className="text-xs uppercase tracking-wider text-secondary-500 font-bold mb-4">Navegación</p>
+          <ul className="space-y-2">
             <li>
               <NavLink to="/" className={({ isActive }) => `${itemBase} ${isActive ? itemActive : itemInactive}`}>
-                <span className="material-symbols-outlined">home</span>
+                <span className="material-symbols-outlined text-xl">home</span>
                 Inicio
               </NavLink>
             </li>
@@ -49,21 +49,21 @@ export default function Sidebar({ open = false, onClose }) {
                 aria-controls="menu-products"
               >
                 <span className="flex items-center gap-3">
-                  <span className="material-symbols-outlined">storefront</span>
+                  <span className="material-symbols-outlined text-xl">storefront</span>
                   Productos
                 </span>
-                <span className={`material-symbols-outlined text-base transition-transform ${productsOpen ? 'rotate-180' : ''}`}>expand_more</span>
+                <span className={`material-symbols-outlined text-lg transition-transform ${productsOpen ? 'rotate-180' : ''}`}>expand_more</span>
               </button>
               {productsOpen && (
-                <ul id="menu-products" className="mt-2 ml-9 space-y-1">
+                <ul id="menu-products" className="mt-2 ml-10 space-y-1">
                   <li>
-                    <button onClick={() => goToCategory('all')} className={`${itemBase} ${itemInactive} w-full justify-start`}>
-                      Todos
+                    <button onClick={() => goToCategory('all')} className={`${itemBase} ${itemInactive} w-full justify-start text-xs`}>
+                      Todos los Productos
                     </button>
                   </li>
                   {CATEGORIES.filter(c => c.id !== 'all').map((cat) => (
                     <li key={cat.id}>
-                      <button onClick={() => goToCategory(cat.id)} className={`${itemBase} ${itemInactive} w-full justify-start`}>
+                      <button onClick={() => goToCategory(cat.id)} className={`${itemBase} ${itemInactive} w-full justify-start text-xs`}>
                         <span className="mr-1">{cat.icon}</span> {cat.name}
                       </button>
                     </li>
@@ -73,20 +73,14 @@ export default function Sidebar({ open = false, onClose }) {
             </li>
             <li>
               <NavLink to="/faq" className={({ isActive }) => `${itemBase} ${isActive ? itemActive : itemInactive}`}>
-                <span className="material-symbols-outlined">live_help</span>
+                <span className="material-symbols-outlined text-xl">live_help</span>
                 Preguntas Frecuentes
               </NavLink>
             </li>
             <li>
               <NavLink to="/about" className={({ isActive }) => `${itemBase} ${isActive ? itemActive : itemInactive}`}>
-                <span className="material-symbols-outlined">info</span>
+                <span className="material-symbols-outlined text-xl">info</span>
                 Nosotros
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/admin" className={({ isActive }) => `${itemBase} ${isActive ? itemActive : itemInactive}`}>
-                <span className="material-symbols-outlined">settings</span>
-                Admin
               </NavLink>
             </li>
           </ul>

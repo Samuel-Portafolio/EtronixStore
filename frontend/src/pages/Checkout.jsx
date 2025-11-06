@@ -1,13 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { initMercadoPago, CardPayment } from '@mercadopago/sdk-react';
 import { EmptyCart } from "../components/EmptyState";
+
+initMercadoPago(import.meta.env.VITE_MP_PUBLIC_KEY || 'TEST-d22313f9-9182-45cd-ba40-032ba771a9ba');
 
 export default function Checkout() {
   const navigate = useNavigate();
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [orderId, setOrderId] = useState(null);
   
-  // Datos del cliente
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -20,12 +24,10 @@ export default function Checkout() {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    // Cargar carrito desde localStorage
     const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
     setCart(savedCart);
     
     if (savedCart.length === 0) {
-      // Si no hay productos, redirigir a la tienda
       navigate('/shop');
     }
   }, [navigate]);
@@ -35,16 +37,9 @@ export default function Checkout() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    // Limpiar error del campo cuando el usuario empieza a escribir
+    setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ""
-      }));
+      setErrors(prev => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -61,7 +56,9 @@ export default function Checkout() {
       newErrors.phone = "Ingresa un teléfono válido (10 dígitos)";
     }
     
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    if (!formData.email.trim()) {
+      newErrors.email = "El email es obligatorio";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "Ingresa un email válido";
     }
     
@@ -97,32 +94,92 @@ export default function Checkout() {
             quantity: item.quantity,
             productId: item._id,
           })),
-          buyer: {
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            address: formData.address,
-            city: formData.city,
-            notes: formData.notes
-          },
+          buyer: formData
         }),
       });
       
       const data = await res.json();
       
-      if (data?.init_point) {
-        // Limpiar carrito antes de redirigir a Mercado Pago
-        localStorage.removeItem('cart');
-        window.location.href = data.init_point;
+      if (data?.orderId) {
+        setOrderId(data.orderId);
+        setShowPayment(true);
+        setLoading(false);
       } else {
-        alert("No se pudo iniciar el pago. Por favor intenta nuevamente.");
+        alert("No se pudo crear la orden.");
         setLoading(false);
       }
     } catch (error) {
-      console.error("Error en checkout:", error);
+      console.error("Error:", error);
+      alert("Error al procesar la orden.");
+      setLoading(false);
+    }
+  };
+
+  const onSubmitPayment = async (paymentFormData) => {
+    try {
+      setLoading(true);
+      
+      console.log("Datos del pago a enviar:", {
+        orderId,
+        transaction_amount: total,
+        formData: paymentFormData
+      });
+      
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/process`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...paymentFormData,
+          orderId: orderId,
+          transaction_amount: total,
+          description: `Orden #${orderId}`,
+          payer: {
+            email: formData.email,
+            identification: paymentFormData.payer?.identification || {
+              type: "CC",
+              number: "12345678"
+            }
+          }
+        }),
+      });
+
+      const result = await response.json();
+      
+      console.log("Respuesta del servidor:", result);
+      
+      if (result.success && result.status === "approved") {
+        localStorage.removeItem('cart');
+        navigate(`/success?order=${orderId}`);
+      } else {
+        // Mostrar mensaje más descriptivo según el status
+        let errorMsg = "El pago fue rechazado.";
+        
+        if (result.status === "rejected") {
+          errorMsg = `Pago rechazado: ${result.message || "Intenta con otra tarjeta o método de pago."}`;
+        } else if (result.status === "pending" || result.status === "in_process") {
+          errorMsg = "El pago está en proceso. Por favor verifica el estado más tarde.";
+        }
+        
+        alert(errorMsg);
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Error procesando pago:", error);
       alert("Error al procesar el pago. Por favor intenta nuevamente.");
       setLoading(false);
     }
+  };
+
+  const onErrorPayment = (error) => {
+    console.error("Error en Payment Brick:", error);
+    console.error("Error type:", error?.type);
+    console.error("Error cause:", error?.cause);
+    console.error("Error message:", error?.message);
+    // No mostrar alerta para errores menores de validación
+    if (error?.type === 'critical') {
+      alert(`Error: ${error?.message || "Ocurrió un error al procesar el pago."}`);
+    }
+    setLoading(false);
   };
 
   if (cart.length === 0) {
@@ -138,221 +195,211 @@ export default function Checkout() {
   return (
     <div className="min-h-screen flex flex-col bg-background-light dark:bg-background-dark">
       <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-8 py-8 w-full">
-        <h1 className="text-3xl font-bold text-text-light dark:text-text-dark mb-8">
+        <h1 className="text-3xl font-bold text-primary-700 dark:text-primary-400 mb-8">
           Finalizar Compra
         </h1>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Formulario */}
-          <div className="bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark shadow p-6">
-            <h2 className="text-xl font-bold text-text-light dark:text-text-dark mb-6">
-              Información de Envío
-            </h2>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Nombre */}
-              <div>
-                <label className="block text-sm font-semibold text-text-light dark:text-text-dark mb-2">
-                  Nombre Completo <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    errors.name 
-                      ? 'border-red-500' 
-                      : 'border-border-light dark:border-border-dark'
-                  } bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary`}
-                  placeholder="Juan Pérez"
-                />
-                {errors.name && (
-                  <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-                )}
-              </div>
-
-              {/* Teléfono */}
-              <div>
-                <label className="block text-sm font-semibold text-text-light dark:text-text-dark mb-2">
-                  Teléfono / WhatsApp <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    errors.phone 
-                      ? 'border-red-500' 
-                      : 'border-border-light dark:border-border-dark'
-                  } bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary`}
-                  placeholder="3001234567"
-                />
-                {errors.phone && (
-                  <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
-                )}
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-semibold text-text-light dark:text-text-dark mb-2">
-                  Email (opcional)
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    errors.email 
-                      ? 'border-red-500' 
-                      : 'border-border-light dark:border-border-dark'
-                  } bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary`}
-                  placeholder="correo@ejemplo.com"
-                />
-                {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-                )}
-              </div>
-
-              {/* Dirección */}
-              <div>
-                <label className="block text-sm font-semibold text-text-light dark:text-text-dark mb-2">
-                  Dirección Completa <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    errors.address 
-                      ? 'border-red-500' 
-                      : 'border-border-light dark:border-border-dark'
-                  } bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary`}
-                  placeholder="Calle 123 #45-67, Apto 101"
-                />
-                {errors.address && (
-                  <p className="text-red-500 text-sm mt-1">{errors.address}</p>
-                )}
-              </div>
-
-              {/* Ciudad */}
-              <div>
-                <label className="block text-sm font-semibold text-text-light dark:text-text-dark mb-2">
-                  Ciudad <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-3 rounded-lg border ${
-                    errors.city 
-                      ? 'border-red-500' 
-                      : 'border-border-light dark:border-border-dark'
-                  } bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary`}
-                  placeholder="Bogotá"
-                />
-                {errors.city && (
-                  <p className="text-red-500 text-sm mt-1">{errors.city}</p>
-                )}
-              </div>
-
-              {/* Notas adicionales */}
-              <div>
-                <label className="block text-sm font-semibold text-text-light dark:text-text-dark mb-2">
-                  Notas Adicionales (opcional)
-                </label>
-                <textarea
-                  name="notes"
-                  value={formData.notes}
-                  onChange={handleInputChange}
-                  rows="3"
-                  className="w-full px-4 py-3 rounded-lg border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                  placeholder="Ej: Entregar después de las 2pm, portería del edificio, etc."
-                />
-              </div>
-
-              {/* Botones */}
-              <div className="flex gap-4 pt-4">
-                <button
-                  type="button"
-                  onClick={() => navigate('/shop')}
-                  className="flex-1 py-3 rounded-lg border border-border-light dark:border-border-dark text-text-light dark:text-text-dark font-semibold hover:bg-border-light dark:hover:bg-border-dark transition-colors"
-                >
-                  Volver a la Tienda
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 py-3 rounded-lg bg-primary text-white font-bold hover:bg-opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? 'Procesando...' : 'Continuar al Pago'}
-                </button>
-              </div>
-            </form>
-          </div>
-
-          {/* Resumen del pedido */}
-          <div>
-            <div className="bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark shadow p-6 sticky top-8">
-              <h2 className="text-xl font-bold text-text-light dark:text-text-dark mb-6">
-                Resumen del Pedido
+        {!showPayment ? (
+          <div className="grid lg:grid-cols-2 gap-8">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow p-6">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-6">
+                Información de Envío
               </h2>
               
-              <div className="space-y-4 mb-6">
-                {cart.map((item) => (
-                  <div 
-                    key={item._id}
-                    className="flex gap-4 pb-4 border-b border-border-light dark:border-border-dark"
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                    Nombre Completo <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                    } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                    placeholder="Juan Pérez"
+                  />
+                  {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                    Teléfono / WhatsApp <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      errors.phone ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                    } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                    placeholder="3001234567"
+                  />
+                  {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                    Email <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                    } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                    placeholder="correo@ejemplo.com"
+                  />
+                  {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                    Dirección Completa <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      errors.address ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                    } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                    placeholder="Calle 123 #45-67"
+                  />
+                  {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                    Ciudad <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 rounded-lg border ${
+                      errors.city ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                    } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                    placeholder="Bogotá"
+                  />
+                  {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                    Notas Adicionales (opcional)
+                  </label>
+                  <textarea
+                    name="notes"
+                    value={formData.notes}
+                    onChange={handleInputChange}
+                    rows="3"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                    placeholder="Ej: Entregar después de las 2pm"
+                  />
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/shop')}
+                    className="flex-1 py-3 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   >
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-text-light dark:text-text-dark">
-                        {item.title}
-                      </h3>
-                      <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                        Cantidad: {item.quantity}
-                      </p>
-                      <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                        ${item.price?.toLocaleString("es-CO")} c/u
-                      </p>
+                    Volver a la Tienda
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 py-3 rounded-lg bg-primary-600 text-white font-bold hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Procesando...' : 'Continuar al Pago'}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div>
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow p-6 sticky top-8">
+                <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-6">
+                  Resumen del Pedido
+                </h2>
+                
+                <div className="space-y-4 mb-6">
+                  {cart.map((item) => (
+                    <div 
+                      key={item._id}
+                      className="flex gap-4 pb-4 border-b border-gray-200 dark:border-gray-700"
+                    >
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-800 dark:text-white">
+                          {item.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          Cantidad: {item.quantity}
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          ${item.price?.toLocaleString("es-CO")} c/u
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-gray-800 dark:text-white">
+                          ${(item.price * item.quantity).toLocaleString("es-CO")}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-text-light dark:text-text-dark">
-                        ${(item.price * item.quantity).toLocaleString("es-CO")}
-                      </p>
-                    </div>
+                  ))}
+                </div>
+
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
+                  <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                    <span>Subtotal ({totalItems} {totalItems === 1 ? 'producto' : 'productos'})</span>
+                    <span>${total.toLocaleString("es-CO")}</span>
                   </div>
-                ))}
-              </div>
-
-              <div className="border-t border-border-light dark:border-border-dark pt-4 space-y-2">
-                <div className="flex justify-between text-text-secondary-light dark:text-text-secondary-dark">
-                  <span>Subtotal ({totalItems} {totalItems === 1 ? 'producto' : 'productos'})</span>
-                  <span>${total.toLocaleString("es-CO")}</span>
+                  <div className="flex justify-between text-2xl font-bold text-gray-800 dark:text-white pt-2 border-t border-gray-200 dark:border-gray-700">
+                    <span>Total</span>
+                    <span className="text-primary-600">${total.toLocaleString("es-CO")}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-text-secondary-light dark:text-text-secondary-dark">
-                  <span>Envío</span>
-                  <span className="text-primary font-semibold">A calcular</span>
-                </div>
-                <div className="flex justify-between text-2xl font-bold text-text-light dark:text-text-dark pt-2 border-t border-border-light dark:border-border-dark">
-                  <span>Total</span>
-                  <span className="text-primary">${total.toLocaleString("es-CO")}</span>
-                </div>
-              </div>
-
-              <div className="mt-6 p-4 bg-primary/10 rounded-lg">
-                <p className="text-sm text-text-light dark:text-text-dark">
-                  <strong>Nota:</strong> El costo de envío se calculará y confirmará por WhatsApp según tu ubicación.
-                </p>
               </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow p-6 mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+                Información de Pago
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Total a pagar: <span className="text-2xl font-bold text-primary-600">${total.toLocaleString("es-CO")}</span>
+              </p>
+              
+              <CardPayment
+                initialization={{
+                  amount: total
+                }}
+                onSubmit={onSubmitPayment}
+                onError={onErrorPayment}
+                locale="es-CO"
+              />
+              
+              <button
+                type="button"
+                onClick={() => setShowPayment(false)}
+                className="w-full mt-6 py-3 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                ← Volver
+              </button>
+            </div>
+          </div>
+        )}
       </main>
-
     </div>
   );
 }

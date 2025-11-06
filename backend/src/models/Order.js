@@ -12,7 +12,7 @@ const orderSchema = new mongoose.Schema(
     ],
     buyer: {
       name: { type: String, required: true },
-      email: String,
+      email: { type: String },
       phone: { type: String, required: true },
       address: { type: String, required: true },
       city: { type: String, required: true },
@@ -30,5 +30,11 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Índices para mejorar rendimiento de consultas
+orderSchema.index({ createdAt: -1 });
+orderSchema.index({ external_reference: 1 });
+orderSchema.index({ status: 1 });
+orderSchema.index({ "buyer.email": 1 });
 
 export default mongoose.model("Order", orderSchema);
