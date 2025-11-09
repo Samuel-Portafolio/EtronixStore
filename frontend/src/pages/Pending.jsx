@@ -7,9 +7,8 @@ export default function Pending() {
   return (
     <>
       <Helmet>
-        <title>Tienda de Accesorios | Etronix Store</title>
-        <meta name="description" content="Explora nuestro catálogo completo..." />
-        <link rel="canonical" href="https://etronix-store.com/shop" />
+        <title>Pago Pendiente | Etronix Store</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       <div className="min-h-screen flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-white rounded-xl shadow p-6 text-center">

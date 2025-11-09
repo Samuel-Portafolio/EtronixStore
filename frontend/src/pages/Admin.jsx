@@ -192,10 +192,10 @@ export default function Admin() {
   return (
     <>
       <Helmet>
-        <title>Tienda de Accesorios | Etronix Store</title>
-        <meta name="description" content="Explora nuestro catálogo completo..." />
-        <link rel="canonical" href="https://etronix-store.com/shop" />
+        <title>Panel de Administración | Etronix Store</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
+
       <div className="min-h-screen bg-background-light dark:bg-background-dark">
         {/* Audio para notificación */}
         <audio ref={audioRef} src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjKM0/LRgzgKGGS46+mjUhENUKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0" />

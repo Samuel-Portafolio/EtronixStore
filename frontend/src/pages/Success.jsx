@@ -8,9 +8,8 @@ export default function Success() {
   return (
     <>
       <Helmet>
-        <title>Tienda de Accesorios | Etronix Store</title>
-        <meta name="description" content="Explora nuestro catálogo completo..." />
-        <link rel="canonical" href="https://etronix-store.com/shop" />
+        <title>Pago Exitoso | Etronix Store</title>
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       <div className="min-h-screen flex flex-col">
