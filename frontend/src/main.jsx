@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import Layout from "./components/Layout.jsx";
 import "./index.css";
 
@@ -112,8 +113,26 @@ const router = createBrowserRouter([
   },
 ]);
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <RouterProvider router={router} />
-  </React.StrictMode>
-);
+// Función de renderizado para soporte de react-snap
+const rootElement = document.getElementById("root");
+
+if (rootElement.hasChildNodes()) {
+  // react-snap ya pre-renderizó, usar hydrate
+  ReactDOM.hydrateRoot(
+    rootElement,
+    <React.StrictMode>
+      <HelmetProvider>
+        <RouterProvider router={router} />
+      </HelmetProvider>
+    </React.StrictMode>
+  );
+} else {
+  // Renderizado normal
+  ReactDOM.createRoot(rootElement).render(
+    <React.StrictMode>
+      <HelmetProvider>
+        <RouterProvider router={router} />
+      </HelmetProvider>
+    </React.StrictMode>
+  );
+}

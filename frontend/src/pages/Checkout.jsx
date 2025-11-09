@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { initMercadoPago, CardPayment } from '@mercadopago/sdk-react';
 import { EmptyCart } from "../components/EmptyState";
+import { Helmet } from "react-helmet-async";
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -219,224 +220,226 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background-light dark:bg-background-dark">
-      <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-8 py-8 w-full">
-        <h1 className="text-3xl font-bold text-primary-700 dark:text-primary-400 mb-8">
-          Finalizar Compra
-        </h1>
+    <>
+      <Helmet>
+        <title>Tienda de Accesorios | Etronix Store</title>
+        <meta name="description" content="Explora nuestro catálogo completo..." />
+        <link rel="canonical" href="https://etronix-store.com/shop" />
+      </Helmet>
+      <div className="min-h-screen flex flex-col bg-background-light dark:bg-background-dark">
+        <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-8 py-8 w-full">
+          <h1 className="text-3xl font-bold text-primary-700 dark:text-primary-400 mb-8">
+            Finalizar Compra
+          </h1>
 
-        {!showPayment ? (
-          <div className="grid lg:grid-cols-2 gap-8">
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow p-6">
-              <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-6">
-                Información de Envío
-              </h2>
-              
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                    Nombre Completo <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-lg border ${
-                      errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500`}
-                    placeholder="Juan Pérez"
-                  />
-                  {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                    Teléfono / WhatsApp <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-lg border ${
-                      errors.phone ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500`}
-                    placeholder="3001234567"
-                  />
-                  {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                    Email <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-lg border ${
-                      errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500`}
-                    placeholder="correo@ejemplo.com"
-                  />
-                  {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                    Dirección Completa <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-lg border ${
-                      errors.address ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500`}
-                    placeholder="Calle 123 #45-67"
-                  />
-                  {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                    Ciudad <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-lg border ${
-                      errors.city ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                    } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500`}
-                    placeholder="Bogotá"
-                  />
-                  {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                    Notas Adicionales (opcional)
-                  </label>
-                  <textarea
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleInputChange}
-                    rows="3"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-                    placeholder="Ej: Entregar después de las 2pm"
-                  />
-                </div>
-
-                <div className="flex gap-4 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => navigate('/shop')}
-                    className="flex-1 py-3 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                  >
-                    Volver a la Tienda
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-1 py-3 rounded-lg bg-primary-600 text-white font-bold hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? 'Procesando...' : 'Continuar al Pago'}
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            <div>
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow p-6 sticky top-8">
+          {!showPayment ? (
+            <div className="grid lg:grid-cols-2 gap-8">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow p-6">
                 <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-6">
-                  Resumen del Pedido
+                  Información de Envío
                 </h2>
-                
-                <div className="space-y-4 mb-6">
-                  {cart.map((item) => (
-                    <div 
-                      key={item._id}
-                      className="flex gap-4 pb-4 border-b border-gray-200 dark:border-gray-700"
-                    >
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-800 dark:text-white">
-                          {item.title}
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Cantidad: {item.quantity}
-                        </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          ${item.price?.toLocaleString("es-CO")} c/u
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-gray-800 dark:text-white">
-                          ${(item.price * item.quantity).toLocaleString("es-CO")}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
 
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
-                  <div className="flex justify-between text-gray-600 dark:text-gray-400">
-                    <span>Subtotal ({totalItems} {totalItems === 1 ? 'producto' : 'productos'})</span>
-                    <span>${total.toLocaleString("es-CO")}</span>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                      Nombre Completo <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-3 rounded-lg border ${errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                      placeholder="Juan Pérez"
+                    />
+                    {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
                   </div>
-                  <div className="flex justify-between text-2xl font-bold text-gray-800 dark:text-white pt-2 border-t border-gray-200 dark:border-gray-700">
-                    <span>Total</span>
-                    <span className="text-primary-600">${total.toLocaleString("es-CO")}</span>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                      Teléfono / WhatsApp <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-3 rounded-lg border ${errors.phone ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                      placeholder="3001234567"
+                    />
+                    {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                      Email <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-3 rounded-lg border ${errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                      placeholder="correo@ejemplo.com"
+                    />
+                    {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                      Dirección Completa <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-3 rounded-lg border ${errors.address ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                      placeholder="Calle 123 #45-67"
+                    />
+                    {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                      Ciudad <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-3 rounded-lg border ${errors.city ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                        } bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                      placeholder="Bogotá"
+                    />
+                    {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                      Notas Adicionales (opcional)
+                    </label>
+                    <textarea
+                      name="notes"
+                      value={formData.notes}
+                      onChange={handleInputChange}
+                      rows="3"
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                      placeholder="Ej: Entregar después de las 2pm"
+                    />
+                  </div>
+
+                  <div className="flex gap-4 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => navigate('/shop')}
+                      className="flex-1 py-3 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      Volver a la Tienda
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="flex-1 py-3 rounded-lg bg-primary-600 text-white font-bold hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {loading ? 'Procesando...' : 'Continuar al Pago'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <div>
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow p-6 sticky top-8">
+                  <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-6">
+                    Resumen del Pedido
+                  </h2>
+
+                  <div className="space-y-4 mb-6">
+                    {cart.map((item) => (
+                      <div
+                        key={item._id}
+                        className="flex gap-4 pb-4 border-b border-gray-200 dark:border-gray-700"
+                      >
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-800 dark:text-white">
+                            {item.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Cantidad: {item.quantity}
+                          </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            ${item.price?.toLocaleString("es-CO")} c/u
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-gray-800 dark:text-white">
+                            ${(item.price * item.quantity).toLocaleString("es-CO")}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
+                    <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                      <span>Subtotal ({totalItems} {totalItems === 1 ? 'producto' : 'productos'})</span>
+                      <span>${total.toLocaleString("es-CO")}</span>
+                    </div>
+                    <div className="flex justify-between text-2xl font-bold text-gray-800 dark:text-white pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <span>Total</span>
+                      <span className="text-primary-600">${total.toLocaleString("es-CO")}</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow p-6 mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
-                Información de Pago
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Total a pagar: <span className="text-2xl font-bold text-primary-600">${total.toLocaleString("es-CO")}</span>
-              </p>
-              
-              {!mpInitialized ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600 dark:text-gray-400">Cargando sistema de pago...</p>
-                </div>
-              ) : total > 0 ? (
-                <CardPayment
-                  initialization={{
-                    amount: Number(total),
-                    payer: {
-                      email: formData.email
-                    }
-                  }}
-                  onSubmit={onSubmitPayment}
-                  onError={onErrorPayment}
-                />
-              ) : (
-                <p className="text-red-500">Error: El total debe ser mayor a 0</p>
-              )}
-              
-              <button
-                type="button"
-                onClick={() => setShowPayment(false)}
-                className="w-full mt-6 py-3 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              >
-                ← Volver
-              </button>
+          ) : (
+            <div className="max-w-2xl mx-auto">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow p-6 mb-6">
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+                  Información de Pago
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  Total a pagar: <span className="text-2xl font-bold text-primary-600">${total.toLocaleString("es-CO")}</span>
+                </p>
+
+                {!mpInitialized ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600 dark:text-gray-400">Cargando sistema de pago...</p>
+                  </div>
+                ) : total > 0 ? (
+                  <CardPayment
+                    initialization={{
+                      amount: Number(total),
+                      payer: {
+                        email: formData.email
+                      }
+                    }}
+                    onSubmit={onSubmitPayment}
+                    onError={onErrorPayment}
+                  />
+                ) : (
+                  <p className="text-red-500">Error: El total debe ser mayor a 0</p>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setShowPayment(false)}
+                  className="w-full mt-6 py-3 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  ← Volver
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-      </main>
-    </div>
+          )}
+        </main>
+      </div>
+    </>
   );
 }
