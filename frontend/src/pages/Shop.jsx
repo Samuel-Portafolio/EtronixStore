@@ -138,7 +138,7 @@ export default function Shop() {
       </Helmet>
 
       {/* === Fondo LightRays: ocupa toda la pantalla === */}
-      <div className="fixed inset-0 w-full h-full z-0 bg-gradient-to-br from-gray-900 via-slate-900 to-black">
+      <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black">
         <LightRays
           raysOrigin="top-center"
           raysColor="#00d4ff"
@@ -174,7 +174,7 @@ export default function Shop() {
                 {/* Barra de Búsqueda */}
                 <div className="relative w-full md:w-96">
                   <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 bg-linear-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div className="relative">
                       <input
                         type="text"
@@ -220,7 +220,7 @@ export default function Shop() {
 
               {/* Sidebar de Categorías */}
               <aside className={`${sidebarOpen ? 'block' : 'hidden'} md:block w-full md:w-72 shrink-0`}>
-                <div className="backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 p-6 sticky top-24 shadow-xl">
+                <div className="backdrop-blur-xl bg-linear-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 p-6 sticky top-24 shadow-xl">
                   <h2 className="font-black text-xl text-white mb-6 flex items-center gap-2">
                     <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
@@ -244,7 +244,7 @@ export default function Shop() {
                           className={`
                             w-full text-left px-4 py-3.5 rounded-xl transition-all flex items-center justify-between group font-bold
                             ${selectedCategory === cat.id
-                              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/30'
+                              ? 'bg-linear-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/30'
                               : 'hover:bg-white/10 text-gray-300 hover:text-white border border-transparent hover:border-white/20'
                             }
                           `}
@@ -298,12 +298,12 @@ export default function Shop() {
                       {filteredProducts.map((p) => (
                         <div
                           key={p._id}
-                          className="backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 hover:border-cyan-400/50 shadow-xl hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-300 overflow-hidden group flex flex-col hover:-translate-y-1"
+                          className="backdrop-blur-xl bg-linear-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 hover:border-cyan-400/50 shadow-xl hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-300 overflow-hidden group flex flex-col hover:-translate-y-1"
                         >
                           <div className="relative aspect-square bg-white/5 overflow-hidden">
                             {/* Badge de stock */}
                             {p.stock > 0 && p.stock < 5 && (
-                              <span className="absolute top-4 right-4 z-10 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-black shadow-lg">
+                              <span className="absolute top-4 right-4 z-10 px-3 py-1.5 rounded-lg bg-linear-to-r from-amber-500 to-orange-500 text-white text-xs font-black shadow-lg">
                                 Últimas unidades
                               </span>
                             )}
@@ -314,7 +314,7 @@ export default function Shop() {
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                               />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-500/20 to-blue-500/20">
+                              <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-cyan-500/20 to-blue-500/20">
                                 <span className="text-white/50 text-4xl">📱</span>
                               </div>
                             )}
@@ -336,7 +336,7 @@ export default function Shop() {
                                 </p>
                               )}
                               <div className="flex items-baseline justify-between mb-5 pb-4 border-b border-white/10">
-                                <p className="text-2xl font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                                <p className="text-2xl font-black bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                                   ${p.price.toLocaleString("es-CO")}
                                 </p>
                                 <p className={`text-sm font-black ${p.stock > 0 ? 'text-green-400' : 'text-red-400'}`}>
@@ -349,7 +349,7 @@ export default function Shop() {
                               <button
                                 onClick={() => addToCart(p)}
                                 disabled={p.stock === 0}
-                                className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white py-3.5 font-black hover:from-cyan-400 hover:to-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-cyan-500/50 transform hover:-translate-y-0.5"
+                                className="w-full rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 text-white py-3.5 font-black hover:from-cyan-400 hover:to-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-cyan-500/50 transform hover:-translate-y-0.5"
                               >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -376,7 +376,7 @@ export default function Shop() {
 
         {/* Toast */}
         {toast && (
-          <div className="fixed bottom-8 right-8 z-50 backdrop-blur-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl shadow-green-500/50 flex items-center gap-3 border border-green-400/50">
+          <div className="fixed bottom-8 right-8 z-50 backdrop-blur-xl bg-linear-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl shadow-green-500/50 flex items-center gap-3 border border-green-400/50">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
             </svg>

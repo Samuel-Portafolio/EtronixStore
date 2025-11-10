@@ -131,7 +131,7 @@ export default function Chatbot() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-full shadow-2xl shadow-cyan-500/50 flex items-center justify-center hover:scale-110 transition-all duration-300 z-50 group"
+          className="fixed bottom-6 right-6 w-16 h-16 bg-linear-to-br from-cyan-500 to-blue-500 rounded-full shadow-2xl shadow-cyan-500/50 flex items-center justify-center hover:scale-110 transition-all duration-300 z-50 group"
           aria-label="Abrir chat"
         >
           <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -145,8 +145,8 @@ export default function Chatbot() {
       {isOpen && (
         <div className="fixed bottom-6 right-6 w-96 h-[600px] backdrop-blur-2xl bg-gray-900/95 rounded-2xl shadow-2xl border border-white/10 flex flex-col z-50 overflow-hidden">
           {/* Header */}
-          <div className="relative bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-4 flex items-center justify-between">
-            <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+          <div className="relative bg-linear-to-r from-cyan-500 to-blue-500 px-6 py-4 flex items-center justify-between">
+            <div className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-white/50 to-transparent" />
             
             <div className="flex items-center gap-3">
               <div className="relative">
@@ -186,7 +186,7 @@ export default function Chatbot() {
                 <div
                   className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                     msg.type === "user"
-                      ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
+                      ? "bg-linear-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
                       : "backdrop-blur-md bg-white/10 border border-white/20 text-white shadow-lg"
                   }`}
                 >
@@ -226,7 +226,7 @@ export default function Chatbot() {
                   <button
                     key={idx}
                     onClick={() => handleSendMessage(question)}
-                    className="text-xs px-3 py-1.5 rounded-full backdrop-blur-md bg-white/10 border border-white/20 text-gray-300 hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-500 hover:text-white hover:border-transparent transition-all font-bold"
+                    className="text-xs px-3 py-1.5 rounded-full backdrop-blur-md bg-white/10 border border-white/20 text-gray-300 hover:bg-linear-to-r hover:from-cyan-500 hover:to-blue-500 hover:text-white hover:border-transparent transition-all font-bold"
                   >
                     {question}
                   </button>
@@ -249,7 +249,7 @@ export default function Chatbot() {
               <button
                 onClick={() => handleSendMessage()}
                 disabled={!inputText.trim()}
-                className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center hover:shadow-lg hover:shadow-cyan-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
+                className="w-12 h-12 bg-linear-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center hover:shadow-lg hover:shadow-cyan-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
                 aria-label="Enviar mensaje"
               >
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

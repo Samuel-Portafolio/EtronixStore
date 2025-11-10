@@ -187,7 +187,7 @@ export default function Checkout() {
   if (cart.length === 0) {
     return (
       <>
-        <div className="fixed inset-0 w-full h-full z-0 bg-gradient-to-br from-gray-900 via-slate-900 to-black">
+        <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-r from-gray-900 via-slate-900 to-black">
           <LightRays
             raysOrigin="top-center"
             raysColor="#00d4ff"
@@ -219,7 +219,7 @@ export default function Checkout() {
       </Helmet>
 
       {/* Fondo LightRays */}
-      <div className="fixed inset-0 w-full h-full z-0 bg-gradient-to-br from-gray-900 via-slate-900 to-black">
+      <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-r from-gray-900 via-slate-900 to-black">
         <LightRays
           raysOrigin="top-center"
           raysColor="#00d4ff"
@@ -243,7 +243,7 @@ export default function Checkout() {
           {!showPayment ? (
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Formulario */}
-              <div className="backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 shadow-xl p-6">
+              <div className="backdrop-blur-xl bg-linear-to-r from-white/15 to-white/5 rounded-2xl border border-white/20 shadow-xl p-6">
                 <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-3">
                   <svg className="w-7 h-7 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -363,7 +363,7 @@ export default function Checkout() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-black hover:from-cyan-400 hover:to-blue-400 shadow-lg hover:shadow-cyan-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 py-3.5 rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 text-white font-black hover:from-cyan-400 hover:to-blue-400 shadow-lg hover:shadow-cyan-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {loading ? 'Procesando...' : 'Continuar al Pago'}
                     </button>
@@ -373,7 +373,7 @@ export default function Checkout() {
 
               {/* Resumen */}
               <div>
-                <div className="backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 shadow-xl p-6 sticky top-24">
+                <div className="backdrop-blur-xl bg-linear-to-r from-white/15 to-white/5 rounded-2xl border border-white/20 shadow-xl p-6 sticky top-24">
                   <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-3">
                     <svg className="w-7 h-7 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -414,7 +414,7 @@ export default function Checkout() {
                     </div>
                     <div className="flex justify-between text-2xl font-black text-white pt-3 border-t border-white/20">
                       <span>Total</span>
-                      <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                      <span className="bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                         ${total.toLocaleString("es-CO")}
                       </span>
                     </div>
@@ -424,12 +424,12 @@ export default function Checkout() {
             </div>
           ) : (
             <div className="max-w-2xl mx-auto">
-              <div className="backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 shadow-xl p-6 mb-6">
+              <div className="backdrop-blur-xl bg-linear-to-r from-white/15 to-white/5 rounded-2xl border border-white/20 shadow-xl p-6 mb-6">
                 <h2 className="text-3xl font-black text-white mb-4">
                   Información de Pago
                 </h2>
                 <p className="text-gray-300 mb-6 text-lg">
-                  Total a pagar: <span className="text-3xl font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">${total.toLocaleString("es-CO")}</span>
+                  Total a pagar: <span className="text-3xl font-black bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">${total.toLocaleString("es-CO")}</span>
                 </p>
 
                 {!mpInitialized ? (

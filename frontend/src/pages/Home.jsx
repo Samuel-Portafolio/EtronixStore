@@ -58,7 +58,7 @@ export default function Home() {
       </Helmet>
 
       {/* === Fondo LightRays: ocupa toda la pantalla === */}
-      <div className="fixed inset-0 w-full h-full z-0 bg-gradient-to-br from-gray-900 via-slate-900 to-black">
+      <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black">
         <LightRays
           raysOrigin="top-center"
           raysColor="#00d4ff"
@@ -80,10 +80,10 @@ export default function Home() {
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
               {/* Texto */}
               <div className="order-2 lg:order-1">
-                <div className="backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 rounded-3xl p-8 lg:p-10 border border-white/20 shadow-2xl">
+                <div className="backdrop-blur-xl bg-linear-to-br from-white/15 to-white/5 rounded-3xl p-8 lg:p-10 border border-white/20 shadow-2xl">
                   <h1 className="text-4xl lg:text-6xl font-black leading-[1.05] text-white mb-5">
                     Actualiza tu{" "}
-                    <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                    <span className="bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                       mundo móvil
                     </span>
                   </h1>
@@ -94,7 +94,7 @@ export default function Home() {
                   <div className="flex flex-wrap gap-4">
                     <Link
                       to="/shop"
-                      className="inline-flex items-center gap-2 rounded-xl px-7 py-4 text-gray-900 font-bold shadow-lg transition-all hover:-translate-y-1 hover:shadow-cyan-500/50 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400"
+                      className="inline-flex items-center gap-2 rounded-xl px-7 py-4 text-gray-900 font-bold shadow-lg transition-all hover:-translate-y-1 hover:shadow-cyan-500/50 bg-linear-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400"
                     >
                       Explorar ahora
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,7 +116,7 @@ export default function Home() {
               <div className="order-1 lg:order-2">
                 <div className="relative">
                   {/* Glow effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 to-blue-500/30 rounded-3xl blur-3xl" />
+                  <div className="absolute inset-0 bg-linear-to-r from-cyan-500/30 to-blue-500/30 rounded-3xl blur-3xl" />
                   <div className="relative backdrop-blur-sm bg-white/10 rounded-3xl p-8 border border-white/20 shadow-2xl overflow-visible">
                     <div className="overflow-visible flex items-center justify-center -m-12">
                       <img
@@ -173,7 +173,7 @@ export default function Home() {
                 {featuredProducts.map((p, idx) => (
                   <article
                     key={p._id || idx}
-                    className="group relative rounded-2xl backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 border border-white/20 p-4 shadow-xl hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-300 hover:-translate-y-2 hover:border-cyan-400/50"
+                    className="group relative rounded-2xl backdrop-blur-xl bg-linear-to-br from-white/15 to-white/5 border border-white/20 p-4 shadow-xl hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-300 hover:-translate-y-2 hover:border-cyan-400/50"
                   >
 
                     <Link to={`/products/${p._id}`} className="block">
@@ -187,7 +187,7 @@ export default function Home() {
                             decoding="async"
                           />
                         ) : (
-                          <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-cyan-500/20 to-blue-500/20">
+                          <div className="h-full w-full flex items-center justify-center bg-linear-to-br from-cyan-500/20 to-blue-500/20">
                             <span className="text-white/50 text-4xl">📱</span>
                           </div>
                         )}
@@ -196,12 +196,12 @@ export default function Home() {
                       <h3 className="text-[15px] font-bold text-white line-clamp-1 mb-2">
                         {p.title}
                       </h3>
-                      <p className="text-[13px] text-gray-300 line-clamp-2 min-h-[40px] mb-3">
+                      <p className="text-[13px] text-gray-300 line-clamp-2 min-h-10] mb-3">
                         {p.description || "Producto de alta calidad con garantía extendida."}
                       </p>
                       
                       <div className="flex items-center justify-between pt-3 border-t border-white/10">
-                        <span className="text-lg font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                        <span className="text-lg font-black bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                           {typeof p.price === "number" ? `$${p.price.toLocaleString("es-CO")}` : "Consultar"}
                         </span>
                         <span className="text-xs font-bold text-cyan-400 group-hover:translate-x-1 transition-transform">
@@ -228,7 +228,7 @@ export default function Home() {
               ].map((b, i) => (
                 <div 
                   key={i} 
-                  className="rounded-2xl backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 border border-white/20 p-6 text-center shadow-xl hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/50"
+                  className="rounded-2xl backdrop-blur-xl bg-linear-to-br from-white/15 to-white/5 border border-white/20 p-6 text-center shadow-xl hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/50"
                 >
                   <div className="text-4xl mb-3">{b.icon}</div>
                   <p className="text-base font-black text-white mb-1">{b.t}</p>

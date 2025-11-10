@@ -39,7 +39,7 @@ export default function Sidebar({ open = false, onClose }) {
   const itemInactive =
     "text-gray-300 hover:text-white hover:bg-white/10 border border-transparent hover:border-white/20";
   const itemActive =
-    "text-white bg-gradient-to-r from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/30";
+    "text-white bg-linear-to-r from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/30";
 
   return (
     <>
@@ -74,12 +74,12 @@ export default function Sidebar({ open = false, onClose }) {
           {/* Header del panel */}
           <div className="relative px-6 py-5 border-b border-white/10">
             {/* Línea gradiente decorativa */}
-            <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-50" />
+            <div className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-cyan-500 to-transparent opacity-50" />
             
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 to-blue-500/30 rounded-lg blur-md" />
+                  <div className="absolute inset-0 bg-linear-to-r from-cyan-500/30 to-blue-500/30 rounded-lg blur-md" />
                   <span className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 border border-white/20">
                     <span className="material-symbols-outlined text-[24px] text-cyan-400">menu</span>
                   </span>
@@ -88,7 +88,7 @@ export default function Sidebar({ open = false, onClose }) {
                   <p className="text-xs font-bold tracking-wider text-gray-400 uppercase">
                     Menú
                   </p>
-                  <h2 className="text-base font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-300 bg-clip-text text-transparent">
+                  <h2 className="text-base font-black bg-linear-to-r from-cyan-400 via-blue-400 to-cyan-300 bg-clip-text text-transparent">
                     Navegación
                   </h2>
                 </div>
@@ -211,7 +211,7 @@ export default function Sidebar({ open = false, onClose }) {
               </section>
 
               {/* Línea decorativa */}
-              <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+              <div className="h-px bg-linear-to-r from-transparent via-white/10 to-transparent" />
 
               {/* Bloque: Atajos útiles */}
               <section>
@@ -237,12 +237,12 @@ export default function Sidebar({ open = false, onClose }) {
           {/* Footer CTA WhatsApp */}
           <div className="px-5 py-4 border-t border-white/10">
             <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-green-500/30 to-emerald-500/30 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 bg-linear-to-r from-green-500/30 to-emerald-500/30 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
               <a
                 href="https://wa.me/573207208410"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="relative flex items-center justify-between rounded-xl backdrop-blur-md bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-3 hover:from-green-400 hover:to-emerald-400 transition-all shadow-lg hover:shadow-green-500/50"
+                className="relative flex items-center justify-between rounded-xl backdrop-blur-md bg-linear-to-r from-green-500 to-emerald-500 px-4 py-3 hover:from-green-400 hover:to-emerald-400 transition-all shadow-lg hover:shadow-green-500/50"
               >
                 <div className="flex items-center gap-3">
                   <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white/20">
@@ -288,7 +288,7 @@ export default function Sidebar({ open = false, onClose }) {
 function HeaderLabel({ title }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="h-5 w-1 rounded-full bg-gradient-to-b from-cyan-500 to-blue-500" />
+      <span className="h-5 w-1 rounded-full bg-linear-to-b from-cyan-500 to-blue-500" />
       <p className="text-xs uppercase tracking-wider text-gray-400 font-black">{title}</p>
     </div>
   );
@@ -300,7 +300,7 @@ function QuickLink({ to, icon, label, gradient = "from-cyan-500 to-blue-500" }) 
       to={to}
       className={`
         group rounded-xl backdrop-blur-md bg-white/10 border border-white/20
-        hover:bg-gradient-to-r hover:${gradient} hover:border-transparent
+        hover:bg-linear-to-r hover:${gradient} hover:border-transparent
         transition-all hover:-translate-y-0.5 hover:shadow-lg
       `}
     >

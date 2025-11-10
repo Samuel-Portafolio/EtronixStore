@@ -156,7 +156,7 @@ export default function Admin() {
   if (checkingAuth) {
     return (
       <>
-        <div className="fixed inset-0 w-full h-full z-0 bg-gradient-to-br from-gray-900 via-slate-900 to-black">
+        <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black">
           <LightRays
             raysOrigin="top-center"
             raysColor="#00d4ff"
@@ -189,7 +189,7 @@ export default function Admin() {
       </Helmet>
 
       {/* Fondo LightRays */}
-      <div className="fixed inset-0 w-full h-full z-0 bg-gradient-to-br from-gray-900 via-slate-900 to-black">
+      <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black">
         <LightRays
           raysOrigin="top-center"
           raysColor="#00d4ff"
@@ -209,15 +209,15 @@ export default function Admin() {
 
         {/* Header */}
         <header className="sticky top-0 z-20 backdrop-blur-xl bg-gray-900/80 border-b border-white/10 shadow-lg">
-          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-50" />
+          <div className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-cyan-500 to-transparent opacity-50" />
           
           <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 to-blue-500/30 rounded-lg blur-md" />
+                <div className="absolute inset-0 bg-linear-to-r from-cyan-500/30 to-blue-500/30 rounded-lg blur-md" />
                 <span className="relative material-symbols-outlined text-3xl text-cyan-400">dashboard</span>
               </div>
-              <h1 className="text-2xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-300 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-black bg-linear-to-r from-cyan-400 via-blue-400 to-cyan-300 bg-clip-text text-transparent">
                 Panel de Administración
               </h1>
             </div>
@@ -225,7 +225,7 @@ export default function Admin() {
             <div className="flex items-center gap-3">
               <button 
                 onClick={fetchOrders} 
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-black shadow-lg hover:shadow-cyan-500/50 transition-all hover:-translate-y-0.5 flex items-center gap-2"
+                className="px-4 py-2 rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 text-white font-black shadow-lg hover:shadow-cyan-500/50 transition-all hover:-translate-y-0.5 flex items-center gap-2"
               >
                 <span className="material-symbols-outlined text-lg">refresh</span>
                 Actualizar
@@ -261,9 +261,9 @@ export default function Admin() {
             ].map((stat) => (
               <div 
                 key={stat.label} 
-                className="backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 p-4 flex flex-col items-center justify-center shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all"
+                className="backdrop-blur-xl bg-linear-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 p-4 flex flex-col items-center justify-center shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all"
               >
-                <span className={`material-symbols-outlined text-3xl mb-2 bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                <span className={`material-symbols-outlined text-3xl mb-2 bg-linear-to-r ${stat.color} bg-clip-text text-transparent`}>
                   {stat.icon}
                 </span>
                 <p className="text-sm font-bold text-gray-300">{stat.label}</p>
@@ -288,7 +288,7 @@ export default function Admin() {
                 onClick={() => setFilter(filterOption.value)}
                 className={`px-5 py-2.5 rounded-xl font-black transition-all flex items-center gap-2 shadow-lg ${
                   filter === filterOption.value
-                    ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-cyan-500/50"
+                    ? "bg-linear-to-r from-cyan-500 to-blue-500 text-white shadow-cyan-500/50"
                     : "backdrop-blur-md bg-white/10 border-2 border-white/20 text-gray-300 hover:bg-white/20 hover:border-cyan-400/50"
                 }`}
               >
@@ -304,7 +304,7 @@ export default function Admin() {
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-400 border-t-transparent"></div>
             </div>
           ) : filteredOrders.length === 0 ? (
-            <div className="backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 p-8 text-center shadow-xl">
+            <div className="backdrop-blur-xl bg-linear-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 p-8 text-center shadow-xl">
               <p className="text-gray-300 text-lg font-bold">
                 {filter === "all" ? "No hay pedidos aún" : `No hay pedidos ${filter}`}
               </p>
@@ -314,7 +314,7 @@ export default function Admin() {
               {filteredOrders.map((order) => (
                 <div
                   key={order._id}
-                  className="backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 p-6 shadow-xl hover:shadow-2xl hover:border-cyan-400/50 transition-all"
+                  className="backdrop-blur-xl bg-linear-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 p-6 shadow-xl hover:shadow-2xl hover:border-cyan-400/50 transition-all"
                 >
                   {/* Encabezado del pedido */}
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4 pb-4 border-b border-white/10">
@@ -418,7 +418,7 @@ export default function Admin() {
                               <p className="font-black text-white">{item.title}</p>
                               <p className="text-xs text-gray-400">${item.unit_price?.toLocaleString("es-CO")} x {item.quantity}</p>
                             </div>
-                            <span className="font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                            <span className="font-black bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                               ${(item.unit_price * item.quantity).toLocaleString("es-CO")}
                             </span>
                           </div>
@@ -428,7 +428,7 @@ export default function Admin() {
                       {/* Total */}
                       <div className="mt-4 pt-4 border-t border-white/20 flex justify-between items-center">
                         <span className="font-black text-white">TOTAL:</span>
-                        <span className="text-2xl font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                        <span className="text-2xl font-black bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                           ${order.total?.toLocaleString("es-CO")}
                         </span>
                       </div>
