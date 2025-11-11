@@ -12,14 +12,22 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const cached = localStorage.getItem("featuredProducts");
+    if (cached) {
+      setFeaturedProducts(JSON.parse(cached));
+      setLoading(false);
+    }
+
+    
     (async () => {
       try {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
         const data = await res.json();
-        setFeaturedProducts(Array.isArray(data) ? data.slice(0, 5) : []);
+        const sliced = Array.isArray(data) ? data.slice(0, 5) : [];
+        setFeaturedProducts(sliced);
+        localStorage.setItem("featuredProducts", JSON.stringify(sliced));
       } catch (error) {
         console.error("Error cargando productos:", error);
-        setFeaturedProducts([]);
       } finally {
         setLoading(false);
       }
@@ -60,85 +68,68 @@ export default function Home() {
 
       <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black">
         <LightRays
-          raysOrigin="top-center"
+          /*raysOrigin="top-center"
           raysColor="#00d4ff"
-          raysSpeed={1.5}
+          raysSpeed={1.5} 
           lightSpread={0.9}
-          rayLength={1.2}
+          rayLength={1.2} 
           followMouse
           mouseInfluence={0.12}
           noiseAmount={0.06}
           distortion={0.03}
-          className="w-full h-full pointer-events-none opacity-70"
+          className="w-full h-full pointer-events-none opacity-70"*/
         />
       </div>
 
       <main className="relative min-h-screen z-10">
-        {/* ---------- HERO ---------- */}
+        {/* ---------- HERO (diseño tipo imagen referencia) ---------- */}
         <section className="relative">
-          <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16 lg:py-24">
-            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-              <div className="order-2 lg:order-1">
-                <div className="backdrop-blur-xl bg-linear-to-br from-white/15 to-white/5 rounded-3xl p-8 lg:p-10 border border-white/20 shadow-2xl">
-                  <h1 className="text-4xl lg:text-6xl font-black leading-[1.05] text-white mb-5">
-                    Actualiza tu{" "}
-                    <span className="bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                      mundo móvil
-                    </span>
-                  </h1>
-                  <p className="text-gray-200 text-lg leading-relaxed mb-8">
-                    Calidad real, envíos rápidos y pagos seguros. Celulares, cargadores, cables y más para tu día a día.
-                  </p>
+          <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-0 pb-20">
+            <div className="grid grid-cols-12 gap-8 lg:gap-12 items-center">
+              {/* Robot grande a la izquierda */}
+              <div className="order-2 lg:order-1 col-span-12 lg:col-span-7 flex items-center justify-center">
+                <div className="relative flex justify-start items-center h-[400px] lg:h-[600px] xl:h-[700px] overflow-visible">
+                  <OptimizedImage
+                    src={hero}
+                    alt="Logo Etronix - Accesorios tecnológicos"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-screen max-w-none lg:w-[850px] xl:w-[1050px] 2xl:w-[1230px] h-auto object-left object-contain drop-shadow-[0_20px_50px_rgba(59,130,246,0.45)] z-0"
+                    priority
+                  />
+                </div>
+              </div>
+              {/* Texto y botones a la derecha */}
+              <div className="order-1 lg:order-2 col-span-12 lg:col-span-5 flex flex-col items-center lg:items-start justify-center text-center lg:text-left">
+                <h1 className="text-5xl lg:text-6xl font-extrabold leading-tight text-white mb-6 relative z-10 text-center lg:text-left">
+                  <span className="block ml-10 lg:ml-10">Transforma</span>
+                  <span className="block ml-44 lg:ml-44">tu</span>
+                  <span className="block ml-8 lg:ml-8">experiencia</span>
+                  <span className="block ml-30 lg:ml-30 bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                    móvil
+                  </span>
+                </h1>
 
-                  <div className="flex flex-wrap gap-4">
-                    <Link
-                      to="/shop"
-                      className="inline-flex items-center gap-2 rounded-xl px-7 py-4 text-gray-900 font-bold shadow-lg transition-all hover:-translate-y-1 hover:shadow-cyan-500/50 bg-linear-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400"
-                    >
-                      Explorar ahora
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </Link>
-
-                    <Link
-                      to="/offers"
-                      className="inline-flex items-center gap-2 rounded-xl px-7 py-4 font-bold shadow-lg transition-all hover:-translate-y-1 border-2 border-white/30 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm hover:border-cyan-400/50"
-                    >
-                      Ver ofertas
-                    </Link>
-                  </div>
+                <p className="text-gray-300 text-lg lg:text-xl mb-10 leading-relaxed max-w-md text-center lg:text-left">
+                  En Etronix encuentras calidad, innovación y estilo. Potencia tu mundo digital con accesorios premium, envíos rápidos y pagos seguros.
+                </p>
+                <div className="flex flex-wrap gap-5 justify-center lg:justify-start">
+                  <Link
+                    to="/shop"
+                    className="inline-flex items-center gap-2 px-8 py-4 font-bold rounded-xl bg-linear-to-r from-cyan-400 to-blue-500 text-gray-900 shadow-lg hover:-translate-y-1 hover:shadow-cyan-400/50 transition-all"
+                  >
+                    Explorar ahora
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </Link>
+                  <Link
+                    to="/offers"
+                    className="inline-flex items-center gap-2 px-8 py-4 font-bold rounded-xl border-2 border-white/30 text-white hover:bg-white/10 hover:border-cyan-400/50 backdrop-blur-md transition-all"
+                  >
+                    Ver ofertas
+                  </Link>
                 </div>
               </div>
 
-              {/* ⚠️ CAMBIO 1: Imagen del Hero - PRIORIDAD ALTA */}
-              <div className="order-1 lg:order-2">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-linear-to-r from-cyan-500/30 to-blue-500/30 rounded-3xl blur-3xl" />
-                  <div className="relative backdrop-blur-sm bg-white/10 rounded-3xl p-8 border border-white/20 shadow-2xl overflow-visible">
-                    <div className="overflow-visible flex items-center justify-center -m-12">
-                      {/* ❌ ANTES: */}
-                      {/* <img
-                        src={hero}
-                        alt="Hero Etronix"
-                        className="w-full h-auto rounded-2xl object-contain drop-shadow-2xl scale-95"
-                        loading="eager"
-                        decoding="async"
-                        fetchPriority="high"
-                      /> */}
-
-                      {/* ✅ DESPUÉS: */}
-                      <OptimizedImage
-                        src={hero}
-                        alt="Hero Etronix - Accesorios para celulares"
-                        className="w-full h-auto rounded-2xl object-contain drop-shadow-2xl scale-95"
-                        priority={true}
-                        placeholder="none"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </section>
@@ -184,16 +175,6 @@ export default function Home() {
                       {/* ⚠️ CAMBIO 2: Imágenes de productos destacados */}
                       <div className="aspect-4/5 rounded-xl bg-white/5 overflow-hidden mb-4 border border-white/10">
                         {p.image ? (
-                          /* ❌ ANTES: */
-                          /* <img
-                            src={p.image}
-                            alt={p.title}
-                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            loading="lazy"
-                            decoding="async"
-                          /> */
-
-                          /* ✅ DESPUÉS: */
                           <OptimizedImage
                             src={p.image}
                             alt={p.title}

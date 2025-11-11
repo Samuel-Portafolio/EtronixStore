@@ -141,18 +141,7 @@ export default function Shop() {
 
       {/* === Fondo LightRays: ocupa toda la pantalla === */}
       <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black">
-        <LightRays
-          raysOrigin="top-center"
-          raysColor="#00d4ff"
-          raysSpeed={1.5}
-          lightSpread={0.9}
-          rayLength={1.2}
-          followMouse
-          mouseInfluence={0.12}
-          noiseAmount={0.06}
-          distortion={0.03}
-          className="w-full h-full pointer-events-none opacity-70"
-        />
+        
       </div>
 
       <div className="relative min-h-screen flex flex-col z-10">

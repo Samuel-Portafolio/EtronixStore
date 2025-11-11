@@ -26,16 +26,15 @@ export default function Layout() {
         />
       )}
 
-      {/* Drawer lateral superpuesto (no afecta el layout) */}
+      {/* Drawer lateral */}
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Cart Drawer */}
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
 
+      {/* ✅ MAIN sin padding general (para evitar que Home se baje o mueva) */}
       <main className="flex-1 min-w-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Outlet />
-        </div>
+        <Outlet />
         <Footer />
       </main>
 
