@@ -4,6 +4,8 @@ import { CATEGORIES } from "../constants/categories";
 import { NoResults, ProductSkeleton } from "../components/EmptyState";
 import { Helmet } from "react-helmet-async";
 import LightRays from "../components/LightRays";
+import OptimizedImage from '../components/OptimizedImage';
+
 
 export default function Shop() {
   const location = useLocation();
@@ -308,10 +310,12 @@ export default function Shop() {
                               </span>
                             )}
                             {p.image ? (
-                              <img
+                              <OptimizedImage
                                 src={p.image}
-                                alt={p.title}
+                                alt={`${p.title} - ${p.category}`}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                priority={false}
+                                placeholder="blur"
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-cyan-500/20 to-blue-500/20">

@@ -2,10 +2,26 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    
+    <!-- DNS Prefetch para recursos externos -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+    <link rel="dns-prefetch" href="https://api.mercadopago.com" />
+    
+    <!-- Preconnect a recursos críticos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://api.mercadopago.com" crossorigin />
+    
+    <!-- Favicon optimizado -->
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Viewport optimizado -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    
+    <!-- Theme color para PWA -->
+    <meta name="theme-color" content="#1E3A8A" />
     
     <!-- SEO Meta Tags -->
     <title>Etronix Store – Accesorios para celulares y tecnología</title>
@@ -43,34 +59,51 @@
       "description": "Tienda especializada en accesorios para celulares y tecnología",
       "sameAs": [
         "https://facebook.com/etronixstore",
-        "https://instagram.com/etronixstore",
-        "https://twitter.com/etronixstore"
+        "https://instagram.com/etronixstore"
       ],
       "contactPoint": {
         "@type": "ContactPoint",
-        "telephone": "+57-XXX-XXX-XXXX",
+        "telephone": "+57-320-720-8410",
         "contactType": "customer service",
         "availableLanguage": ["Spanish"]
       }
     }
     </script>
     
-    <!-- Google Fonts (non-blocking) - Fuentes profesionales -->
+    <!-- Google Fonts - Optimizado con display=swap -->
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <noscript>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     </noscript>
 
-    <!-- Material Icons (non-blocking) -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" media="print" onload="this.media='all'" />
+    <!-- Material Icons - Optimizado -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400" rel="stylesheet" media="print" onload="this.media='all'" />
     <noscript>
-      <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400" rel="stylesheet" />
     </noscript>
+    
+    <!-- Preload logo crítico -->
+    <link rel="preload" as="image" href="/src/assets/logoEtronixBordesRedondos.svg" />
+    
+    <!-- Prefetch rutas importantes -->
+    <link rel="prefetch" href="/shop" />
+    
+    <!-- Resource hints para mejor performance -->
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- Service Worker para PWA (opcional pero recomendado) -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
   </body>
 </html>

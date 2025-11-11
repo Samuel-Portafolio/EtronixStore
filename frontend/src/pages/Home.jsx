@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useState, useEffect, lazy, Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 import LightRays from "../components/LightRays";
+import OptimizedImage from "../components/OptimizedImage"; // ✅ YA AGREGADO
 const FAQ = lazy(() => import("../components/FAQ"));
 
 import hero from "../assets/LogoEtronixBordesRedondos.svg";
@@ -57,7 +58,6 @@ export default function Home() {
         <link rel="canonical" href="https://etronix-store.com/" />
       </Helmet>
 
-      {/* === Fondo LightRays: ocupa toda la pantalla === */}
       <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black">
         <LightRays
           raysOrigin="top-center"
@@ -78,7 +78,6 @@ export default function Home() {
         <section className="relative">
           <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16 lg:py-24">
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-              {/* Texto */}
               <div className="order-2 lg:order-1">
                 <div className="backdrop-blur-xl bg-linear-to-br from-white/15 to-white/5 rounded-3xl p-8 lg:p-10 border border-white/20 shadow-2xl">
                   <h1 className="text-4xl lg:text-6xl font-black leading-[1.05] text-white mb-5">
@@ -112,26 +111,34 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Imagen producto / mockup */}
+              {/* ⚠️ CAMBIO 1: Imagen del Hero - PRIORIDAD ALTA */}
               <div className="order-1 lg:order-2">
                 <div className="relative">
-                  {/* Glow effect */}
                   <div className="absolute inset-0 bg-linear-to-r from-cyan-500/30 to-blue-500/30 rounded-3xl blur-3xl" />
                   <div className="relative backdrop-blur-sm bg-white/10 rounded-3xl p-8 border border-white/20 shadow-2xl overflow-visible">
                     <div className="overflow-visible flex items-center justify-center -m-12">
-                      <img
+                      {/* ❌ ANTES: */}
+                      {/* <img
                         src={hero}
                         alt="Hero Etronix"
                         className="w-full h-auto rounded-2xl object-contain drop-shadow-2xl scale-95"
                         loading="eager"
                         decoding="async"
                         fetchPriority="high"
+                      /> */}
+
+                      {/* ✅ DESPUÉS: */}
+                      <OptimizedImage
+                        src={hero}
+                        alt="Hero Etronix - Accesorios para celulares"
+                        className="w-full h-auto rounded-2xl object-contain drop-shadow-2xl scale-95"
+                        priority={true}
+                        placeholder="none"
                       />
                     </div>
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         </section>
@@ -139,7 +146,6 @@ export default function Home() {
         {/* ---------- FEATURED PRODUCTS ---------- */}
         <section className="pb-20">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
-            {/* Header */}
             <div className="flex items-end justify-between mb-8">
               <div>
                 <h2 className="text-3xl lg:text-4xl font-black text-white">
@@ -157,7 +163,6 @@ export default function Home() {
               </Link>
             </div>
 
-            {/* Grid de productos */}
             {loading ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -175,16 +180,26 @@ export default function Home() {
                     key={p._id || idx}
                     className="group relative rounded-2xl backdrop-blur-xl bg-linear-to-br from-white/15 to-white/5 border border-white/20 p-4 shadow-xl hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-300 hover:-translate-y-2 hover:border-cyan-400/50"
                   >
-
                     <Link to={`/products/${p._id}`} className="block">
+                      {/* ⚠️ CAMBIO 2: Imágenes de productos destacados */}
                       <div className="aspect-4/5 rounded-xl bg-white/5 overflow-hidden mb-4 border border-white/10">
                         {p.image ? (
-                          <img
+                          /* ❌ ANTES: */
+                          /* <img
                             src={p.image}
                             alt={p.title}
                             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                             loading="lazy"
                             decoding="async"
+                          /> */
+
+                          /* ✅ DESPUÉS: */
+                          <OptimizedImage
+                            src={p.image}
+                            alt={p.title}
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            priority={idx < 2}
+                            placeholder="blur"
                           />
                         ) : (
                           <div className="h-full w-full flex items-center justify-center bg-linear-to-br from-cyan-500/20 to-blue-500/20">
@@ -239,7 +254,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ---------- FAQ ---------- */}
         <Suspense fallback={null}>
           <FAQ />
         </Suspense>

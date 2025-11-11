@@ -28,6 +28,7 @@ import {
 } from "./src/middleware/errorHandler.js";
 
 import { MercadoPagoConfig, Preference, MerchantOrder, Payment } from "mercadopago";
+import compression from 'compression';
 
 dotenv.config();
 
@@ -39,6 +40,31 @@ app.use(helmet());
 
 // Sanitización de datos MongoDB (middleware personalizado para Express 5)
 app.use(mongoSanitizeMiddleware);
+
+// 1. COMPRESIÓN GZIP/BROTLI
+app.use(compression({
+  level: 6, // Balance entre velocidad y compresión
+  threshold: 1024, // Solo comprimir respuestas > 1KB
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  }
+}));
+
+// 2. CACHE HEADERS PARA ASSETS ESTÁTICOS
+app.use((req, res, next) => {
+  // Cache para assets inmutables (1 año)
+  if (req.url.match(/\.(js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$/)) {
+    res.set('Cache-Control', 'public, max-age=31536000, immutable');
+  }
+  // No cache para API
+  else if (req.url.startsWith('/api/')) {
+    res.set('Cache-Control', 'no-store, must-revalidate');
+  }
+  next();
+});
 
 // Rate limiting general
 const limiter = rateLimit({
@@ -90,8 +116,19 @@ const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN 
 
 // --- Healthcheck ---
 app.get("/api/health", (_req, res) => {
-  res.json({ ok: true, service: "backend", time: new Date().toISOString() });
+  const health = {
+    ok: true,
+    service: "backend",
+    time: new Date().toISOString(),
+    uptime: process.uptime(),
+    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    memory: process.memoryUsage(),
+  };
+  
+  const status = health.mongodb === 'connected' ? 200 : 503;
+  res.status(status).json(health);
 });
+
 
 // --- Función para validar stock ---
 async function validateStock(items) {
@@ -169,10 +206,69 @@ async function normalizeItemsFromDB(items) {
 }
 
 // --- Productos ---
-app.get("/api/products", asyncHandler(async (_req, res) => {
-  const items = await Product.find().sort({ createdAt: -1 });
+app.get("/api/products", asyncHandler(async (req, res) => {
+  // Cache en memoria simple (en producción usar Redis)
+  const cacheKey = 'all_products';
+  const cached = productCache.get(cacheKey);
+  
+  if (cached) {
+    return res.json(cached);
+  }
+  
+  // Proyección: solo campos necesarios
+  const items = await Product.find(
+    { stock: { $gte: 0 } }, // Solo productos con stock >= 0
+    {
+      title: 1,
+      price: 1,
+      image: 1,
+      stock: 1,
+      category: 1,
+      description: 1,
+      specs: 1,
+      // Excluir campos pesados si no se necesitan
+    }
+  )
+  .sort({ createdAt: -1 })
+  .lean(); // .lean() mejora performance significativamente
+  
+  // Guardar en cache por 5 minutos
+  productCache.set(cacheKey, items, 300);
+  
   res.json(items);
 }));
+
+// 7. CACHE EN MEMORIA SIMPLE (top del archivo)
+class SimpleCache {
+  constructor() {
+    this.cache = new Map();
+  }
+  
+  get(key) {
+    const item = this.cache.get(key);
+    if (!item) return null;
+    if (Date.now() > item.expires) {
+      this.cache.delete(key);
+      return null;
+    }
+    return item.value;
+  }
+  
+  set(key, value, ttlSeconds = 300) {
+    this.cache.set(key, {
+      value,
+      expires: Date.now() + (ttlSeconds * 1000)
+    });
+  }
+  
+  clear() {
+    this.cache.clear();
+  }
+}
+
+const productCache = new SimpleCache();
+productCache.clear();
+
 
 // --- Helpers ---
 async function decreaseStock(order) {

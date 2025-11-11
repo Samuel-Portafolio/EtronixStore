@@ -36,5 +36,8 @@ orderSchema.index({ createdAt: -1 });
 orderSchema.index({ external_reference: 1 });
 orderSchema.index({ status: 1 });
 orderSchema.index({ "buyer.email": 1 });
+orderSchema.index({ status: 1, createdAt: -1 });
+orderSchema.index({ "buyer.email": 1, status: 1 });
+
 
 export default mongoose.model("Order", orderSchema);

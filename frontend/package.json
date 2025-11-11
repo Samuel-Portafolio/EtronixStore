@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+  "build": "vite build",
+  "build:analyze": "vite build && analyze",
+    "preview": "vite preview",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "optimize-images": "node scripts/optimize-images.js"
   },
   "dependencies": {
     "@mercadopago/sdk-react": "^1.0.6",
@@ -31,42 +33,9 @@
     "postcss": "^8.5.6",
     "rollup-plugin-visualizer": "^6.0.5",
     "tailwindcss": "^4.1.16",
-    "vite": "^7.1.7"
-  },
-  "reactSnap": {
-    "source": "dist",
-    "inlineCss": true,
-    "minifyHtml": {
-      "collapseWhitespace": true,
-      "removeComments": true
-    },
-    "puppeteerArgs": [
-      "--no-sandbox",
-      "--disable-setuid-sandbox"
-    ],
-    "include": [
-      "/",
-      "/shop",
-      "/about",
-      "/faq",
-      "/products/6909f659bfc78f97eacbda14",
-      "/products/6909f659bfc78f97eacbda2b",
-      "/products/6909f659bfc78f97eacbda32",
-      "/products/6909f659bfc78f97eacbda28",
-      "/products/6909f659bfc78f97eacbda38",
-      "/products/6909f659bfc78f97eacbda18",
-      "/products/6909f659bfc78f97eacbda1b",
-      "/products/6909f659bfc78f97eacbda24",
-      "/products/6909f659bfc78f97eacbda3b",
-      "/products/6909f659bfc78f97eacbda21",
-      "/products/6909f659bfc78f97eacbda2e",
-      "/products/6909f659bfc78f97eacbda35",
-      "/products/6909f659bfc78f97eacbda1e"
-    ],
-    "skipThirdPartyRequests": true,
-    "cacheAjaxRequests": false,
-    "removeBlobs": true,
-    "fixWebpackChunksIssue": false,
-    "waitFor": 2000
+    "terser": "^5.44.1",
+    "vite": "^7.1.7",
+    "vite-bundle-analyzer": "^1.2.3",
+    "vite-plugin-compression": "^0.5.1"
   }
 }

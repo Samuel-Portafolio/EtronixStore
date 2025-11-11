@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import OptimizedImage from "../components/OptimizedImage";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -153,12 +154,12 @@ export default function ProductDetail() {
             {/* Imagen */}
             <div className="aspect-square rounded-xl overflow-hidden bg-border-light dark:bg-border-dark">
               {product.image ? (
-                <img 
-                  src={product.image} 
-                  alt={product.title}
+                <OptimizedImage
+                  src={product.image}
+                  alt={`${product.title} - ${product.specs?.brand || 'Etronix'}`}
                   className="w-full h-full object-cover"
-                  loading="lazy"
-                  decoding="async"
+                  priority={true}
+                  placeholder="blur"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
