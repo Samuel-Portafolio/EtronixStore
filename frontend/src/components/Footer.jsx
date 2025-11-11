@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import logo from "../assets/logoEtronixBordesRedondos.svg";
+import logo from "../assets/logoEtronix.webp";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();

@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { visualizer } from 'rollup-plugin-visualizer'
+import viteCompression from 'vite-plugin-compression';
 
 export default defineConfig({
   plugins: [
@@ -9,8 +10,10 @@ export default defineConfig({
     visualizer({
       open: true,
       gzipSize: true,
-      brotliSize: true,
-    })
+      brotliSize: true
+    }),
+    viteCompression({ algorithm: 'brotliCompress'}),
+    viteCompression({ algorithm: 'gzip' })
   ],
   build: {
     // Optimizaciones críticas

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import logo from "../assets/logoEtronixBordesRedondos.svg";
+import logo from "../assets/logoEtronix.webp";
 
 export default function Header({ cartCount: cartCountProp, onToggleSidebar, onToggleCart }) {
   const [cartCount, setCartCount] = useState(cartCountProp ?? 0);

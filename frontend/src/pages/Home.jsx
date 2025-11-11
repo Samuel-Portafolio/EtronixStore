@@ -5,7 +5,7 @@ import LightRays from "../components/LightRays";
 import OptimizedImage from "../components/OptimizedImage"; // ✅ YA AGREGADO
 const FAQ = lazy(() => import("../components/FAQ"));
 
-import hero from "../assets/LogoEtronixBordesRedondos.svg";
+import hero from "../assets/logoEtronix.webp";
 
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
