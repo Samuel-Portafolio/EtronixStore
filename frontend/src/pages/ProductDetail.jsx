@@ -41,24 +41,26 @@ export default function ProductDetail() {
   };
 
   if (loading) {
+    // 👉 Si quieres también fondo oscuro aquí, luego lo adaptamos
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-linear-to-br from-gray-900 via-slate-900 to-black">
         <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary "></div>
         </div>
       </div>
     );
   }
 
   if (!product) {
+    // 👉 Igual, aquí le puse ya el mismo gradiente
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-linear-to-br from-gray-900 via-slate-900 to-black">
         <Helmet>
           <title>Producto no encontrado | Etronix Store</title>
           <meta name="robots" content="noindex,nofollow" />
         </Helmet>
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
+          <div className="text-center text-white">
             <p className="text-xl mb-4">Producto no encontrado</p>
             <Link to="/shop" className="text-primary hover:underline">
               Volver a la tienda
@@ -136,14 +138,18 @@ export default function ProductDetail() {
         <link rel="canonical" href={productUrl} />
       </Helmet>
 
-      <div className="min-h-screen flex flex-col">
-        <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-8 py-8">
+      {/* ⭐ CAMBIO: fondo global igual al de Home */}
+      <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black" />
+
+      {/* ⭐ CAMBIO: contenido por encima del fondo */}
+      <div className="relative min-h-screen flex flex-col z-10">
+        <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-8 py-8 text-white">
           {/* Breadcrumb */}
           <div className="mb-6 text-sm">
             <Link to="/" className="text-primary hover:underline">Inicio</Link>
-            <span className="mx-2">/</span>
+            <span className="mx-2 text-text-secondary-light dark:text-text-secondary-dark">/</span>
             <Link to="/shop" className="text-primary hover:underline">Productos</Link>
-            <span className="mx-2">/</span>
+            <span className="mx-2 text-text-secondary-light dark:text-text-secondary-dark">/</span>
             <span className="text-text-secondary-light dark:text-text-secondary-dark">
               {product.title}
             </span>
@@ -152,7 +158,7 @@ export default function ProductDetail() {
           {/* Producto */}
           <div className="grid md:grid-cols-2 gap-8 mb-12">
             {/* Imagen */}
-            <div className="aspect-square rounded-xl overflow-hidden bg-border-light dark:bg-border-dark">
+            <div className="aspect-square rounded-xl overflow-hidden bg-border-light/40 dark:bg-border-dark/60">
               {product.image ? (
                 <OptimizedImage
                   src={product.image}
@@ -224,8 +230,8 @@ export default function ProductDetail() {
           </div>
 
           {/* Tabs de información */}
-          <div className="border-t border-border-light dark:border-border-dark pt-8">
-            <div className="flex gap-4 border-b border-border-light dark:border-border-dark mb-6">
+          <div className="border-t border-border-light/60 dark:border-border-dark/60 pt-8">
+            <div className="flex gap-4 border-b border-border-light/60 dark:border-border-dark/60 mb-6">
               <button
                 onClick={() => setActiveTab('specs')}
                 className={`pb-3 font-semibold transition-colors ${
@@ -254,7 +260,7 @@ export default function ProductDetail() {
                 {Object.entries(product.specs).map(([key, value]) => {
                   if (!value || key === 'features') return null;
                   return (
-                    <div key={key} className="flex border-b border-border-light dark:border-border-dark pb-3">
+                    <div key={key} className="flex border-b border-border-light/50 dark:border-border-dark/50 pb-3">
                       <span className="font-semibold capitalize w-1/3 text-text-light dark:text-text-dark">
                         {key === 'brand' ? 'Marca' : 
                          key === 'model' ? 'Modelo' :
@@ -279,7 +285,7 @@ export default function ProductDetail() {
                   product.faqs.map((faq, idx) => (
                     <div 
                       key={idx}
-                      className="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg p-5"
+                      className="bg-card-light/80 dark:bg-card-dark/80 border border-border-light/60 dark:border-border-dark/60 rounded-lg p-5"
                     >
                       <h3 className="font-bold text-text-light dark:text-text-dark mb-2">
                         {faq.question}
@@ -295,7 +301,7 @@ export default function ProductDetail() {
                   </p>
                 )}
                 
-                <div className="mt-8 p-6 bg-primary/5 rounded-lg text-center">
+                <div className="mt-8 p-6 bg-primary/10 rounded-lg text-center">
                   <p className="text-text-light dark:text-text-dark font-semibold mb-2">
                     ¿Tienes otra pregunta?
                   </p>
@@ -319,7 +325,7 @@ export default function ProductDetail() {
 
         {/* Toast */}
         {toast && (
-          <div className="fixed bottom-6 right-6 z-50 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
+          <div className="fixed bottom-6 right-6 z-50 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items:center gap-2">
             {toast}
           </div>
         )}

@@ -1,6 +1,9 @@
 // frontend/src/components/Layout.jsx - MEJORAR
 
 import { lazy, Suspense } from 'react';
+import { useState } from "react";
+import Header from "./Header";
+import { Outlet } from "react-router-dom";
 
 // ✅ Lazy load TODOS los componentes no críticos
 const Sidebar = lazy(() => import('./Sidebar'));

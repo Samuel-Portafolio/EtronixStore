@@ -10,6 +10,7 @@ const Home = lazy(() => import("./pages/Home.jsx"));
 const Shop = lazy(() => import("./pages/Shop.jsx"));
 const Checkout = lazy(() => import("./pages/Checkout.jsx"));
 const Admin = lazy(() => import("./pages/Admin.jsx"));
+const AdminProductNew = lazy(() => import("./pages/AdminProductNew.jsx"));
 const Success = lazy(() => import("./pages/Success.jsx"));
 const Failure = lazy(() => import("./pages/Failure.jsx"));
 const Pending = lazy(() => import("./pages/Pending.jsx"));
@@ -69,6 +70,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <Admin />
+          </Suspense>
+        )
+      },
+      {
+        path: "admin/product/new",
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminProductNew />
           </Suspense>
         )
       },
