@@ -2,7 +2,6 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { EmptyCart } from "../components/EmptyState";
 import { Helmet } from "react-helmet-async";
-const LightRays = lazy(() => import("../components/LightRays"));
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -194,20 +193,7 @@ export default function Checkout() {
     return (
       <>
         <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-r from-gray-900 via-slate-900 to-black">
-          <Suspense fallback={null}>
-            <LightRays
-              raysOrigin="top-center"
-              raysColor="#00d4ff"
-              raysSpeed={1.5}
-              lightSpread={0.9}
-              rayLength={1.2}
-              followMouse
-              mouseInfluence={0.12}
-              noiseAmount={0.06}
-              distortion={0.03}
-              className="w-full h-full pointer-events-none opacity-70"
-            />
-          </Suspense>
+         
         </div>
         <div className="relative min-h-screen flex flex-col z-10">
           <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-8 py-8 w-full">

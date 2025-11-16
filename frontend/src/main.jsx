@@ -17,6 +17,17 @@ const FAQPage = lazy(() => import("./pages/FAQPage.jsx"));
 const About = lazy(() => import("./pages/About.jsx"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail.jsx"));
 
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .catch(() => {
+        // opcional: loguear el error
+      });
+  });
+}
+
+
 // Componente de carga
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen">

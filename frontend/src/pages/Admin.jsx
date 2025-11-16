@@ -1,8 +1,8 @@
-import { useEffect, useState, useRef, lazy, Suspense } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
+import AdminLogin from "../components/AdminLogin";
 import { Helmet } from "react-helmet-async";
-const AdminLogin = lazy(() => import("../components/AdminLogin"));
-const LightRays = lazy(() => import("../components/LightRays"));
+import LightRays from "../components/LightRays";
 
 export default function Admin() {
   const [orders, setOrders] = useState([]);
@@ -15,21 +15,7 @@ export default function Admin() {
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    const savedCode = localStorage.getItem('adminCode');
-    const loginTime = localStorage.getItem('adminLoginTime');
-    
-    if (savedCode && loginTime) {
-      const now = Date.now();
-      const elapsed = now - parseInt(loginTime);
-      const twentyFourHours = 24 * 60 * 60 * 1000;
-      
-      if (elapsed < twentyFourHours) {
-        setAdminCode(savedCode);
-        setIsAuthenticated(true);
-      } else {
-        handleLogout();
-      }
-    }
+
     setCheckingAuth(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -37,10 +23,6 @@ export default function Admin() {
   const handleLoginSuccess = (code) => {
     setAdminCode(code);
     setIsAuthenticated(true);
-    try {
-      localStorage.setItem('adminCode', code);
-      localStorage.setItem('adminLoginTime', String(Date.now()));
-    } catch (e) {}
   };
 
   const handleLogout = () => {
@@ -157,20 +139,18 @@ export default function Admin() {
     return (
       <>
         <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black">
-          <Suspense fallback={null}>
-            <LightRays
-              raysOrigin="top-center"
-              raysColor="#00d4ff"
-              raysSpeed={1.5}
-              lightSpread={0.9}
-              rayLength={1.2}
-              followMouse
-              mouseInfluence={0.12}
-              noiseAmount={0.06}
-              distortion={0.03}
-              className="w-full h-full pointer-events-none opacity-70"
-            />
-          </Suspense>
+          <LightRays
+            raysOrigin="top-center"
+            raysColor="#00d4ff"
+            raysSpeed={1.5}
+            lightSpread={0.9}
+            rayLength={1.2}
+            followMouse
+            mouseInfluence={0.12}
+            noiseAmount={0.06}
+            distortion={0.03}
+            className="w-full h-full pointer-events-none opacity-70"
+          />
         </div>
         <div className="relative min-h-screen flex items-center justify-center z-10">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-400 border-t-transparent"></div>
@@ -180,11 +160,37 @@ export default function Admin() {
   }
 
   if (!isAuthenticated) {
-    return (
-      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-400 border-t-transparent"></div></div>}>
+    if (!isAuthenticated) {
+  return (
+    <>
+      <Helmet>
+        <title>Acceso Administrador | Etronix Store</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+
+      {/* Fondo negro + LightRays como en los demás */}
+      <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black">
+        <LightRays
+          raysOrigin="top-center"
+          raysColor="#00d4ff"
+          raysSpeed={1.5}
+          lightSpread={0.9}
+          rayLength={1.2}
+          followMouse
+          mouseInfluence={0.12}
+          noiseAmount={0.06}
+          distortion={0.03}
+          className="w-full h-full pointer-events-none opacity-70"
+        />
+      </div>
+
+      {/* Contenedor del login centrado */}
+      <div className="relative min-h-screen z-10 flex items-center justify-center">
         <AdminLogin onLoginSuccess={handleLoginSuccess} />
-      </Suspense>
-    );
+      </div>
+    </>
+  );
+}
   }
 
   return (

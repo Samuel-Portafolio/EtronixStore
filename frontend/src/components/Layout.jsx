@@ -1,16 +1,17 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import CartDrawer from './CartDrawer';
 import Footer from './Footer';
 import { Outlet } from 'react-router-dom';
 
+// ✅ OPTIMIZACIÓN: Chatbot 100% lazy
+const Chatbot = lazy(() => import('./Chatbot'));
+
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [ChatbotComponent, setChatbotComponent] = useState(null);
   const [chatVisible, setChatVisible] = useState(false);
-  const [chatStartOpen, setChatStartOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background-light text-text-light">
@@ -19,7 +20,7 @@ export default function Layout() {
         onToggleCart={() => setCartOpen(true)}
       />
 
-      {/* Backdrop del drawer (no cubre el header) */}
+      {/* Backdrop del drawer */}
       {sidebarOpen && (
         <div
           className="fixed left-0 right-0 top-16 bottom-0 bg-black/30 z-40"
@@ -28,38 +29,23 @@ export default function Layout() {
         />
       )}
 
-      {/* Drawer lateral */}
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
-      {/* Cart Drawer */}
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
 
-      {/* ✅ MAIN sin padding general (para evitar que Home se baje o mueva) */}
       <main className="flex-1 min-w-0">
         <Outlet />
         <Footer />
       </main>
 
-      {/* Chatbot: cargamos dinámicamente solo cuando el usuario lo abre */}
+      {/* ✅ Chatbot con lazy loading completo */}
       {!chatVisible && (
         <button
+          onClick={() => setChatVisible(true)}
           onMouseEnter={() => {
-            // Prefetch the Chatbot module on hover for snappy open
-            if (!ChatbotComponent) import('./Chatbot').then((m) => setChatbotComponent(() => m.default)).catch(() => {});
+            // ✅ Prefetch on hover
+            import('./Chatbot').catch(() => {});
           }}
-          onClick={async () => {
-            setChatVisible(true);
-            setChatStartOpen(true);
-            if (!ChatbotComponent) {
-              try {
-                const mod = await import('./Chatbot');
-                setChatbotComponent(() => mod.default);
-              } catch (e) {
-                console.error('Error loading Chatbot:', e);
-              }
-            }
-          }}
-          className="fixed bottom-6 right-6 w-16 h-16 bg-linear-to-br from-cyan-500 to-blue-500 rounded-full shadow-2xl shadow-cyan-500/50 flex items-center justify-center hover:scale-110 transition-all duration-300 z-50 group"
+          className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-full shadow-2xl shadow-cyan-500/50 flex items-center justify-center hover:scale-110 transition-all duration-300 z-50"
           aria-label="Abrir chat"
         >
           <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -69,7 +55,15 @@ export default function Layout() {
         </button>
       )}
 
-      {chatVisible && ChatbotComponent && <ChatbotComponent startOpen={chatStartOpen} onClose={() => { setChatVisible(false); setChatStartOpen(false); }} />}
+      {/* ✅ Solo cargar Chatbot cuando el usuario lo abre */}
+      {chatVisible && (
+        <Suspense fallback={null}>
+          <Chatbot 
+            startOpen={true} 
+            onClose={() => setChatVisible(false)} 
+          />
+        </Suspense>
+      )}
     </div>
   );
 }
