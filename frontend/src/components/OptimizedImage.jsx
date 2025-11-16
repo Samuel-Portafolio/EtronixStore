@@ -1,12 +1,14 @@
+// frontend/src/components/OptimizedImage.jsx
 import { useState, useEffect, useRef } from "react";
 
 /**
  * Componente de imagen optimizada con:
- * - Lazy loading nativo
+ * - <picture> (WebP + JPG)
+ * - Soporte para srcSet y sizes (responsive)
+ * - Lazy loading nativo + IntersectionObserver
  * - Placeholder blur
- * - WebP con fallback (para Unsplash)
- * - Intersection Observer
- * - Error handling
+ * - Optimización especial para Unsplash
+ * - Manejo de error con fallback
  */
 export default function OptimizedImage({
   src,
@@ -14,12 +16,17 @@ export default function OptimizedImage({
   className = "",
   placeholder = "blur",
   priority = false,
+  srcSet,
+  sizes,
   ...props
 }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const imgRef = useRef(null);
 
+  // ---------------------------
+  // Intersection Observer (lazy)
+  // ---------------------------
   useEffect(() => {
     if (!imgRef.current || priority) return;
 
@@ -30,8 +37,11 @@ export default function OptimizedImage({
             const img = entry.target;
             if (img.dataset.src) {
               img.src = img.dataset.src;
-              observer.unobserve(img);
             }
+            if (img.dataset.srcset) {
+              img.srcset = img.dataset.srcset;
+            }
+            observer.unobserve(img);
           }
         });
       },
@@ -47,53 +57,117 @@ export default function OptimizedImage({
     };
   }, [priority]);
 
-  const getOptimizedSrc = (url) => {
+  const isUnsplash = src && src.includes("unsplash");
+
+  // ---------------------------
+  // Helpers para Unsplash
+  // ---------------------------
+  const addFormatToUrl = (url, format) => {
     if (!url) return "";
 
-    // Optimiza si es Unsplash
-    if (url.includes("unsplash.com")) {
-      const params = new URLSearchParams({
-        w: 800,
-        q: 85,
-        fm: "webp",
-        fit: "crop",
-        auto: "format,compress",
-      });
-      return `${url.split("?")[0]}?${params.toString()}`;
+    // Manejo de query string simple sin usar URL()
+    const hasQuery = url.includes("?");
+    let newUrl = url;
+
+    if (newUrl.includes("fm=")) {
+      newUrl = newUrl.replace(/fm=[^&]+/, `fm=${format}`);
+    } else {
+      newUrl += (hasQuery ? "&" : "?") + `fm=${format}`;
     }
 
-    return url;
+    // Comprimir un poquito si no tiene `q=`
+    if (!/[\?&]q=/.test(newUrl)) {
+      newUrl += "&q=85";
+    }
+
+    return newUrl;
   };
 
-  const optimizedSrc = getOptimizedSrc(src);
+  const transformSrcSet = (rawSrcSet, format) => {
+    if (!rawSrcSet) return "";
+
+    return rawSrcSet
+      .split(",")
+      .map((part) => {
+        const trimmed = part.trim();
+        if (!trimmed) return "";
+        const [urlPart, descriptor] = trimmed.split(/\s+/);
+        if (!urlPart) return "";
+        const newUrl = addFormatToUrl(urlPart, format);
+        return descriptor ? `${newUrl} ${descriptor}` : newUrl;
+      })
+      .filter(Boolean)
+      .join(", ");
+  };
+
+  // ---------------------------
+  // Construir URLs optimizadas
+  // ---------------------------
+  const webpSrc = isUnsplash ? addFormatToUrl(src, "webp") : src;
+  const jpgSrc = isUnsplash ? addFormatToUrl(src, "jpg") : src;
+
+  const webpSrcSet = isUnsplash && srcSet ? transformSrcSet(srcSet, "webp") : srcSet;
+  const jpgSrcSet = isUnsplash && srcSet ? transformSrcSet(srcSet, "jpg") : srcSet;
+
+  // Para lazy: si NO es priority, dejamos src/srcSet en data-*
+  const imgSrc = priority ? jpgSrc : undefined;
+  const imgSrcSet = priority ? jpgSrcSet : undefined;
+
+  const dataSrc = !priority ? jpgSrc : undefined;
+  const dataSrcSet = !priority ? jpgSrcSet : undefined;
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
-      {/* Placeholder mientras carga */}
+      {/* Placeholder blur mientras carga */}
       {!isLoaded && !hasError && placeholder === "blur" && (
         <div className="absolute inset-0 bg-linear-to-br from-gray-200 to-gray-300 animate-pulse" />
       )}
 
-      {/* Imagen principal */}
-      <img
-        ref={imgRef}
-        src={priority ? optimizedSrc : undefined}
-        data-src={!priority ? optimizedSrc : undefined}
-        alt={alt}
-        loading={priority ? "eager" : "lazy"}
-        decoding="async"
-        onLoad={() => setIsLoaded(true)}
-        onError={() => {
-          setHasError(true);
-          setIsLoaded(true);
-        }}
-        className={`
-          w-full h-full object-cover transition-opacity duration-500
-          ${isLoaded ? "opacity-100" : "opacity-0"}
-          ${hasError ? "hidden" : ""}
-        `}
-        {...props}
-      />
+      {/* Imagen con picture + formatos */}
+      <picture className="block w-full h-full">
+        {/* Fuentes para navegadores que soportan WebP */}
+        {webpSrc && (
+          <source
+            srcSet={priority ? webpSrcSet || webpSrc : undefined}
+            data-srcset={!priority && webpSrcSet ? webpSrcSet : undefined}
+            type="image/webp"
+            sizes={sizes}
+          />
+        )}
+
+        {/* Fallback JPEG */}
+        {jpgSrc && (
+          <source
+            srcSet={priority ? jpgSrcSet || jpgSrc : undefined}
+            data-srcset={!priority && jpgSrcSet ? jpgSrcSet : undefined}
+            type="image/jpeg"
+            sizes={sizes}
+          />
+        )}
+
+        <img
+          ref={imgRef}
+          src={imgSrc}
+          data-src={dataSrc}
+          srcSet={imgSrcSet}
+          data-srcset={dataSrcSet}
+          alt={alt}
+          loading={priority ? "eager" : "lazy"}
+          decoding="async"
+          onLoad={() => setIsLoaded(true)}
+          onError={() => {
+            setHasError(true);
+            setIsLoaded(true);
+          }}
+          className={`
+            w-full h-full object-cover transition-opacity duration-500
+            ${isLoaded ? "opacity-100" : "opacity-0"}
+            ${hasError ? "hidden" : ""}
+          `}
+          sizes={sizes}
+          {...props}
+        />
+      </picture>
 
       {/* Fallback si falla la imagen */}
       {hasError && (

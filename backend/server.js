@@ -54,17 +54,40 @@ app.use(compression({
 }));
 
 // 2. CACHE HEADERS PARA ASSETS ESTÁTICOS
+// 2. CACHE HEADERS PARA ASSETS Y APIS
 app.use((req, res, next) => {
-  // Cache para assets inmutables (1 año)
-  if (req.url.match(/\.(js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$/)) {
-    res.set('Cache-Control', 'public, max-age=31536000, immutable');
+  const url = req.url;
+
+  // Assets inmutables - 1 año
+  if (url.match(/\.(js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot|webp)$/)) {
+    res.set({
+      'Cache-Control': 'public, max-age=31536000, immutable',
+      'Expires': new Date(Date.now() + 31536000000).toUTCString(),
+    });
   }
-  // No cache para API
-  else if (req.url.startsWith('/api/')) {
+  // API de productos - cache corto con revalidación
+  else if (url.startsWith('/api/products')) {
+    res.set({
+      'Cache-Control': 'public, max-age=300, stale-while-revalidate=60',
+      'Vary': 'Accept-Encoding',
+    });
+  }
+  // Admin / pagos - SIN caché
+  else if (url.startsWith('/api/orders') || url.startsWith('/api/payments')) {
+    res.set({
+      'Cache-Control': 'private, no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    });
+  }
+  // Resto de APIs: no-store por seguridad
+  else if (url.startsWith('/api/')) {
     res.set('Cache-Control', 'no-store, must-revalidate');
   }
+
   next();
 });
+
 
 // Rate limiting general
 const limiter = rateLimit({
@@ -735,22 +758,48 @@ app.get("/api/products/:id", asyncHandler(async (req, res) => {
 }));
 
 // --- Actualizar estado de orden ---
-app.patch("/api/orders/:id", requireAdmin, validate(updateOrderStatusSchema), asyncHandler(async (req, res) => {
-  const { status } = req.body;
+app.post("/api/products", requireAdmin, asyncHandler(async (req, res) => {
+  const { title, price, image, stock, category, description, specs, faqs, sku } = req.body;
   
-  const order = await Order.findByIdAndUpdate(
+  const product = await Product.create({
+    title,
+    price,
+    image,
+    stock,
+    category,
+    description,
+    specs,
+    faqs,
+    sku: sku || `SKU-${Date.now()}`
+  });
+  
+  // Limpiar cache
+  productCache.clear();
+  
+  res.status(201).json(product);
+}));
+
+// Actualizar producto
+app.patch("/api/products/:id", requireAdmin, asyncHandler(async (req, res) => {
+  const product = await Product.findByIdAndUpdate(
     req.params.id,
-    { status },
+    req.body,
     { new: true, runValidators: true }
   );
   
-  if (!order) {
-    throw new NotFoundError("Orden");
-  }
+  if (!product) throw new NotFoundError("Producto");
   
-  logger.info(`Orden ${order._id} actualizada a status: ${status}`);
+  productCache.clear();
+  res.json(product);
+}));
+
+// Eliminar producto
+app.delete("/api/products/:id", requireAdmin, asyncHandler(async (req, res) => {
+  const product = await Product.findByIdAndDelete(req.params.id);
+  if (!product) throw new NotFoundError("Producto");
   
-  res.json(order);
+  productCache.clear();
+  res.json({ message: "Producto eliminado" });
 }));
 
 // --- Middleware de manejo de errores ---

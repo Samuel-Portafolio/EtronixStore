@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
-    <!-- ✅ CRITICAL: Favicon con type correcto -->
+    <!-- ✅ Favicon -->
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     
     <!-- ✅ Theme color para PWA -->
@@ -12,104 +12,122 @@
 
     <!-- ✅ SEO Meta Tags -->
     <title>Etronix Store – Accesorios para celulares y tecnología</title>
-    <meta name="description" content="Encuentra los mejores accesorios para celulares: audífonos, cargadores, cables, protectores de pantalla y más. Calidad y precios accesibles." />
-    <meta name="keywords" content="accesorios celulares, audífonos, cargadores, cables USB, protectores pantalla, tecnología" />
+    <meta
+      name="description"
+      content="Encuentra los mejores accesorios para celulares: audífonos, cargadores, cables, protectores de pantalla y más. Calidad y precios accesibles."
+    />
+    <meta
+      name="keywords"
+      content="accesorios celulares, audífonos, cargadores, cables USB, protectores pantalla, tecnología"
+    />
 
-    <!-- ✅ OPTIMIZACIÓN CRÍTICA: Fonts optimizadas -->
-    <!-- Preconnect a dominios críticos -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <!-- ✅ Preload font crítica (Inter woff2) -->
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2"
+      crossorigin
+    />
+
+    <!-- ✅ Preconnect dominios CRÍTICOS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    
-    <!-- Fonts con font-display=swap para evitar FOIT -->
-    <link 
-      rel="preload" 
-      as="style" 
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" 
-    />
-    <link 
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" 
-      rel="stylesheet" 
-      media="print" 
-      onload="this.media='all'"
-    />
-    <noscript>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    </noscript>
+    <link rel="preconnect" href="https://api.etronix-store.com" crossorigin />
 
-    <!-- ✅ Material Icons optimizado (solo variaciones necesarias) -->
-    <link 
-      rel="preload" 
-      as="style" 
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+    <!-- ✅ CRITICAL CSS inline (above-the-fold) -->
+    <style>
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, sans-serif;
+        background: #0f172a;
+        color: #ffffff;
+      }
+      #root {
+        min-height: 100vh;
+      }
+      .hero-container {
+        min-height: 600px;
+        display: flex;
+        align-items: center;
+      }
+    </style>
+
+    <!-- ✅ SOLO Inter (font principal) -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
     />
-    <link 
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" 
-      rel="stylesheet" 
-      media="print" 
-      onload="this.media='all'"
+
+    <!-- ✅ Material Icons ASYNC (no bloquea render) -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
     />
     <noscript>
-      <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400&display=swap"
+      />
     </noscript>
 
     <!-- ✅ Preload imagen crítica del hero -->
     <link rel="preload" as="image" href="/src/assets/logoEtronix.webp" />
 
-    <!-- ✅ Prefetch rutas importantes (solo las MÁS usadas) -->
+    <!-- ✅ Prefetch rutas importantes -->
     <link rel="prefetch" href="/shop" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://etronix-store.com/" />
-    <meta property="og:title" content="Etronix Store – Accesorios para celulares y tecnología" />
-    <meta property="og:description" content="Encuentra los mejores accesorios para celulares: audífonos, cargadores, cables, protectores de pantalla y más." />
+    <meta
+      property="og:title"
+      content="Etronix Store – Accesorios para celulares y tecnología"
+    />
+    <meta
+      property="og:description"
+      content="Encuentra los mejores accesorios para celulares: audífonos, cargadores, cables, protectores de pantalla y más."
+    />
     <meta property="og:image" content="/og-image.jpg" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Etronix Store – Accesorios para celulares" />
-    <meta name="twitter:description" content="Los mejores accesorios para celulares: audífonos, cargadores, cables y más." />
+    <meta
+      name="twitter:title"
+      content="Etronix Store – Accesorios para celulares"
+    />
+    <meta
+      name="twitter:description"
+      content="Los mejores accesorios para celulares: audífonos, cargadores, cables y más."
+    />
 
     <!-- Canonical URL -->
     <link rel="canonical" href="https://etronix-store.com/" />
 
     <!-- JSON-LD Schema -->
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "Etronix Store",
-      "url": "https://etronix-store.com",
-      "logo": "https://etronix-store.com/logo.png",
-      "description": "Tienda especializada en accesorios para celulares y tecnología",
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "telephone": "+57-320-720-8410",
-        "contactType": "customer service",
-        "availableLanguage": ["Spanish"]
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Etronix Store",
+        "url": "https://etronix-store.com",
+        "logo": "https://etronix-store.com/logo.png",
+        "description": "Tienda especializada en accesorios para celulares y tecnología",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+57-320-720-8410",
+          "contactType": "customer service",
+          "availableLanguage": ["Spanish"]
+        }
       }
-    }
     </script>
-
-    <!-- ✅ CRITICAL CSS inline (opcional - solo si tienes un archivo crítico pequeño) -->
-    <style>
-      /* Estilos críticos mínimos para el FCP */
-      body { 
-        margin: 0; 
-        font-family: Inter, system-ui, sans-serif;
-        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-        color: white;
-      }
-      #root { min-height: 100vh; }
-    </style>
   </head>
   <body>
     <div id="root"></div>
-    
-    <!-- ✅ Script principal (Vite lo optimizará) -->
+
+    <!-- ✅ Script principal -->
     <script type="module" src="/src/main.jsx"></script>
-    
-    <!-- ✅ Service Worker para PWA (SOLO en producción) -->
-    
   </body>
 </html>

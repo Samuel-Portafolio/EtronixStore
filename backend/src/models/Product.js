@@ -38,9 +38,8 @@ const productSchema = new mongoose.Schema(
 
 // Índices para mejorar rendimiento de consultas
 productSchema.index({ sku: 1 }, { unique: true, sparse: true });
-productSchema.index({ category: 1 });
+productSchema.index({ category: 1, price:1 });
 productSchema.index({ title: "text", description: "text" });
-productSchema.index({ price: 1 });
 productSchema.index({ category: 1, price: 1 });
 productSchema.index({ stock: 1, category: 1 });
 
