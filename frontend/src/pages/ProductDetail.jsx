@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import OptimizedImage from "../components/OptimizedImage";
+import { SEO_CONFIG } from "../config/seo";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -105,35 +106,31 @@ export default function ProductDetail() {
         
         {/* Schema.org Product */}
         <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org/",
-            "@type": "Product",
-            "name": product.title,
-            "image": productImage,
-            "description": product.description || productDescription,
-            "sku": product.sku || product._id,
-            "brand": {
-              "@type": "Brand",
-              "name": product.specs?.brand || "Etronix Store"
-            },
-            "offers": {
-              "@type": "Offer",
-              "url": productUrl,
-              "priceCurrency": "COP",
-              "price": product.price,
-              "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-              "seller": {
-                "@type": "Organization",
-                "name": "Etronix Store"
-              }
-            },
-            "aggregateRating": product.rating ? {
-              "@type": "AggregateRating",
-              "ratingValue": product.rating,
-              "reviewCount": product.reviewCount || 1
-            } : undefined
-          })}
-        </script>
+  {JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Inicio",
+        "item": `${SEO_CONFIG.siteUrl}/`
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Productos",
+        "item": `${SEO_CONFIG.siteUrl}/shop`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": product.title,
+        "item": `${SEO_CONFIG.siteUrl}/products/${product._id}`
+      }
+    ]
+  })}
+</script>
         
         <link rel="canonical" href={productUrl} />
       </Helmet>

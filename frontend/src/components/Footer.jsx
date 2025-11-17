@@ -1,11 +1,49 @@
 import { Link } from "react-router-dom";
 import logo from "../assets/logoEtronix.webp";
 import OptimizedImage from "./OptimizedImage";
+import { Helmet } from "react-helmet-async";
+import { SEO_CONFIG } from "../config/seo";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
+    <>
+      <Helmet>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "name": SEO_CONFIG.organization.name,
+            "image": `${SEO_CONFIG.siteUrl}${SEO_CONFIG.organization.logo}`,
+            "telephone": SEO_CONFIG.organization.phone,
+            "email": SEO_CONFIG.organization.email,
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": SEO_CONFIG.organization.address.addressLocality,
+              "addressRegion": SEO_CONFIG.organization.address.addressRegion,
+              "addressCountry": SEO_CONFIG.organization.address.addressCountry
+            },
+            "url": SEO_CONFIG.siteUrl,
+            "priceRange": "$$",
+            "openingHoursSpecification": [
+              {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "opens": "08:00",
+                "closes": "20:00"
+              },
+              {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": "Saturday",
+                "opens": "09:00",
+                "closes": "18:00"
+              }
+            ]
+          })}
+        </script>
+      </Helmet>
+      
     <footer className="relative backdrop-blur-xl bg-gray-900/90 border-t border-white/10">
       {/* Línea superior con gradiente */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-cyan-500 to-transparent opacity-50" />
@@ -187,5 +225,6 @@ export default function Footer() {
         </div>
       </div>
     </footer>
+    </>
   );
 }

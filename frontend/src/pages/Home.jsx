@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { useState, useEffect, memo } from "react";
 import { Helmet } from "react-helmet-async";
 import OptimizedImage from "../components/OptimizedImage";
+import { generateMetaTags } from "../config/seo";
+import { SEO_CONFIG } from "../config/seo";
 // ❌ NO importar LightRays aquí - lo cargaremos después del FCP
 
 import hero from "../assets/logoEtronix.webp";
@@ -72,6 +74,11 @@ export default function Home() {
   const [loading, setLoading] = useState(() => initialProducts.length === 0);
   const [showLightRays, setShowLightRays] = useState(false);
 
+    const seoData = generateMetaTags({
+    title: null, // Usar título por defecto
+    path: ''
+  });
+
   // ✅ OPTIMIZACIÓN: Solo cargar LightRays DESPUÉS del First Contentful Paint
   useEffect(() => {
     // Esperar a que el contenido principal esté renderizado
@@ -131,10 +138,47 @@ export default function Home() {
 
   return (
     <>
-      <Helmet>
-        <title>Etronix Store – Accesorios para celulares y tecnología | Tienda Online Colombia</title>
-        <meta name="description" content="Accesorios para celulares en Colombia: audífonos, cargadores, cables y más. Envío gratis desde $100.000. Garantía extendida y pago seguro." />
-        <link rel="canonical" href="https://etronix-store.com/" />
+       <Helmet>
+        <title>{seoData.title}</title>
+        <meta name="description" content={seoData.description} />
+        <link rel="canonical" href={seoData.canonical} />
+        
+        {/* Open Graph */}
+        <meta property="og:title" content={seoData.openGraph.title} />
+        <meta property="og:description" content={seoData.openGraph.description} />
+        <meta property="og:url" content={seoData.openGraph.url} />
+        <meta property="og:image" content={seoData.openGraph.image} />
+        <meta property="og:type" content="website" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoData.twitter.title} />
+        <meta name="twitter:description" content={seoData.twitter.description} />
+        <meta name="twitter:image" content={seoData.twitter.image} />
+        
+        {/* Schema.org */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": SEO_CONFIG.siteName,
+            "url": SEO_CONFIG.siteUrl,
+            "description": SEO_CONFIG.defaultDescription,
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": `${SEO_CONFIG.siteUrl}/shop?q={search_term_string}`,
+              "query-input": "required name=search_term_string"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": SEO_CONFIG.organization.name,
+              "logo": {
+                "@type": "ImageObject",
+                "url": `${SEO_CONFIG.siteUrl}${SEO_CONFIG.organization.logo}`
+              }
+            }
+          })}
+        </script>
       </Helmet>
 
       {/* ✅ Fondo SIMPLE primero (sin WebGL) */}

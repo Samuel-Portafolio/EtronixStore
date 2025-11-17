@@ -36,7 +36,24 @@ const app = express();
 
 // --- Seguridad ---
 // Helmet para headers de seguridad
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: [
+        "'self'",
+        "'unsafe-inline'",
+        "https://sdk.mercadopago.com",
+        "https://www.mercadopago.com"
+      ],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:", "https://images.unsplash.com"],
+      connectSrc: ["'self'", "https://api.mercadopago.com", process.env.FRONTEND_URL]
+    }
+  },
+  crossOriginEmbedderPolicy: false
+}));
 
 // Sanitización de datos MongoDB (middleware personalizado para Express 5)
 app.use(mongoSanitizeMiddleware);
