@@ -5,7 +5,6 @@ const processedEventSchema = new mongoose.Schema(
     notificationId: {
       type: String,
       required: true,
-      unique: true,
     },
     notificationType: {
       type: String,
@@ -29,7 +28,7 @@ const processedEventSchema = new mongoose.Schema(
 );
 
 // Índice para notificationId (búsqueda rápida)
-processedEventSchema.index({ notificationId: 1 });
+processedEventSchema.index({ notificationId: 1 }), { unique: true };
 
 // Índice TTL para eliminar eventos antiguos (30 días)
 processedEventSchema.index({ processedAt: 1 }, { expireAfterSeconds: 2592000 });
