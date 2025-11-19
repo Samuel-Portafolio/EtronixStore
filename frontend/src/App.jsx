@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Chatbot from "./components/Chatbot";
 import { Link } from "react-router-dom";
 
 export default function App() {
@@ -48,7 +49,7 @@ export default function App() {
   };
 
   return (
-  <div className="min-h-screen bg-background-light">
+    <div className="min-h-screen bg-background-light">
       <header className="border-b bg-white">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">Etronix</h1>
@@ -85,6 +86,8 @@ export default function App() {
           </button>
         </div>
       </footer>
+      {/* Chatbot flotante en toda la app */}
+      <Chatbot />
     </div>
   );
 }

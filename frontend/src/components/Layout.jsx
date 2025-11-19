@@ -1,6 +1,7 @@
 // frontend/src/components/Layout.jsx - MEJORAR
 
 import { lazy, Suspense } from 'react';
+import Chatbot from "./Chatbot";
 import { useState } from "react";
 import Header from "./Header";
 import { Outlet } from "react-router-dom";
@@ -39,6 +40,8 @@ export default function Layout() {
       <Suspense fallback={null}>
         <Footer />
       </Suspense>
+      {/* Chatbot flotante en toda la app */}
+      <Chatbot />
     </div>
   );
 }
