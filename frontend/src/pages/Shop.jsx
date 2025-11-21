@@ -313,9 +313,11 @@ export default function Shop() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {paginatedProducts.map((p) => (
-                        <div
+                        <Link
                           key={p._id}
-                          className="bg-linear-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 hover:border-cyan-400/50 shadow-xl hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-300 overflow-hidden group flex flex-col hover:-translate-y-1"
+                          to={`/products/${p._id}`}
+                          className="bg-linear-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 hover:border-cyan-400/50 shadow-xl hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-300 overflow-hidden group flex flex-col hover:-translate-y-1 cursor-pointer"
+                          style={{ textDecoration: 'none', color: 'inherit' }}
                         >
                           <div className="relative aspect-square bg-white/5 overflow-hidden">
                             {/* Badge de stock */}
@@ -369,7 +371,7 @@ export default function Shop() {
 
                             <div className="space-y-2">
                               <button
-                                onClick={() => addToCart(p)}
+                                onClick={e => { e.preventDefault(); addToCart(p); }}
                                 disabled={p.stock === 0}
                                 className="w-full rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 text-white py-3.5 font-black hover:from-cyan-400 hover:to-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-cyan-500/50 transform hover:-translate-y-0.5"
                               >
@@ -378,15 +380,9 @@ export default function Shop() {
                                 </svg>
                                 {p.stock === 0 ? 'Sin Stock' : 'Agregar al Carrito'}
                               </button>
-                              <Link
-                                to={`/products/${p._id}`}
-                                className="block w-full text-center rounded-xl border-2 border-white/30 text-white py-3 font-black hover:bg-white/10 hover:border-cyan-400/50 transition-all"
-                              >
-                                Ver Detalles
-                              </Link>
                             </div>
                           </div>
-                        </div>
+                        </Link>
                       ))}
                     </div>
                     {/* Botón para cargar más productos */}

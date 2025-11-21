@@ -537,16 +537,40 @@ app.post(
       );
     }
 
+    // 🔥 CORRECCIÓN: Procesar specs correctamente
+    let specsObj = {};
+    try {
+      if (typeof specs === 'string') {
+        specsObj = JSON.parse(specs);
+      } else if (specs && typeof specs === 'object') {
+        specsObj = specs;
+      }
+    } catch (e) {
+      console.error('Error parseando specs:', e);
+    }
+
+    // 🔥 CORRECCIÓN: Procesar FAQs correctamente
+    let faqsArray = [];
+    try {
+      if (typeof faqs === 'string') {
+        faqsArray = JSON.parse(faqs);
+      } else if (Array.isArray(faqs)) {
+        faqsArray = faqs;
+      }
+    } catch (e) {
+      console.error('Error parseando faqs:', e);
+    }
+
     const product = await Product.create({
       title,
       price,
-      image,
+      image: image || imagesArr[0] || "",
       images: imagesArr,
       stock,
       category,
       description,
-      specs,
-      faqs,
+      specs: specsObj,
+      faqs: faqsArray,
       sku: sku || `SKU-${Date.now()}`,
       videos,
     });
@@ -556,14 +580,101 @@ app.post(
   })
 );
 
+
 // Actualizar producto
 app.patch(
   "/api/products/:id",
   requireAdmin,
+  upload.fields([
+    { name: "videoFiles", maxCount: 5 },
+    { name: "imageFiles", maxCount: 10 },
+  ]),
   asyncHandler(async (req, res) => {
+    const {
+      title,
+      price,
+      image,
+      images,
+      stock,
+      category,
+      description,
+      specs,
+      faqs,
+      sku,
+      videoUrls,
+    } = req.body;
+
+    const updateData = {};
+
+    if (title !== undefined) updateData.title = title;
+    if (price !== undefined) updateData.price = price;
+    if (stock !== undefined) updateData.stock = stock;
+    if (category !== undefined) updateData.category = category;
+    if (description !== undefined) updateData.description = description;
+    if (sku !== undefined) updateData.sku = sku;
+
+    // Manejar imágenes
+    if (images !== undefined) {
+      let imagesArr = Array.isArray(images) ? images : images ? [images] : [];
+      
+      if (req.files && req.files.imageFiles) {
+        imagesArr = imagesArr.concat(
+          req.files.imageFiles.map((f) => `/uploads/images/${f.filename}`)
+        );
+      }
+      
+      updateData.images = imagesArr;
+      updateData.image = image || imagesArr[0] || "";
+    }
+
+    // Manejar videos
+    if (videoUrls !== undefined || (req.files && req.files.videoFiles)) {
+      let videos = [];
+      
+      if (videoUrls) {
+        if (Array.isArray(videoUrls)) videos = videos.concat(videoUrls);
+        else if (typeof videoUrls === "string" && videoUrls.trim() !== "")
+          videos.push(videoUrls);
+      }
+      
+      if (req.files && req.files.videoFiles) {
+        videos = videos.concat(
+          req.files.videoFiles.map((f) => `/uploads/videos/${f.filename}`)
+        );
+      }
+      
+      updateData.videos = videos;
+    }
+
+    // 🔥 CORRECCIÓN: Procesar specs correctamente
+    if (specs !== undefined) {
+      try {
+        if (typeof specs === 'string') {
+          updateData.specs = JSON.parse(specs);
+        } else if (specs && typeof specs === 'object') {
+          updateData.specs = specs;
+        }
+      } catch (e) {
+        console.error('Error parseando specs:', e);
+      }
+    }
+
+    // 🔥 CORRECCIÓN: Procesar FAQs correctamente
+    if (faqs !== undefined) {
+      try {
+        if (typeof faqs === 'string') {
+          updateData.faqs = JSON.parse(faqs);
+        } else if (Array.isArray(faqs)) {
+          updateData.faqs = faqs;
+        }
+      } catch (e) {
+        console.error('Error parseando faqs:', e);
+      }
+    }
+
     const product = await Product.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updateData,
       { new: true, runValidators: true }
     );
 

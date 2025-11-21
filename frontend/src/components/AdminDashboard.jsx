@@ -360,7 +360,7 @@ function StatCard({ title, value, icon, color, subtitle, alert }) {
             <p className="text-xs text-gray-400 mt-2">{subtitle}</p>
           )}
         </div>
-        <div className={`bg-gradient-to-br ${color} p-3 rounded-xl`}>
+        <div className={`bg-linear-to-br ${color} p-3 rounded-xl`}>
           <span className="material-symbols-outlined text-2xl text-white">
             {icon}
           </span>

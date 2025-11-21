@@ -2,13 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 
 /**
- * Componente de imagen optimizada con:
- * - <picture> (WebP + JPG)
- * - Soporte para srcSet y sizes (responsive)
- * - Lazy loading nativo + IntersectionObserver
- * - Placeholder blur
- * - Optimización especial para Unsplash
- * - Manejo de error con fallback
+ * Componente de imagen optimizada con manejo robusto de URLs
  */
 export default function OptimizedImage({
   src,
@@ -22,13 +16,34 @@ export default function OptimizedImage({
 }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [imageSrc, setImageSrc] = useState("");
   const imgRef = useRef(null);
 
-  // ---------------------------
-  // Intersection Observer (lazy)
-  // ---------------------------
+  // Normalizar la URL de la imagen
   useEffect(() => {
-    if (!imgRef.current || priority) return;
+    if (!src) {
+      setHasError(true);
+      return;
+    }
+
+    let normalizedSrc = src;
+
+    // Si la URL comienza con /uploads, agregar la URL del backend
+    if (src.startsWith('/uploads')) {
+      const backendUrl = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '') || 'http://localhost:3000';
+      normalizedSrc = `${backendUrl}${src}`;
+    }
+    // Si no es una URL completa y no empieza con /, agregar /
+    else if (!src.startsWith('http://') && !src.startsWith('https://') && !src.startsWith('/')) {
+      normalizedSrc = `/${src}`;
+    }
+
+    setImageSrc(normalizedSrc);
+  }, [src]);
+
+  // Intersection Observer para lazy loading
+  useEffect(() => {
+    if (!imgRef.current || priority || !imageSrc) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -55,17 +70,13 @@ export default function OptimizedImage({
         observer.unobserve(imgRef.current);
       }
     };
-  }, [priority]);
+  }, [priority, imageSrc]);
 
-  const isUnsplash = src && src.includes("unsplash");
+  const isUnsplash = imageSrc && imageSrc.includes("unsplash");
 
-  // ---------------------------
   // Helpers para Unsplash
-  // ---------------------------
   const addFormatToUrl = (url, format) => {
     if (!url) return "";
-
-    // Manejo de query string simple sin usar URL()
     const hasQuery = url.includes("?");
     let newUrl = url;
 
@@ -75,7 +86,6 @@ export default function OptimizedImage({
       newUrl += (hasQuery ? "&" : "?") + `fm=${format}`;
     }
 
-    // Comprimir un poquito si no tiene `q=`
     if (!/[\?&]q=/.test(newUrl)) {
       newUrl += "&q=85";
     }
@@ -85,7 +95,6 @@ export default function OptimizedImage({
 
   const transformSrcSet = (rawSrcSet, format) => {
     if (!rawSrcSet) return "";
-
     return rawSrcSet
       .split(",")
       .map((part) => {
@@ -100,21 +109,36 @@ export default function OptimizedImage({
       .join(", ");
   };
 
-  // ---------------------------
   // Construir URLs optimizadas
-  // ---------------------------
-  const webpSrc = isUnsplash ? addFormatToUrl(src, "webp") : src;
-  const jpgSrc = isUnsplash ? addFormatToUrl(src, "jpg") : src;
-
+  const webpSrc = isUnsplash ? addFormatToUrl(imageSrc, "webp") : imageSrc;
+  const jpgSrc = isUnsplash ? addFormatToUrl(imageSrc, "jpg") : imageSrc;
   const webpSrcSet = isUnsplash && srcSet ? transformSrcSet(srcSet, "webp") : srcSet;
   const jpgSrcSet = isUnsplash && srcSet ? transformSrcSet(srcSet, "jpg") : srcSet;
 
-  // Para lazy: si NO es priority, dejamos src/srcSet en data-*
   const imgSrc = priority ? jpgSrc : undefined;
   const imgSrcSet = priority ? jpgSrcSet : undefined;
-
   const dataSrc = !priority ? jpgSrc : undefined;
   const dataSrcSet = !priority ? jpgSrcSet : undefined;
+
+  if (!imageSrc || hasError) {
+    return (
+      <div className={`relative overflow-hidden bg-linear-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center ${className}`}>
+        <svg
+          className="w-12 h-12 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
+        </svg>
+      </div>
+    );
+  }
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
@@ -125,7 +149,6 @@ export default function OptimizedImage({
 
       {/* Imagen con picture + formatos */}
       <picture className="block w-full h-full">
-        {/* Fuentes para navegadores que soportan WebP */}
         {webpSrc && (
           <source
             srcSet={priority ? webpSrcSet || webpSrc : undefined}
@@ -135,7 +158,6 @@ export default function OptimizedImage({
           />
         )}
 
-        {/* Fallback JPEG */}
         {jpgSrc && (
           <source
             srcSet={priority ? jpgSrcSet || jpgSrc : undefined}
@@ -155,7 +177,8 @@ export default function OptimizedImage({
           loading={priority ? "eager" : "lazy"}
           decoding="async"
           onLoad={() => setIsLoaded(true)}
-          onError={() => {
+          onError={(e) => {
+            console.error('Error cargando imagen:', imageSrc);
             setHasError(true);
             setIsLoaded(true);
           }}
@@ -168,25 +191,6 @@ export default function OptimizedImage({
           {...props}
         />
       </picture>
-
-      {/* Fallback si falla la imagen */}
-      {hasError && (
-        <div className="absolute inset-0 bg-linear-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center">
-          <svg
-            className="w-12 h-12 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-            />
-          </svg>
-        </div>
-      )}
     </div>
   );
 }
