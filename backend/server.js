@@ -740,6 +740,38 @@ app.delete(
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) throw new NotFoundError("Producto");
 
+    // Eliminar imágenes
+    if (product.images && Array.isArray(product.images)) {
+      product.images.forEach(imgPath => {
+        if (imgPath.startsWith('/uploads/images/')) {
+          const filePath = imgPath.replace('/uploads/', 'uploads/');
+          fs.unlink(filePath, err => {
+            if (err) logger.warn(`No se pudo borrar imagen: ${filePath}`);
+          });
+        }
+      });
+    }
+    // Eliminar imagen principal si no está en el array
+    if (product.image && product.image.startsWith('/uploads/images/')) {
+      const filePath = product.image.replace('/uploads/', 'uploads/');
+      if (!product.images || !product.images.includes(product.image)) {
+        fs.unlink(filePath, err => {
+          if (err) logger.warn(`No se pudo borrar imagen principal: ${filePath}`);
+        });
+      }
+    }
+    // Eliminar videos
+    if (product.videos && Array.isArray(product.videos)) {
+      product.videos.forEach(videoPath => {
+        if (videoPath.startsWith('/uploads/videos/')) {
+          const filePath = videoPath.replace('/uploads/', 'uploads/');
+          fs.unlink(filePath, err => {
+            if (err) logger.warn(`No se pudo borrar video: ${filePath}`);
+          });
+        }
+      });
+    }
+
     productCache.clear();
     res.json({ message: "Producto eliminado" });
   })
