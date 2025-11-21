@@ -235,7 +235,7 @@ logger.info(`MP token presente: ${!!process.env.MP_ACCESS_TOKEN}`);
 app.use(
   cors({
     origin: process.env.FRONTEND_URL,
-    methods: ["GET", "POST", "PATCH"],
+    methods: ["GET", "POST", "PATCH", "DELETE"],
     credentials: true,
   })
 );
@@ -538,15 +538,29 @@ app.post(
     }
 
     // 🔥 CORRECCIÓN: Procesar specs correctamente
-    let specsObj = {};
+     let specsObj = {};
     try {
       if (typeof specs === 'string') {
-        specsObj = JSON.parse(specs);
+        const parsed = JSON.parse(specs);
+        if (parsed && typeof parsed === 'object') {
+          // Filtrar campos vacíos
+          Object.entries(parsed).forEach(([key, value]) => {
+            if (key && key.trim() !== '' && value && String(value).trim() !== '') {
+              specsObj[key.trim()] = value;
+            }
+          });
+        }
       } else if (specs && typeof specs === 'object') {
-        specsObj = specs;
+        Object.entries(specs).forEach(([key, value]) => {
+          if (key && key.trim() !== '' && value && String(value).trim() !== '') {
+            specsObj[key.trim()] = value;
+          }
+        });
       }
+      
+      logger.info('📝 Specs procesadas para crear:', specsObj);
     } catch (e) {
-      console.error('Error parseando specs:', e);
+      logger.error('❌ Error parseando specs:', e);
     }
 
     // 🔥 CORRECCIÓN: Procesar FAQs correctamente
@@ -557,8 +571,14 @@ app.post(
       } else if (Array.isArray(faqs)) {
         faqsArray = faqs;
       }
+      
+      // Filtrar FAQs vacías
+      faqsArray = faqsArray.filter(faq => 
+        faq.question && faq.question.trim() !== '' && 
+        faq.answer && faq.answer.trim() !== ''
+      );
     } catch (e) {
-      console.error('Error parseando faqs:', e);
+      logger.error('❌ Error parseando faqs:', e);
     }
 
     const product = await Product.create({
@@ -575,11 +595,11 @@ app.post(
       videos,
     });
 
+    logger.info('✅ Producto creado:', product._id);
     productCache.clear();
     res.status(201).json(product);
   })
 );
-
 
 // Actualizar producto
 app.patch(
@@ -646,29 +666,55 @@ app.patch(
       updateData.videos = videos;
     }
 
-    // 🔥 CORRECCIÓN: Procesar specs correctamente
+    // 🔥 CORRECCIÓN: Procesar specs correctamente SIN features especiales
     if (specs !== undefined) {
       try {
+        let specsObj = {};
+        
         if (typeof specs === 'string') {
-          updateData.specs = JSON.parse(specs);
+          const parsed = JSON.parse(specs);
+          if (parsed && typeof parsed === 'object') {
+            Object.entries(parsed).forEach(([key, value]) => {
+              if (key && key.trim() !== '' && value && String(value).trim() !== '') {
+                specsObj[key.trim()] = value;
+              }
+            });
+          }
         } else if (specs && typeof specs === 'object') {
-          updateData.specs = specs;
+          Object.entries(specs).forEach(([key, value]) => {
+            if (key && key.trim() !== '' && value && String(value).trim() !== '') {
+              specsObj[key.trim()] = value;
+            }
+          });
         }
+        
+        updateData.specs = specsObj;
+        logger.info('📝 Specs procesadas para actualizar:', specsObj);
       } catch (e) {
-        console.error('Error parseando specs:', e);
+        logger.error('❌ Error parseando specs:', e);
       }
     }
 
     // 🔥 CORRECCIÓN: Procesar FAQs correctamente
     if (faqs !== undefined) {
       try {
+        let faqsArray = [];
+        
         if (typeof faqs === 'string') {
-          updateData.faqs = JSON.parse(faqs);
+          faqsArray = JSON.parse(faqs);
         } else if (Array.isArray(faqs)) {
-          updateData.faqs = faqs;
+          faqsArray = faqs;
         }
+        
+        // Filtrar FAQs vacías
+        faqsArray = faqsArray.filter(faq => 
+          faq.question && faq.question.trim() !== '' && 
+          faq.answer && faq.answer.trim() !== ''
+        );
+        
+        updateData.faqs = faqsArray;
       } catch (e) {
-        console.error('Error parseando faqs:', e);
+        logger.error('❌ Error parseando faqs:', e);
       }
     }
 
@@ -680,6 +726,7 @@ app.patch(
 
     if (!product) throw new NotFoundError("Producto");
 
+    logger.info('✅ Producto actualizado:', product._id);
     productCache.clear();
     res.json(product);
   })

@@ -377,45 +377,6 @@ export default function AdminProductNew() {
             </div>
           </div>
 
-          {/* 🔥 CORRECCIÓN: Especificaciones simplificadas */}
-          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 space-y-4 border border-cyan-200 dark:border-cyan-900">
-            <h2 className="text-xl font-bold text-cyan-500 mb-4">Especificaciones</h2>
-            <p className="text-sm text-gray-500 mb-4">
-              Agrega las características técnicas del producto (Marca, Color, Modelo, etc.)
-            </p>
-            {form.specs.map((spec, idx) => (
-              <div key={idx} className="flex gap-2 mb-2 items-center">
-                <input 
-                  type="text" 
-                  value={spec.key} 
-                  onChange={(e) => handleArrayChange("specs", idx, "key", e.target.value)} 
-                  placeholder="Campo (ej: Marca, Color, Modelo)" 
-                  className="p-2 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white flex-1 border" 
-                />
-                <input 
-                  type="text" 
-                  value={spec.value} 
-                  onChange={(e) => handleArrayChange("specs", idx, "value", e.target.value)} 
-                  placeholder="Valor (ej: Samsung, Negro, Galaxy S23)" 
-                  className="p-2 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white flex-1 border" 
-                />
-                <button 
-                  type="button" 
-                  onClick={() => handleRemoveArrayItem("specs", idx)} 
-                  className="px-2 py-1 bg-red-500 text-white rounded"
-                >
-                  Eliminar
-                </button>
-              </div>
-            ))}
-            <button 
-              type="button" 
-              onClick={() => handleAddArrayItem("specs", { key: "", value: "" })} 
-              className="px-3 py-1 bg-cyan-500 text-white rounded font-bold"
-            >
-              Agregar Especificación
-            </button>
-          </div>
 
           {/* FAQs */}
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 space-y-4 border border-cyan-200 dark:border-cyan-900">

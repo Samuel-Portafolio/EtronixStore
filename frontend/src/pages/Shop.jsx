@@ -32,10 +32,21 @@ export default function Shop() {
         const productsArray = Array.isArray(data) ? data : [];
         setProducts(productsArray);
         setFilteredProducts(productsArray);
+        // Limpiar carrito si no hay productos
+        if (productsArray.length === 0) {
+          localStorage.removeItem('cart');
+        } else {
+          // Si hay productos, filtrar el carrito para que solo tenga productos existentes
+          const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+          const validIds = new Set(productsArray.map(p => p._id));
+          const filteredCart = cart.filter(item => validIds.has(item._id));
+          localStorage.setItem('cart', JSON.stringify(filteredCart));
+        }
       } catch (error) {
         console.error("Error cargando productos:", error);
         setProducts([]);
         setFilteredProducts([]);
+        localStorage.removeItem('cart');
       } finally {
         setLoading(false);
       }

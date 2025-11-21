@@ -123,11 +123,18 @@ export default function Home() {
         try {
           localStorage.setItem(CACHE_KEY, JSON.stringify(sliced));
           localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
+          // Limpiar el caché si no hay productos
+          if (sliced.length === 0) {
+            localStorage.removeItem(CACHE_KEY);
+            localStorage.removeItem(CACHE_TS_KEY);
+          }
         } catch {}
       } catch (error) {
         if (error.name !== "AbortError") {
           console.error("Error cargando productos:", error);
         }
+        localStorage.removeItem(CACHE_KEY);
+        localStorage.removeItem(CACHE_TS_KEY);
       } finally {
         setLoading(false);
       }

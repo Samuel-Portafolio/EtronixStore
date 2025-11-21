@@ -189,7 +189,6 @@ export default function Sidebar({ open = false, onClose }) {
                               onClick={() => goToCategory(cat.id)}
                               className={`${itemBase} ${itemInactive} w-full justify-start text-[13px]`}
                             >
-                              <span className="mr-1">{cat.icon}</span>
                               {cat.name}
                             </button>
                           </li>

@@ -59,8 +59,8 @@ function ProductMediaCarousel({ product }) {
 
   if (media.length === 0) {
     return (
-      <div className="aspect-square rounded-xl overflow-hidden bg-border-light/40 dark:bg-border-dark/60 flex items-center justify-center">
-        <span className="material-symbols-outlined text-6xl text-text-secondary-light dark:text-text-secondary-dark">
+      <div className="aspect-square rounded-xl overflow-hidden bg-linear-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center">
+        <span className="material-symbols-outlined text-6xl text-gray-400">
           image
         </span>
       </div>
@@ -68,11 +68,11 @@ function ProductMediaCarousel({ product }) {
   }
 
   return (
-    <div className="relative aspect-square rounded-xl overflow-hidden bg-border-light/40 dark:bg-border-dark/60 flex items-center justify-center">
+    <div className="relative aspect-square rounded-xl overflow-hidden bg-black/20 flex items-center justify-center">
       {media.length > 1 && (
         <button
           onClick={handlePrev}
-          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 z-10"
+          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 z-10 transition-all"
         >
           <span className="material-symbols-outlined text-3xl">
             chevron_left
@@ -112,7 +112,7 @@ function ProductMediaCarousel({ product }) {
         <>
           <button
             onClick={handleNext}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 z-10"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 z-10 transition-all"
           >
             <span className="material-symbols-outlined text-3xl">
               chevron_right
@@ -124,8 +124,8 @@ function ProductMediaCarousel({ product }) {
               <button
                 key={idx}
                 onClick={() => setCurrent(idx)}
-                className={`w-3 h-3 rounded-full ${
-                  idx === current ? "bg-primary" : "bg-white/30"
+                className={`w-3 h-3 rounded-full transition-all ${
+                  idx === current ? "bg-cyan-400 w-8" : "bg-white/40"
                 } border border-white/50`}
               />
             ))}
@@ -148,6 +148,8 @@ export default function ProductDetail() {
       try {
         const res = await fetch(`${API_URL}/api/products/${id}`);
         const data = await res.json();
+        console.log('📦 Producto cargado:', data);
+        console.log('📋 Specs recibidas:', data.specs);
         setProduct(data);
       } catch (error) {
         console.error("Error cargando producto:", error);
@@ -169,29 +171,61 @@ export default function ProductDetail() {
 
     localStorage.setItem('cart', JSON.stringify(cart));
     window.dispatchEvent(new Event('cartUpdated'));
-    setToast('Producto agregado al carrito');
-    setTimeout(() => setToast(""), 1800);
+    setToast('✅ Producto agregado al carrito');
+    setTimeout(() => setToast(""), 2000);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-white">
-        <div className="animate-spin h-12 w-12 border-b-2 border-primary rounded-full"></div>
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-900 via-slate-900 to-black">
+        <div className="animate-spin h-16 w-16 border-4 border-cyan-400 border-t-transparent rounded-full"></div>
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <h2 className="text-white">Producto no encontrado</h2>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-linear-to-br from-gray-900 via-slate-900 to-black text-white">
+        <span className="material-symbols-outlined text-8xl text-gray-600 mb-4">error</span>
+        <h2 className="text-2xl font-bold mb-2">Producto no encontrado</h2>
+        <Link to="/shop" className="text-cyan-400 hover:underline">← Volver a la tienda</Link>
       </div>
     );
   }
 
-  // 🔥 CORRECCIÓN: Procesar specs correctamente
-  const hasSpecs = product.specs && typeof product.specs === 'object' && Object.keys(product.specs).length > 0;
+  // 🔥 CORRECCIÓN: Procesar y validar specs correctamente
+  const specsArray = [];
+  
+  if (product.specs && typeof product.specs === 'object' && !Array.isArray(product.specs)) {
+    Object.entries(product.specs).forEach(([key, value]) => {
+      // Filtrar campos vacíos, null, undefined, o strings vacíos
+      if (key && 
+          value !== null && 
+          value !== undefined && 
+          value !== '' && 
+          String(value).trim() !== '') {
+        
+        // Formatear el valor
+        let displayValue;
+        if (Array.isArray(value)) {
+          displayValue = value.filter(v => v && String(v).trim() !== '').join(", ");
+        } else {
+          displayValue = String(value).trim();
+        }
+        
+        // Solo agregar si el valor formateado no está vacío
+        if (displayValue) {
+          specsArray.push({ key, value: displayValue });
+        }
+      }
+    });
+  }
+
+  const hasSpecs = specsArray.length > 0;
   const hasFaqs = Array.isArray(product.faqs) && product.faqs.length > 0;
+
+  console.log('✅ Specs procesadas para mostrar:', specsArray);
+  console.log('📊 hasSpecs:', hasSpecs, 'hasFaqs:', hasFaqs);
 
   return (
     <>
@@ -202,128 +236,120 @@ export default function ProductDetail() {
 
       <div className="fixed inset-0 bg-linear-to-br from-gray-900 via-slate-900 to-black z-0" />
 
-      <div className="relative z-10 min-h-screen text-white px-6 py-12 max-w-7xl mx-auto">
+      <div className="relative z-10 min-h-screen text-white px-4 sm:px-6 py-8 sm:py-12 max-w-7xl mx-auto">
         {/* Breadcrumb */}
-        <div className="text-sm mb-6 text-gray-400">
-          <Link to="/" className="text-primary hover:underline">Inicio</Link> /{" "}
-          <Link to="/shop" className="text-primary hover:underline">Productos</Link> /{" "}
-          <span>{product.title}</span>
+        <div className="text-sm mb-6 text-gray-400 flex items-center gap-2">
+          <Link to="/" className="text-cyan-400 hover:underline">Inicio</Link>
+          <span>/</span>
+          <Link to="/shop" className="text-cyan-400 hover:underline">Productos</Link>
+          <span>/</span>
+          <span className="text-gray-300">{product.title}</span>
         </div>
 
         {/* Layout Principal */}
-        <div className="grid md:grid-cols-2 gap-12">
+        <div className="grid md:grid-cols-2 gap-8 lg:gap-12 mb-12">
           {/* Carrusel */}
-          <ProductMediaCarousel product={product} />
+          <div className="sticky top-24 h-fit">
+            <ProductMediaCarousel product={product} />
+          </div>
 
           {/* Info Producto */}
           <div>
             {product.category && (
-              <p className="text-primary bg-primary/10 inline-block px-3 py-1 rounded-full text-xs mb-4 uppercase">
+              <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-4 bg-linear-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 border border-cyan-400/30">
                 {product.category}
-              </p>
+              </span>
             )}
 
-            <h1 className="text-3xl font-bold mb-4">{product.title}</h1>
+            <h1 className="text-3xl lg:text-4xl font-black mb-4 leading-tight">{product.title}</h1>
 
             {product.description && (
-              <p className="text-gray-300 mb-6">{product.description}</p>
+              <p className="text-gray-300 text-lg mb-6 leading-relaxed">{product.description}</p>
             )}
 
-            <p className="text-4xl font-bold text-primary mb-2">
-              ${product.price.toLocaleString("es-CO")}
-            </p>
+            <div className="flex items-baseline gap-4 mb-6">
+              <p className="text-5xl font-black bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                ${product.price.toLocaleString("es-CO")}
+              </p>
+              {product.stock > 0 && product.stock < 5 && (
+                <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-sm font-bold border border-amber-400/30">
+                  ⚡ Últimas {product.stock} unidades
+                </span>
+              )}
+            </div>
 
-            <p className={`text-sm font-bold mb-6 ${product.stock > 0 ? 'text-green-400' : 'text-red-400'}`}>
-              {product.stock > 0 ? `Stock disponible: ${product.stock}` : 'Agotado'}
-            </p>
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold mb-8 ${
+              product.stock > 0 
+                ? 'bg-green-500/20 text-green-400 border border-green-400/30' 
+                : 'bg-red-500/20 text-red-400 border border-red-400/30'
+            }`}>
+              <span className="material-symbols-outlined text-xl">
+                {product.stock > 0 ? 'check_circle' : 'cancel'}
+              </span>
+              {product.stock > 0 ? `${product.stock} disponibles` : 'Agotado'}
+            </div>
 
             <button
               onClick={() => addToCart(product)}
               disabled={product.stock === 0}
-              className="w-full rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 text-white py-4 font-black hover:from-cyan-400 hover:to-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg mb-4"
+              className="w-full rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 text-white py-4 font-black text-lg hover:from-cyan-400 hover:to-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg hover:shadow-cyan-500/50 hover:-translate-y-0.5 mb-4"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
               {product.stock === 0 ? 'Sin Stock' : 'Agregar al Carrito'}
             </button>
+
+            <Link
+              to="/shop"
+              className="block w-full text-center rounded-xl border-2 border-white/30 text-white py-3 font-bold hover:bg-white/10 hover:border-cyan-400/50 transition-all"
+            >
+              ← Seguir Comprando
+            </Link>
           </div>
         </div>
 
         {/* Tabs */}
         {(hasSpecs || hasFaqs) && (
-          <div className="mt-10 border-t border-white/10 pt-8">
-            <div className="flex gap-6 border-b border-white/10 pb-3 mb-6">
-              {hasSpecs && (
-                <button
-                  onClick={() => setActiveTab("specs")}
-                  className={`pb-2 font-bold ${
-                    activeTab === "specs"
-                      ? "text-primary border-b-2 border-primary"
-                      : "text-gray-400"
-                  }`}
-                >
-                  Especificaciones
-                </button>
-              )}
-
-              {hasFaqs && (
-                <button
-                  onClick={() => setActiveTab("faqs")}
-                  className={`pb-2 font-bold ${
-                    activeTab === "faqs"
-                      ? "text-primary border-b-2 border-primary"
-                      : "text-gray-400"
-                  }`}
-                >
+          <div className="mt-12 pt-8 border-t border-white/10">
+            {hasFaqs && (
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold mb-6 text-cyan-400 flex items-center gap-2">
+                  <span className="material-symbols-outlined">help</span>
                   Preguntas Frecuentes
-                </button>
-              )}
-            </div>
-
-            {/* 🔥 CORRECCIÓN: Mostrar specs correctamente */}
-            {activeTab === "specs" && hasSpecs && (
-              <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                <h2 className="text-lg font-bold mb-4 text-cyan-400">Especificaciones Técnicas</h2>
-                <dl className="space-y-3">
-                  {Object.entries(product.specs).map(([key, value]) => {
-                    // Evitar mostrar campos vacíos
-                    if (!value || (Array.isArray(value) && value.length === 0)) {
-                      return null;
-                    }
-
-                    return (
-                      <div key={key} className="flex border-b border-white/10 pb-2">
-                        <dt className="font-bold text-gray-300 capitalize min-w-[150px]">
-                          {key}:
-                        </dt>
-                        <dd className="text-white flex-1">
-                          {Array.isArray(value) ? value.join(", ") : value}
-                        </dd>
-                      </div>
-                    );
-                  })}
-                </dl>
-              </div>
-            )}
-
-            {activeTab === "faqs" && hasFaqs && (
-              <div className="space-y-4 text-gray-300">
+                </h2>
                 {product.faqs.map((faq, i) => (
-                  <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-6">
-                    <h3 className="font-bold text-white mb-3 text-lg">{faq.question}</h3>
-                    <p className="text-gray-300 leading-relaxed">{faq.answer}</p>
-                  </div>
+                  <details key={i} className="group bg-linear-to-br from-white/10 to-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-cyan-400/30 transition-all">
+                    <summary className="cursor-pointer list-none p-6 font-bold text-lg text-white hover:text-cyan-400 transition-colors flex items-center justify-between">
+                      <span className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-cyan-400">help</span>
+                        {faq.question}
+                      </span>
+                      <span className="material-symbols-outlined transition-transform group-open:rotate-180">
+                        expand_more
+                      </span>
+                    </summary>
+                    <div className="px-6 pb-6 pt-2">
+                      <p className="text-gray-300 leading-relaxed pl-9">{faq.answer}</p>
+                    </div>
+                  </details>
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Mensaje si no hay specs ni FAQs */}
+        {!hasSpecs && !hasFaqs && (
+          <div className="mt-12 pt-8 border-t border-white/10 text-center">
+            <p className="text-gray-400 italic">No hay información adicional disponible para este producto.</p>
           </div>
         )}
       </div>
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-8 right-8 z-50 bg-linear-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl shadow-green-500/50 flex items-center gap-3 border border-green-400/50">
+        <div className="fixed bottom-8 right-8 z-50 bg-linear-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl shadow-green-500/50 flex items-center gap-3 border border-green-400/50 animate-in slide-in-from-bottom-5">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
           </svg>

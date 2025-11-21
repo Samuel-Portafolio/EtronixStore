@@ -39,28 +39,50 @@ export default function AdminProductEdit() {
         if (!res.ok) throw new Error("No se encontró el producto");
         const data = await res.json();
         
-        // 🔥 CORRECCIÓN: Normalizar datos correctamente
+        console.log('📦 Producto cargado:', data);
+        console.log('📋 Specs originales:', data.specs);
+        
+        // 🔥 CORRECCIÓN COMPLETA: Normalizar specs correctamente
         const normalizedSpecs = [];
-        if (data.specs && typeof data.specs === 'object') {
+        
+        if (data.specs && typeof data.specs === 'object' && !Array.isArray(data.specs)) {
+          // Es un objeto, convertir a array
           Object.entries(data.specs).forEach(([key, value]) => {
-            if (key && value) {
-              normalizedSpecs.push({ key, value: Array.isArray(value) ? value.join(", ") : value });
+            // Filtrar campos vacíos, null, undefined
+            if (key && value !== null && value !== undefined && value !== '') {
+              // Si es un array, convertir a string separado por comas
+              const displayValue = Array.isArray(value) ? value.join(", ") : String(value);
+              normalizedSpecs.push({ key, value: displayValue });
+            }
+          });
+        } else if (Array.isArray(data.specs)) {
+          // Ya es un array, solo filtrar
+          data.specs.forEach(spec => {
+            if (spec.key && spec.value) {
+              normalizedSpecs.push({ key: spec.key, value: spec.value });
             }
           });
         }
         
+        // Si no hay specs válidas, agregar una vacía
+        if (normalizedSpecs.length === 0) {
+          normalizedSpecs.push({ key: "", value: "" });
+        }
+        
+        console.log('✅ Specs normalizadas:', normalizedSpecs);
+        
         setForm({
           ...data,
-          images: Array.isArray(data.images) ? data.images : [data.images || ""],
-          videos: Array.isArray(data.videos) ? data.videos : [],
-          specs: normalizedSpecs.length > 0 ? normalizedSpecs : [{ key: "", value: "" }],
+          images: Array.isArray(data.images) ? data.images.filter(Boolean) : [data.image || ""].filter(Boolean),
+          videos: Array.isArray(data.videos) ? data.videos.filter(Boolean) : [],
+          specs: normalizedSpecs,
           faqs: Array.isArray(data.faqs) && data.faqs.length > 0
-            ? data.faqs
+            ? data.faqs.filter(f => f.question && f.answer)
             : [{ question: "", answer: "" }],
         });
       } catch (err) {
         setError("No se pudo cargar el producto");
-        console.error(err);
+        console.error('❌ Error:', err);
       } finally {
         setLoading(false);
       }
@@ -73,12 +95,11 @@ export default function AdminProductEdit() {
   };
 
   const handleArrayChange = (field, idx, subfield, value) => {
-    setForm({
-      ...form,
-      [field]: form[field].map((item, i) =>
-        i === idx ? { ...item, [subfield]: value } : item
-      ),
-    });
+    const updated = form[field].map((item, i) =>
+      i === idx ? { ...item, [subfield]: value } : item
+    );
+    setForm({ ...form, [field]: updated });
+    console.log(`📝 Campo actualizado [${field}][${idx}].${subfield}:`, value);
   };
 
   const handleAddArrayItem = (field, emptyObj) => {
@@ -86,7 +107,12 @@ export default function AdminProductEdit() {
   };
 
   const handleRemoveArrayItem = (field, idx) => {
-    setForm({ ...form, [field]: form[field].filter((_, i) => i !== idx) });
+    const filtered = form[field].filter((_, i) => i !== idx);
+    // Asegurar que siempre haya al menos un campo vacío
+    if (filtered.length === 0 && field === 'specs') {
+      filtered.push({ key: "", value: "" });
+    }
+    setForm({ ...form, [field]: filtered });
   };
 
   const handleImageChange = (idx, value) => {
@@ -136,36 +162,46 @@ export default function AdminProductEdit() {
       const images = form.images.filter((img) => img && img.trim() !== "");
       const videoUrls = form.videos.filter((v) => v && v.trim() !== "");
       
-      // 🔥 CORRECCIÓN: Convertir specs a objeto plano
+      // 🔥 CORRECCIÓN: Convertir specs a objeto plano SIN features
       const specsObj = {};
       form.specs.forEach((spec) => {
-        if (spec.key && spec.key.trim() !== "" && spec.value) {
-          specsObj[spec.key.trim()] = spec.value;
+        const key = spec.key?.trim();
+        const value = spec.value?.trim();
+        
+        // Solo agregar si AMBOS existen y no están vacíos
+        if (key && value && key !== "" && value !== "") {
+          specsObj[key] = value;
         }
       });
+
+      console.log('💾 Specs a enviar:', specsObj);
 
       const formData = new FormData();
       formData.append("title", form.title);
       formData.append("price", form.price);
       formData.append("stock", form.stock);
       formData.append("category", form.category);
-      formData.append("description", form.description);
+      formData.append("description", form.description || "");
       formData.append("image", images[0] || "");
+      formData.append("sku", form.sku || "");
       
       images.forEach((img) => formData.append("images", img));
       videoUrls.forEach((url) => formData.append("videoUrls", url));
+      
+      // Enviar specs como JSON string
       formData.append("specs", JSON.stringify(specsObj));
       
-      form.faqs.forEach((faq, i) => {
-        if (faq.question && faq.answer) {
-          formData.append(`faqs[${i}][question]`, faq.question);
-          formData.append(`faqs[${i}][answer]`, faq.answer);
-        }
+      // FAQs válidas solamente
+      const validFaqs = form.faqs.filter(faq => faq.question?.trim() && faq.answer?.trim());
+      validFaqs.forEach((faq, i) => {
+        formData.append(`faqs[${i}][question]`, faq.question);
+        formData.append(`faqs[${i}][answer]`, faq.answer);
       });
       
       imageFiles.forEach((file) => formData.append("imageFiles", file));
       videoFiles.forEach((file) => formData.append("videoFiles", file));
-      formData.append("sku", form.sku || "");
+
+      console.log('🚀 Enviando actualización...');
 
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products/${id}`, {
         method: "PATCH",
@@ -176,13 +212,15 @@ export default function AdminProductEdit() {
       });
 
       if (res.ok) {
+        const updated = await res.json();
+        console.log('✅ Producto actualizado:', updated);
         navigate("/admin");
       } else {
         const errorData = await res.json();
         setError(errorData.error || "Error al actualizar el producto");
       }
     } catch (err) {
-      console.error('Error:', err);
+      console.error('❌ Error:', err);
       setError("Error de red");
     } finally {
       setLoading(false);
@@ -211,7 +249,10 @@ export default function AdminProductEdit() {
           <meta name="robots" content="noindex, nofollow" />
         </Helmet>
         
-        <h1 className="text-3xl font-black mb-8 text-cyan-400 text-center">Editar Producto</h1>
+        <div className="mb-8">
+          <h1 className="text-3xl font-black mb-2 text-cyan-400 text-center">Editar Producto</h1>
+          <p className="text-center text-gray-500 text-sm">ID: {id}</p>
+        </div>
         
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Datos principales */}
@@ -222,7 +263,7 @@ export default function AdminProductEdit() {
                 name="title" 
                 value={form.title} 
                 onChange={handleChange} 
-                placeholder="Nombre" 
+                placeholder="Nombre del producto" 
                 className="p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border" 
                 required 
               />
@@ -285,7 +326,7 @@ export default function AdminProductEdit() {
                   <button 
                     type="button" 
                     onClick={() => handleRemoveImage(idx)} 
-                    className="px-2 py-1 bg-red-500 text-white rounded"
+                    className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                   >
                     Eliminar
                   </button>
@@ -297,14 +338,14 @@ export default function AdminProductEdit() {
               <button 
                 type="button" 
                 onClick={handleAddImage} 
-                className="px-3 py-1 bg-cyan-500 text-white rounded font-bold"
+                className="px-3 py-1 bg-cyan-500 text-white rounded font-bold hover:bg-cyan-600"
               >
-                Agregar Imagen por URL
+                + Agregar Imagen
               </button>
             </div>
             
             <div>
-              <label className="font-bold text-cyan-400 mb-2 block">Subir Imágenes (archivos)</label>
+              <label className="font-bold text-cyan-400 mb-2 block">Subir nuevas imágenes</label>
               <label className="inline-block px-4 py-2 bg-cyan-500 text-white rounded font-bold cursor-pointer hover:bg-cyan-600 transition-colors">
                 <span className="material-symbols-outlined align-middle mr-2">upload</span>
                 Elegir archivos
@@ -318,7 +359,7 @@ export default function AdminProductEdit() {
               </label>
               <div className="flex gap-2 flex-wrap mt-2">
                 {imageFiles.length === 0 && (
-                  <span className="text-gray-400 italic">Sin archivos seleccionados</span>
+                  <span className="text-gray-400 italic text-sm">Sin archivos nuevos seleccionados</span>
                 )}
                 {imageFiles.map((file, idx) => (
                   <img 
@@ -336,7 +377,7 @@ export default function AdminProductEdit() {
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 space-y-4 border border-cyan-200 dark:border-cyan-900">
             <h2 className="text-xl font-bold text-cyan-500 mb-4">Videos</h2>
             <div className="mb-4">
-              <label className="font-bold text-cyan-400 mb-2 block">Videos por URL</label>
+              <label className="font-bold text-cyan-400 mb-2 block">Videos por URL (YouTube o directo)</label>
               {form.videos.map((v, idx) => (
                 <div key={idx} className="flex gap-2 mb-2 items-center">
                   <input 
@@ -349,7 +390,7 @@ export default function AdminProductEdit() {
                   <button 
                     type="button" 
                     onClick={() => handleRemoveVideoUrl(idx)} 
-                    className="px-2 py-1 bg-red-500 text-white rounded"
+                    className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                   >
                     Eliminar
                   </button>
@@ -373,14 +414,14 @@ export default function AdminProductEdit() {
               <button 
                 type="button" 
                 onClick={handleAddVideoUrl} 
-                className="px-3 py-1 bg-cyan-500 text-white rounded font-bold"
+                className="px-3 py-1 bg-cyan-500 text-white rounded font-bold hover:bg-cyan-600"
               >
-                Agregar Video por URL
+                + Agregar Video
               </button>
             </div>
             
             <div>
-              <label className="font-bold text-cyan-400 mb-2 block">Subir Videos (archivos)</label>
+              <label className="font-bold text-cyan-400 mb-2 block">Subir videos (MP4)</label>
               <label className="inline-block px-4 py-2 bg-cyan-500 text-white rounded font-bold cursor-pointer hover:bg-cyan-600 transition-colors">
                 <span className="material-symbols-outlined align-middle mr-2">upload</span>
                 Elegir archivos
@@ -394,7 +435,7 @@ export default function AdminProductEdit() {
               </label>
               <div className="flex gap-2 flex-wrap mt-2">
                 {videoFiles.length === 0 && (
-                  <span className="text-gray-400 italic">Sin archivos seleccionados</span>
+                  <span className="text-gray-400 italic text-sm">Sin archivos nuevos seleccionados</span>
                 )}
                 {videoFiles.map((file, idx) => (
                   <video 
@@ -410,32 +451,30 @@ export default function AdminProductEdit() {
             </div>
           </div>
 
-          {/* 🔥 CORRECCIÓN: Especificaciones */}
+
+          {/* FAQs */}
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 space-y-4 border border-cyan-200 dark:border-cyan-900">
-            <h2 className="text-xl font-bold text-cyan-500 mb-4">Especificaciones</h2>
-            <p className="text-sm text-gray-500 mb-4">
-              Características técnicas del producto (Marca, Color, Modelo, etc.)
-            </p>
-            {form.specs.map((spec, idx) => (
-              <div key={idx} className="flex gap-2 mb-2 items-center">
+            <h2 className="text-xl font-bold text-cyan-500 mb-4">Preguntas Frecuentes</h2>
+            {form.faqs.map((faq, idx) => (
+              <div key={idx} className="space-y-2 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                 <input 
                   type="text" 
-                  value={spec.key} 
-                  onChange={(e) => handleArrayChange("specs", idx, "key", e.target.value)} 
-                  placeholder="Campo (ej: Marca)" 
-                  className="p-2 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white flex-1 border" 
+                  value={faq.question} 
+                  onChange={(e) => handleArrayChange("faqs", idx, "question", e.target.value)} 
+                  placeholder="Pregunta" 
+                  className="w-full p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white border focus:border-cyan-400 outline-none" 
                 />
-                <input 
-                  type="text" 
-                  value={spec.value} 
-                  onChange={(e) => handleArrayChange("specs", idx, "value", e.target.value)} 
-                  placeholder="Valor (ej: Samsung)" 
-                  className="p-2 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white flex-1 border" 
+                <textarea 
+                  value={faq.answer} 
+                  onChange={(e) => handleArrayChange("faqs", idx, "answer", e.target.value)} 
+                  placeholder="Respuesta" 
+                  className="w-full p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white border focus:border-cyan-400 outline-none" 
+                  rows="3"
                 />
                 <button 
                   type="button" 
-                  onClick={() => handleRemoveArrayItem("specs", idx)} 
-                  className="px-2 py-1 bg-red-500 text-white rounded"
+                  onClick={() => handleRemoveArrayItem("faqs", idx)} 
+                  className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
                 >
                   Eliminar
                 </button>
@@ -443,63 +482,45 @@ export default function AdminProductEdit() {
             ))}
             <button 
               type="button" 
-              onClick={() => handleAddArrayItem("specs", { key: "", value: "" })} 
-              className="px-3 py-1 bg-cyan-500 text-white rounded font-bold"
-            >
-              Agregar Especificación
-            </button>
-          </div>
-
-          {/* FAQs */}
-          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 space-y-4 border border-cyan-200 dark:border-cyan-900">
-            <h2 className="text-xl font-bold text-cyan-500 mb-4">Preguntas Frecuentes</h2>
-            {form.faqs.map((faq, idx) => (
-              <div key={idx} className="space-y-2 mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <input 
-                  type="text" 
-                  value={faq.question} 
-                  onChange={(e) => handleArrayChange("faqs", idx, "question", e.target.value)} 
-                  placeholder="Pregunta" 
-                  className="p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white w-full border" 
-                />
-                <textarea 
-                  value={faq.answer} 
-                  onChange={(e) => handleArrayChange("faqs", idx, "answer", e.target.value)} 
-                  placeholder="Respuesta" 
-                  className="p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white w-full border" 
-                  rows="3"
-                />
-                <button 
-                  type="button" 
-                  onClick={() => handleRemoveArrayItem("faqs", idx)} 
-                  className="px-2 py-1 bg-red-500 text-white rounded"
-                >
-                  Eliminar Pregunta
-                </button>
-              </div>
-            ))}
-            <button 
-              type="button" 
               onClick={() => handleAddArrayItem("faqs", { question: "", answer: "" })} 
-              className="px-3 py-1 bg-cyan-500 text-white rounded font-bold"
+              className="w-full px-4 py-2 bg-cyan-500 text-white rounded-lg font-bold hover:bg-cyan-600"
             >
-              Agregar Pregunta
+              + Agregar Pregunta
             </button>
           </div>
 
           {error && (
-            <div className="bg-red-500/20 border border-red-500 text-red-200 px-4 py-3 rounded-lg">
-              {error}
+            <div className="bg-red-500/20 border-2 border-red-500 text-red-200 px-4 py-3 rounded-lg flex items-center gap-2">
+              <span className="text-xl">⚠️</span>
+              <span>{error}</span>
             </div>
           )}
 
-          <button 
-            type="submit" 
-            disabled={loading} 
-            className="w-full px-4 py-3 bg-cyan-500 text-white font-black rounded-xl mt-2 shadow-lg hover:bg-cyan-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? "Guardando..." : "Guardar Cambios"}
-          </button>
+          <div className="flex gap-4">
+            <button 
+              type="button"
+              onClick={() => navigate("/admin")}
+              className="flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button 
+              type="submit" 
+              disabled={loading} 
+              className="flex-1 px-4 py-3 bg-cyan-500 text-white font-black rounded-xl shadow-lg hover:bg-cyan-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                  Guardando...
+                </>
+              ) : (
+                <>
+                  💾 Guardar Cambios
+                </>
+              )}
+            </button>
+          </div>
         </form>
       </div>
     </div>
