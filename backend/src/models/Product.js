@@ -5,6 +5,8 @@ const productSchema = new mongoose.Schema(
     title: { type: String, required: true },
     price: { type: Number, required: true },
     image: { type: String }, // URL de imagen
+    images: [{ type: String }], // Varias imágenes (opcional)
+    videos: [{ type: String }], // URLs o rutas de archivos de video
     stock: { type: Number, default: 0 },
     sku: { type: String },
     description: { type: String }, // Descripción corta

@@ -2,313 +2,299 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import OptimizedImage from "../components/OptimizedImage";
-import { SEO_CONFIG } from "../config/seo";
 
+const API_URL = import.meta.env.VITE_API_URL;        // Ej: http://localhost:3000/api
+const BACKEND_BASE = API_URL.replace(/\/api\/?$/, "");  // -> http://localhost:3000
+
+// ------------------------
+//   NORMALIZAR URL MEDIA
+// ------------------------
+function resolveMediaUrl(url) {
+  if (!url) return "";
+
+  // Si ya viene con http:// o https:// → no tocar
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+
+  // Archivos locales subidos → agregar dominio backend
+  if (url.startsWith("/uploads")) {
+    return `${BACKEND_BASE}${url}`;
+  }
+
+  return url;
+}
+
+// ------------------------
+//   EXTRAER ID DE YOUTUBE
+// ------------------------
+function getYouTubeEmbedUrl(url) {
+  if (url.includes("youtube.com/watch?v=")) {
+    const id = url.split("v=")[1].split("&")[0];
+    return `https://www.youtube.com/embed/${id}`;
+  }
+  if (url.includes("youtu.be/")) {
+    const id = url.split("youtu.be/")[1].split("?")[0];
+    return `https://www.youtube.com/embed/${id}`;
+  }
+  return url;
+}
+
+// ------------------------
+//   CARRUSEL COMPLETO
+// ------------------------
+function ProductMediaCarousel({ product }) {
+  const images = Array.isArray(product.images)
+    ? product.images
+    : product.image
+    ? [product.image]
+    : [];
+
+  const videos = Array.isArray(product.videos) ? product.videos : [];
+  const media = [...images, ...videos];
+
+  const [current, setCurrent] = useState(0);
+
+  const currentUrl = resolveMediaUrl(media[current]);
+
+  const isVideo = (url) => {
+    return (
+      typeof url === "string" &&
+      (url.includes("youtube.com") ||
+        url.includes("youtu.be") ||
+        url.endsWith(".mp4"))
+    );
+  };
+
+  const handlePrev = () =>
+    setCurrent((prev) => (prev === 0 ? media.length - 1 : prev - 1));
+  const handleNext = () =>
+    setCurrent((prev) => (prev === media.length - 1 ? 0 : prev + 1));
+
+  if (media.length === 0) {
+    return (
+      <div className="aspect-square rounded-xl overflow-hidden bg-border-light/40 dark:bg-border-dark/60 flex items-center justify-center">
+        <span className="material-symbols-outlined text-6xl text-text-secondary-light dark:text-text-secondary-dark">
+          image
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative aspect-square rounded-xl overflow-hidden bg-border-light/40 dark:bg-border-dark/60 flex items-center justify-center">
+      {media.length > 1 && (
+        <button
+          onClick={handlePrev}
+          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 z-10"
+        >
+          <span className="material-symbols-outlined text-3xl">
+            chevron_left
+          </span>
+        </button>
+      )}
+
+      {/* ---- MEDIA ---- */}
+      <div className="w-full h-full flex items-center justify-center">
+        {isVideo(currentUrl) ? (
+          currentUrl.includes("youtube.com") || currentUrl.includes("youtu.be") ? (
+            <iframe
+              width="100%"
+              height="100%"
+              src={getYouTubeEmbedUrl(currentUrl)}
+              title="Video del producto"
+              className="w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          ) : (
+            <video controls className="w-full h-full object-contain rounded-xl">
+              <source src={currentUrl} type="video/mp4" />
+              Tu navegador no soporta el video.
+            </video>
+          )
+        ) : (
+          <OptimizedImage
+            src={currentUrl}
+            alt={product.title}
+            className="w-full h-full object-cover"
+            priority={true}
+          />
+        )}
+      </div>
+
+      {/* ---- NAVEGACIÓN ---- */}
+      {media.length > 1 && (
+        <button
+          onClick={handleNext}
+          className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/70 text-white rounded-full p-2 z-10"
+        >
+          <span className="material-symbols-outlined text-3xl">
+            chevron_right
+          </span>
+        </button>
+      )}
+
+      {media.length > 1 && (
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+          {media.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrent(idx)}
+              className={`w-3 h-3 rounded-full ${
+                idx === current ? "bg-primary" : "bg-white/30"
+              } border border-white/50`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ------------------------
+//   PRODUCT DETAIL PAGE
+// ------------------------
 export default function ProductDetail() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('specs');
+  const [activeTab, setActiveTab] = useState("specs");
   const [toast, setToast] = useState("");
 
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products/${id}`);
+        const res = await fetch(`${API_URL}/api/products/${id}`);
         const data = await res.json();
         setProduct(data);
       } catch (error) {
-        console.error("Error:", error);
+        console.error("Error cargando producto:", error);
       } finally {
         setLoading(false);
       }
     })();
   }, [id]);
 
-  const addToCart = () => {
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const found = cart.find(x => x._id === product._id);
-    
-    if (found) {
-      found.quantity += 1;
-    } else {
-      cart.push({ ...product, quantity: 1 });
-    }
-    
-    localStorage.setItem('cart', JSON.stringify(cart));
-    window.dispatchEvent(new Event('cartUpdated'));
-    setToast('✓ Producto agregado al carrito');
-    setTimeout(() => setToast(""), 2000);
-  };
-
   if (loading) {
-    // 👉 Si quieres también fondo oscuro aquí, luego lo adaptamos
     return (
-      <div className="min-h-screen flex flex-col bg-linear-to-br from-gray-900 via-slate-900 to-black">
-        <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary "></div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center text-white">
+        <div className="animate-spin h-12 w-12 border-b-2 border-primary rounded-full"></div>
       </div>
     );
   }
 
   if (!product) {
-    // 👉 Igual, aquí le puse ya el mismo gradiente
     return (
-      <div className="min-h-screen flex flex-col bg-linear-to-br from-gray-900 via-slate-900 to-black">
-        <Helmet>
-          <title>Producto no encontrado | Etronix Store</title>
-          <meta name="robots" content="noindex,nofollow" />
-        </Helmet>
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center text-white">
-            <p className="text-xl mb-4">Producto no encontrado</p>
-            <Link to="/shop" className="text-primary hover:underline">
-              Volver a la tienda
-            </Link>
-          </div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <h2 className="text-white">Producto no encontrado</h2>
       </div>
     );
   }
 
-  // SEO dinámico basado en el producto
-  const productTitle = `${product.title} - ${product.specs?.brand || 'Etronix Store'} | Comprar en Colombia`;
-  const productDescription = product.description 
-    ? `${product.description} Precio: $${product.price?.toLocaleString("es-CO")}. ${product.stock > 0 ? 'Disponible con envío a toda Colombia' : 'Agotado'}. Garantía incluida.`
-    : `Compra ${product.title} al mejor precio en Etronix Store. Envío a toda Colombia, garantía extendida y pago seguro.`;
-  
-  const productUrl = `https://etronix-store.com/products/${product._id}`;
-  const productImage = product.image || 'https://etronix-store.com/og-image.jpg';
-
   return (
     <>
       <Helmet>
-        <title>{productTitle}</title>
-        <meta name="description" content={productDescription} />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content={productTitle} />
-        <meta property="og:description" content={productDescription} />
-        <meta property="og:type" content="product" />
-        <meta property="og:url" content={productUrl} />
-        <meta property="og:image" content={product.image || 'https://etronix-store.com/logo.png'} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={productTitle} />
-        <meta name="twitter:description" content={productDescription} />
-        <meta name="twitter:image" content={product.image || 'https://etronix-store.com/logo.png'} />
-        <link rel="canonical" href={productUrl} />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Product",
-            "name": product?.title || "Producto Etronix",
-            "image": product?.image || "https://etronix-store.com/logo.png",
-            "description": productDescription,
-            "brand": {
-              "@type": "Brand",
-              "name": product?.specs?.brand || "Etronix"
-            },
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "COP",
-              "price": product?.price || "",
-              "availability": product?.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
-            }
-          })}
-        </script>
+        <title>{product.title} | Etronix Store</title>
       </Helmet>
 
-      {/* ⭐ CAMBIO: fondo global igual al de Home */}
-      <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black" />
+      {/* ---- FONDO ---- */}
+      <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-slate-900 to-black z-0" />
 
-      {/* ⭐ CAMBIO: contenido por encima del fondo */}
-      <div className="relative min-h-screen flex flex-col z-10">
-        <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-8 py-8 text-white">
-          {/* Breadcrumb */}
-          <div className="mb-6 text-sm">
-            <Link to="/" className="text-primary hover:underline">Inicio</Link>
-            <span className="mx-2 text-text-secondary-light dark:text-text-secondary-dark">/</span>
-            <Link to="/shop" className="text-primary hover:underline">Productos</Link>
-            <span className="mx-2 text-text-secondary-light dark:text-text-secondary-dark">/</span>
-            <span className="text-text-secondary-light dark:text-text-secondary-dark">
-              {product.title}
-            </span>
+      <div className="relative z-10 min-h-screen text-white px-6 py-12 max-w-7xl mx-auto">
+        {/* ---- BREADCRUMB ---- */}
+        <div className="text-sm mb-6 text-gray-400">
+          <Link to="/" className="text-primary hover:underline">Inicio</Link> /{" "}
+          <Link to="/shop" className="text-primary hover:underline">Productos</Link> /{" "}
+          <span>{product.title}</span>
+        </div>
+
+        {/* ---- LAYOUT ---- */}
+        <div className="grid md:grid-cols-2 gap-12">
+
+          {/* 🟦 CARRUSEL */}
+          <ProductMediaCarousel product={product} />
+
+          {/* 🟦 INFO PRODUCTO */}
+          <div>
+            <p className="text-primary bg-primary/10 inline-block px-3 py-1 rounded-full text-xs mb-4">
+              {product.category}
+            </p>
+
+            <h1 className="text-3xl font-bold mb-4">{product.title}</h1>
+
+            <p className="text-gray-300 mb-6">{product.description}</p>
+
+            <p className="text-4xl font-bold text-primary mb-2">
+              ${product.price.toLocaleString("es-CO")}
+            </p>
+
+            <p className="text-gray-400 mb-6">
+              Stock disponible: {product.stock}
+            </p>
+          </div>
+        </div>
+
+        {/* ---- TABS ---- */}
+        <div className="mt-10 border-t border-white/10 pt-8">
+          <div className="flex gap-6 border-b border-white/10 pb-3 mb-6">
+            <button
+              onClick={() => setActiveTab("specs")}
+              className={`pb-2 ${
+                activeTab === "specs"
+                  ? "text-primary border-b-2 border-primary"
+                  : "text-gray-400"
+              }`}
+            >
+              Especificaciones
+            </button>
+
+            <button
+              onClick={() => setActiveTab("faqs")}
+              className={`pb-2 ${
+                activeTab === "faqs"
+                  ? "text-primary border-b-2 border-primary"
+                  : "text-gray-400"
+              }`}
+            >
+              FAQs
+            </button>
           </div>
 
-          {/* Producto */}
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
-            {/* Imagen */}
-            <div className="aspect-square rounded-xl overflow-hidden bg-border-light/40 dark:bg-border-dark/60">
-              {product.image ? (
-                <OptimizedImage
-                  src={product.image}
-                  alt={`${product.title} - ${product.specs?.brand || 'Etronix'}`}
-                  className="w-full h-full object-cover"
-                  priority={true}
-                  placeholder="blur"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <span className="material-symbols-outlined text-6xl text-text-secondary-light dark:text-text-secondary-dark">
-                    image
-                  </span>
+          {activeTab === "specs" && (() => {
+            const validSpecs = product.specs && Object.entries(product.specs)
+              .filter(([key, value]) => {
+                if (Array.isArray(value)) return value.length > 0;
+                return value !== undefined && value !== null && value !== "";
+              });
+            if (validSpecs && validSpecs.length > 0) {
+              return (
+                <div className="mb-6">
+                  <h2 className="text-lg font-bold mb-2 text-cyan-400">Especificaciones</h2>
+                  <ul className="list-disc pl-5 space-y-1">
+                    {validSpecs.map(([key, value]) => (
+                      <li key={key} className="text-base text-text-secondary-light dark:text-text-secondary-dark">
+                        <span className="font-semibold capitalize">{key}:</span> {Array.isArray(value) ? value.join(", ") : value}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              )}
-            </div>
+              );
+            }
+            return null;
+          })()}
 
-            {/* Info */}
-            <div>
-              <div className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary mb-3">
-                {product.category}
-              </div>
-              
-              <h1 className="text-3xl font-bold text-text-light dark:text-text-dark mb-4">
-                {product.title}
-              </h1>
-              
-              <p className="text-text-secondary-light dark:text-text-secondary-dark mb-6">
-                {product.description}
-              </p>
-
-              <div className="mb-6">
-                <p className="text-4xl font-bold text-primary">
-                  ${product.price?.toLocaleString("es-CO") || "0"}
-                </p>
-                <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark mt-1">
-                  Stock disponible: {product.stock || 0} unidades
-                </p>
-              </div>
-
-              <button
-                onClick={addToCart}
-                disabled={product.stock === 0}
-                className="w-full bg-indigo-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-4 flex items-center justify-center gap-2"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                {product.stock === 0 ? 'Sin stock' : 'Agregar al carrito'}
-              </button>
-
-              {/* Features rápidas */}
-              {product.specs?.features && product.specs.features.length > 0 && (
-                <div className="grid grid-cols-2 gap-3 mt-6">
-                  {product.specs.features.map((feature, idx) => (
-                    <div 
-                      key={idx}
-                      className="flex items-center gap-2 text-sm text-text-secondary-light dark:text-text-secondary-dark"
-                    >
-                      <span className="material-symbols-outlined text-primary text-lg">
-                        check_circle
-                      </span>
-                      {feature}
-                    </div>
-                  ))}
+          {activeTab === "faqs" && (
+            <div className="space-y-4 text-gray-300">
+              {(product.faqs || []).map((f, i) => (
+                <div key={i} className="border border-white/10 rounded-lg p-4">
+                  <h3 className="font-bold mb-2">{f.question}</h3>
+                  <p>{f.answer}</p>
                 </div>
-              )}
+              ))}
             </div>
-          </div>
-
-          {/* Tabs de información */}
-          <div className="border-t border-border-light/60 dark:border-border-dark/60 pt-8">
-            <div className="flex gap-4 border-b border-border-light/60 dark:border-border-dark/60 mb-6">
-              <button
-                onClick={() => setActiveTab('specs')}
-                className={`pb-3 font-semibold transition-colors ${
-                  activeTab === 'specs'
-                    ? 'border-b-2 border-primary text-primary'
-                    : 'text-text-secondary-light dark:text-text-secondary-dark hover:text-primary'
-                }`}
-              >
-                Especificaciones
-              </button>
-              <button
-                onClick={() => setActiveTab('faqs')}
-                className={`pb-3 font-semibold transition-colors ${
-                  activeTab === 'faqs'
-                    ? 'border-b-2 border-primary text-primary'
-                    : 'text-text-secondary-light dark:text-text-secondary-dark hover:text-primary'
-                }`}
-              >
-                Preguntas Frecuentes
-              </button>
-            </div>
-
-            {/* Especificaciones */}
-            {activeTab === 'specs' && product.specs && (
-              <div className="grid md:grid-cols-2 gap-4">
-                {Object.entries(product.specs).map(([key, value]) => {
-                  if (!value || key === 'features') return null;
-                  return (
-                    <div key={key} className="flex border-b border-border-light/50 dark:border-border-dark/50 pb-3">
-                      <span className="font-semibold capitalize w-1/3 text-text-light dark:text-text-dark">
-                        {key === 'brand' ? 'Marca' : 
-                         key === 'model' ? 'Modelo' :
-                         key === 'color' ? 'Color' :
-                         key === 'material' ? 'Material' :
-                         key === 'compatibility' ? 'Compatibilidad' :
-                         key === 'warranty' ? 'Garantía' : key}:
-                      </span>
-                      <span className="text-text-secondary-light dark:text-text-secondary-dark w-2/3">
-                        {value}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* FAQs */}
-            {activeTab === 'faqs' && (
-              <div className="space-y-4">
-                {product.faqs && product.faqs.length > 0 ? (
-                  product.faqs.map((faq, idx) => (
-                    <div 
-                      key={idx}
-                      className="bg-card-light/80 dark:bg-card-dark/80 border border-border-light/60 dark:border-border-dark/60 rounded-lg p-5"
-                    >
-                      <h3 className="font-bold text-text-light dark:text-text-dark mb-2">
-                        {faq.question}
-                      </h3>
-                      <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                        {faq.answer}
-                      </p>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-text-secondary-light dark:text-text-secondary-dark text-center py-8">
-                    No hay preguntas frecuentes para este producto
-                  </p>
-                )}
-                
-                <div className="mt-8 p-6 bg-primary/10 rounded-lg text-center">
-                  <p className="text-text-light dark:text-text-dark font-semibold mb-2">
-                    ¿Tienes otra pregunta?
-                  </p>
-                  <p className="text-text-secondary-light dark:text-text-secondary-dark text-sm">
-                    Contáctanos por WhatsApp y te respondemos en minutos
-                  </p>
-                  <a 
-                    href="https://wa.me/573001234567?text=Hola,%20tengo%20una%20pregunta%20sobre%20este%20producto"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 mt-4 bg-green-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors"
-                  >
-                    <span className="material-symbols-outlined">chat</span>
-                    WhatsApp
-                  </a>
-                </div>
-              </div>
-            )}
-          </div>
-        </main>
-
-        {/* Toast */}
-        {toast && (
-          <div className="fixed bottom-6 right-6 z-50 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items:center gap-2">
-            {toast}
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </>
   );

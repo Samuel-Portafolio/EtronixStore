@@ -18,7 +18,23 @@ export default function Admin() {
   const [view, setView] = useState("dashboard"); // "orders" | "products"
 
   // Ya no hay sesión persistente → siempre pide código
+
   useEffect(() => {
+    // Verificar si hay adminCode y si la sesión no ha expirado
+    const code = localStorage.getItem("adminCode") || "";
+    const loginTime = parseInt(localStorage.getItem("adminLoginTime"), 10) || 0;
+    const now = Date.now();
+    const maxSession = 60 * 60 * 1000; // 1 hora en ms
+    if (code && loginTime && now - loginTime < maxSession) {
+      setAdminCode(code);
+      setIsAuthenticated(true);
+    } else {
+      // Si expiró, limpiar y pedir login
+      localStorage.removeItem("adminCode");
+      localStorage.removeItem("adminLoginTime");
+      setIsAuthenticated(false);
+      setAdminCode("");
+    }
     setCheckingAuth(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

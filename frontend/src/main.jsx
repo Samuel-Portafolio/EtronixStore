@@ -17,6 +17,7 @@ const Pending = lazy(() => import("./pages/Pending.jsx"));
 const FAQPage = lazy(() => import("./pages/FAQPage.jsx"));
 const About = lazy(() => import("./pages/About.jsx"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail.jsx"));
+const AdminProductEdit = lazy(() => import("./pages/AdminProductEdit.jsx"));
 
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -78,6 +79,14 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <AdminProductNew />
+          </Suspense>
+        )
+      },
+      {
+        path: "admin/product/edit/:id",
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AdminProductEdit />
           </Suspense>
         )
       },

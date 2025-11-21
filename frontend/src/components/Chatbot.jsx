@@ -265,7 +265,7 @@ export default function Chatbot({ startOpen = false, onClose } = {}) {
       )}
 
       {/* Estilos para scrollbar */}
-      <style jsx>{`
+      <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;
         }
