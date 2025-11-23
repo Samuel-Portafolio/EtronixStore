@@ -2,7 +2,11 @@
 import { useState, useEffect, useRef } from "react";
 
 /**
- * Componente de imagen optimizada con manejo robusto de URLs
+ * Imagen optimizada con:
+ * - Lazy Loading
+ * - Soporte para WebP/JPG
+ * - object-contain (imagen completa siempre visible)
+ * - Fondo borroso que elimina los espacios grises
  */
 export default function OptimizedImage({
   src,
@@ -19,7 +23,7 @@ export default function OptimizedImage({
   const [imageSrc, setImageSrc] = useState("");
   const imgRef = useRef(null);
 
-  // Normalizar la URL de la imagen
+  // Normalizar URL de imagen
   useEffect(() => {
     if (!src) {
       setHasError(true);
@@ -28,20 +32,23 @@ export default function OptimizedImage({
 
     let normalizedSrc = src;
 
-    // Si la URL comienza con /uploads, agregar la URL del backend
-    if (src.startsWith('/uploads')) {
-      const backendUrl = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, '') || 'http://localhost:3000';
+    if (src.startsWith("/uploads")) {
+      const backendUrl =
+        import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, "") ||
+        "http://localhost:3000";
       normalizedSrc = `${backendUrl}${src}`;
-    }
-    // Si no es una URL completa y no empieza con /, agregar /
-    else if (!src.startsWith('http://') && !src.startsWith('https://') && !src.startsWith('/')) {
+    } else if (
+      !src.startsWith("http://") &&
+      !src.startsWith("https://") &&
+      !src.startsWith("/")
+    ) {
       normalizedSrc = `/${src}`;
     }
 
     setImageSrc(normalizedSrc);
   }, [src]);
 
-  // Intersection Observer para lazy loading
+  // Lazy loading con IntersectionObserver
   useEffect(() => {
     if (!imgRef.current || priority || !imageSrc) return;
 
@@ -50,12 +57,8 @@ export default function OptimizedImage({
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const img = entry.target;
-            if (img.dataset.src) {
-              img.src = img.dataset.src;
-            }
-            if (img.dataset.srcset) {
-              img.srcset = img.dataset.srcset;
-            }
+            if (img.dataset.src) img.src = img.dataset.src;
+            if (img.dataset.srcset) img.srcset = img.dataset.srcset;
             observer.unobserve(img);
           }
         });
@@ -66,15 +69,12 @@ export default function OptimizedImage({
     observer.observe(imgRef.current);
 
     return () => {
-      if (imgRef.current) {
-        observer.unobserve(imgRef.current);
-      }
+      if (imgRef.current) observer.unobserve(imgRef.current);
     };
   }, [priority, imageSrc]);
 
-  const isUnsplash = imageSrc && imageSrc.includes("unsplash");
+  const isUnsplash = imageSrc.includes("unsplash");
 
-  // Helpers para Unsplash
   const addFormatToUrl = (url, format) => {
     if (!url) return "";
     const hasQuery = url.includes("?");
@@ -86,9 +86,7 @@ export default function OptimizedImage({
       newUrl += (hasQuery ? "&" : "?") + `fm=${format}`;
     }
 
-    if (!/[\?&]q=/.test(newUrl)) {
-      newUrl += "&q=85";
-    }
+    if (!/[\?&]q=/.test(newUrl)) newUrl += "&q=85";
 
     return newUrl;
   };
@@ -98,9 +96,7 @@ export default function OptimizedImage({
     return rawSrcSet
       .split(",")
       .map((part) => {
-        const trimmed = part.trim();
-        if (!trimmed) return "";
-        const [urlPart, descriptor] = trimmed.split(/\s+/);
+        const [urlPart, descriptor] = part.trim().split(/\s+/);
         if (!urlPart) return "";
         const newUrl = addFormatToUrl(urlPart, format);
         return descriptor ? `${newUrl} ${descriptor}` : newUrl;
@@ -109,11 +105,13 @@ export default function OptimizedImage({
       .join(", ");
   };
 
-  // Construir URLs optimizadas
   const webpSrc = isUnsplash ? addFormatToUrl(imageSrc, "webp") : imageSrc;
   const jpgSrc = isUnsplash ? addFormatToUrl(imageSrc, "jpg") : imageSrc;
-  const webpSrcSet = isUnsplash && srcSet ? transformSrcSet(srcSet, "webp") : srcSet;
-  const jpgSrcSet = isUnsplash && srcSet ? transformSrcSet(srcSet, "jpg") : srcSet;
+
+  const webpSrcSet =
+    isUnsplash && srcSet ? transformSrcSet(srcSet, "webp") : srcSet;
+  const jpgSrcSet =
+    isUnsplash && srcSet ? transformSrcSet(srcSet, "jpg") : srcSet;
 
   const imgSrc = priority ? jpgSrc : undefined;
   const imgSrcSet = priority ? jpgSrcSet : undefined;
@@ -122,7 +120,9 @@ export default function OptimizedImage({
 
   if (!imageSrc || hasError) {
     return (
-      <div className={`relative overflow-hidden bg-linear-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center ${className}`}>
+      <div
+        className={`relative overflow-hidden bg-gray-200 flex items-center justify-center ${className}`}
+      >
         <svg
           className="w-12 h-12 text-gray-400"
           fill="none"
@@ -141,31 +141,37 @@ export default function OptimizedImage({
   }
 
   return (
-    <div className={`relative overflow-hidden ${className}`}>
-      {/* Placeholder blur mientras carga */}
-      {!isLoaded && !hasError && placeholder === "blur" && (
-        <div className="absolute inset-0 bg-linear-to-br from-gray-200 to-gray-300 animate-pulse" />
-      )}
+    <div className={`relative w-full h-full overflow-hidden ${className}`}>
 
-      {/* Imagen con picture + formatos */}
-      <picture className="block w-full h-full">
-        {webpSrc && (
-          <source
-            srcSet={priority ? webpSrcSet || webpSrc : undefined}
-            data-srcset={!priority && webpSrcSet ? webpSrcSet : undefined}
-            type="image/webp"
-            sizes={sizes}
-          />
-        )}
+      {/* 🔥 Fondo borroso que elimina los espacios grises */}
+      <img
+        src={imageSrc}
+        alt=""
+        aria-hidden="true"
+        className="
+          absolute inset-0 w-full h-full 
+          object-cover 
+          blur-xl 
+          scale-110 
+          opacity-40 
+        "
+      />
 
-        {jpgSrc && (
-          <source
-            srcSet={priority ? jpgSrcSet || jpgSrc : undefined}
-            data-srcset={!priority && jpgSrcSet ? jpgSrcSet : undefined}
-            type="image/jpeg"
-            sizes={sizes}
-          />
-        )}
+      {/* Imagen principal completa */}
+      <picture className="relative z-10 flex items-center justify-center w-full h-full">
+        <source
+          srcSet={priority ? webpSrcSet || webpSrc : undefined}
+          data-srcset={!priority && webpSrcSet ? webpSrcSet : undefined}
+          type="image/webp"
+          sizes={sizes}
+        />
+
+        <source
+          srcSet={priority ? jpgSrcSet || jpgSrc : undefined}
+          data-srcset={!priority && jpgSrcSet ? jpgSrcSet : undefined}
+          type="image/jpeg"
+          sizes={sizes}
+        />
 
         <img
           ref={imgRef}
@@ -177,13 +183,14 @@ export default function OptimizedImage({
           loading={priority ? "eager" : "lazy"}
           decoding="async"
           onLoad={() => setIsLoaded(true)}
-          onError={(e) => {
-            console.error('Error cargando imagen:', imageSrc);
+          onError={() => {
             setHasError(true);
             setIsLoaded(true);
           }}
           className={`
-            w-full h-full object-cover transition-opacity duration-500
+            max-w-full max-h-full
+            object-contain
+            transition-opacity duration-500
             ${isLoaded ? "opacity-100" : "opacity-0"}
             ${hasError ? "hidden" : ""}
           `}

@@ -148,8 +148,6 @@ export default function ProductDetail() {
       try {
         const res = await fetch(`${API_URL}/api/products/${id}`);
         const data = await res.json();
-        console.log('📦 Producto cargado:', data);
-        console.log('📋 Specs recibidas:', data.specs);
         setProduct(data);
       } catch (error) {
         console.error("Error cargando producto:", error);
@@ -224,8 +222,7 @@ export default function ProductDetail() {
   const hasSpecs = specsArray.length > 0;
   const hasFaqs = Array.isArray(product.faqs) && product.faqs.length > 0;
 
-  console.log('✅ Specs procesadas para mostrar:', specsArray);
-  console.log('📊 hasSpecs:', hasSpecs, 'hasFaqs:', hasFaqs);
+  // Eliminados logs innecesarios
 
   return (
     <>
@@ -249,7 +246,7 @@ export default function ProductDetail() {
         {/* Layout Principal */}
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12 mb-12">
           {/* Carrusel */}
-          <div className="sticky top-24 h-fit">
+          <div className="h-fit md:sticky md:top-24">
             <ProductMediaCarousel product={product} />
           </div>
 
