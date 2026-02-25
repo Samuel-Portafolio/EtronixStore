@@ -218,22 +218,20 @@ const paymentLimiter = rateLimit({
 app.use(express.json());
 
 // Logs de entorno
-logger.info("Backend iniciando...");
-logger.info(`FRONTEND_URL: ${process.env.FRONTEND_URL}`);
-logger.info(
-  `BACKEND_PUBLIC_URL: ${
-    process.env.BACKEND_PUBLIC_URL || "(not set)"
-  }`
-);
-logger.info(`MP token presente: ${!!process.env.MP_ACCESS_TOKEN}`);
+console.log("📋 Configuración cargada");
+console.log(`FRONTEND_URL: ${process.env.FRONTEND_URL}`);
+console.log(`BACKEND_PUBLIC_URL: ${process.env.BACKEND_PUBLIC_URL || "(not set)"}`);
+console.log(`MP token presente: ${!!process.env.MP_ACCESS_TOKEN}`);
+console.log(`MONGODB_URI: ${process.env.MONGODB_URI?.substring(0, 30)}...`);
 
 // Conexión a MongoDB
+console.log("🔌 Intentando conectar a MongoDB...");
 (async () => {
   try {
     await connectDB(process.env.MONGODB_URI);
-    logger.info("MongoDB conectado exitosamente");
+    console.log("✅ MongoDB conectado exitosamente");
   } catch (err) {
-    logger.error("Error conectando MongoDB:", err);
+    console.error("❌ Error conectando MongoDB:", err.message);
     process.exit(1);
   }
 })();
