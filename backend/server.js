@@ -39,7 +39,10 @@ import {
 
 import statsRouter from "./src/routes/stats.js";
 
-dotenv.config();
+// Solo cargar .env en desarrollo (en producción Render inyecta las variables)
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+}
 
 // -------------------------
 // CONFIGURACIÓN DE MULTER

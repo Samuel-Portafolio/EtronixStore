@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://etronix-store.com/</loc>
-    <lastmod>2025-11-17T02:47:27.507Z</lastmod>
+    <loc>http://localhost:5173/</loc>
+    <lastmod>2025-11-23T06:38:42.868Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://etronix-store.com/shop</loc>
-    <lastmod>2025-11-17T02:47:27.508Z</lastmod>
+    <loc>http://localhost:5173/shop</loc>
+    <lastmod>2025-11-23T06:38:42.870Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://etronix-store.com/about</loc>
-    <lastmod>2025-11-17T02:47:27.508Z</lastmod>
+    <loc>http://localhost:5173/about</loc>
+    <lastmod>2025-11-23T06:38:42.871Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://etronix-store.com/faq</loc>
-    <lastmod>2025-11-17T02:47:27.508Z</lastmod>
+    <loc>http://localhost:5173/faq</loc>
+    <lastmod>2025-11-23T06:38:42.871Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://etronix-store.com/products/691a0a8383565e538b15bcaf</loc>
-    <lastmod>2025-11-16T17:35:04.574Z</lastmod>
+    <loc>http://localhost:5173/products/69222a04fc0bce80f2bfdfbe</loc>
+    <lastmod>2025-11-22T21:24:58.791Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
