@@ -43,10 +43,14 @@ import {
 
 import statsRouter from "./src/routes/stats.js";
 
+console.log("✅ Imports completados");
+
 // Solo cargar .env en desarrollo (en producción Render inyecta las variables)
 if (process.env.NODE_ENV !== 'production') {
   dotenv.config();
 }
+
+console.log("✅ Dotenv configurado");
 
 // -------------------------
 // CONFIGURACIÓN DE MULTER
@@ -97,6 +101,8 @@ if (!fs.existsSync("uploads/videos/")) {
 if (!fs.existsSync("uploads/images/")) {
   fs.mkdirSync("uploads/images/", { recursive: true });
 }
+
+console.log("✅ Carpetas de uploads verificadas");
 
 // -------------------------
 // APP EXPRESS
