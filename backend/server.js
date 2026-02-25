@@ -1,4 +1,8 @@
 // server.js
+console.log("🚀 Iniciando servidor...");
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("MONGODB_URI presente:", !!process.env.MONGODB_URI);
+
 import express from "express";
 import multer from "multer";
 import fs from "fs";
