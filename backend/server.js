@@ -1,8 +1,4 @@
 // server.js
-console.log("🚀 Iniciando servidor...");
-console.log("NODE_ENV:", process.env.NODE_ENV);
-console.log("MONGODB_URI presente:", !!process.env.MONGODB_URI);
-
 import express from "express";
 import multer from "multer";
 import fs from "fs";
@@ -43,14 +39,10 @@ import {
 
 import statsRouter from "./src/routes/stats.js";
 
-console.log("✅ Imports completados");
-
 // Solo cargar .env en desarrollo (en producción Render inyecta las variables)
 if (process.env.NODE_ENV !== 'production') {
   dotenv.config();
 }
-
-console.log("✅ Dotenv configurado");
 
 // -------------------------
 // CONFIGURACIÓN DE MULTER
@@ -101,8 +93,6 @@ if (!fs.existsSync("uploads/videos/")) {
 if (!fs.existsSync("uploads/images/")) {
   fs.mkdirSync("uploads/images/", { recursive: true });
 }
-
-console.log("✅ Carpetas de uploads verificadas");
 
 // -------------------------
 // APP EXPRESS
@@ -224,28 +214,39 @@ const paymentLimiter = rateLimit({
 app.use(express.json());
 
 // Logs de entorno
-console.log("📋 Configuración cargada");
-console.log(`FRONTEND_URL: ${process.env.FRONTEND_URL}`);
-console.log(`BACKEND_PUBLIC_URL: ${process.env.BACKEND_PUBLIC_URL || "(not set)"}`);
-console.log(`MP token presente: ${!!process.env.MP_ACCESS_TOKEN}`);
-console.log(`MONGODB_URI: ${process.env.MONGODB_URI?.substring(0, 30)}...`);
+logger.info("Backend iniciando...");
+logger.info(`FRONTEND_URL: ${process.env.FRONTEND_URL}`);
+logger.info(`BACKEND_PUBLIC_URL: ${process.env.BACKEND_PUBLIC_URL || "(not set)"}`);
+logger.info(`MP token presente: ${!!process.env.MP_ACCESS_TOKEN}`);
 
 // Conexión a MongoDB
-console.log("🔌 Intentando conectar a MongoDB...");
 (async () => {
   try {
     await connectDB(process.env.MONGODB_URI);
-    console.log("✅ MongoDB conectado exitosamente");
+    logger.info("MongoDB conectado exitosamente");
   } catch (err) {
-    console.error("❌ Error conectando MongoDB:", err.message);
+    logger.error("Error conectando MongoDB:", err.message);
     process.exit(1);
   }
 })();
 
-// CORS
+// CORS - permitir con y sin www
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.FRONTEND_URL?.replace('https://', 'https://www.'),
+  'http://localhost:5173',
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: function(origin, callback) {
+      // Permitir requests sin origin (como apps móviles o Postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
     methods: ["GET", "POST", "PATCH", "DELETE"],
     credentials: true,
   })
