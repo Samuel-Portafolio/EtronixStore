@@ -36,7 +36,7 @@
 2. Inicia sesión con tu cuenta de Google
 3. Click en "Agregar propiedad"
 
-### Paso 2: Verificar el dominio
+### Paso 2: Verificar el dominio    
 **Opción A - Verificación DNS (Recomendada):**
 1. Selecciona "Dominio" y escribe: `etronix-store.com`
 2. Google te dará un registro TXT para agregar
