@@ -93,23 +93,14 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
     const CACHE_KEY = "featuredProducts";
     const CACHE_TS_KEY = "featuredProductsTs";
-    const CACHE_TTL = 5 * 60 * 1000;
-
-    const cachedTsRaw = localStorage.getItem(CACHE_TS_KEY);
-    const now = Date.now();
-    const cacheTs = cachedTsRaw ? parseInt(cachedTsRaw, 10) : 0;
-    const cacheAge = now - cacheTs;
-
-    if (initialProducts.length > 0 && cacheTs && cacheAge < CACHE_TTL) {
-      setLoading(false);
-      return;
-    }
 
     const controller = new AbortController();
 
+    // SIEMPRE hacer fetch — mostrar caché mientras llega la respuesta (stale-while-revalidate)
+    // El bloqueo por TTL causaba que ediciones del admin no se reflejaran en Home
     (async () => {
       try {
         const res = await fetch(
@@ -120,10 +111,10 @@ export default function Home() {
         const sliced = Array.isArray(data) ? data.slice(0, 5) : [];
         setFeaturedProducts(sliced);
         try {
-          localStorage.setItem(CACHE_KEY, JSON.stringify(sliced));
-          localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
-          // Limpiar el caché si no hay productos
-          if (sliced.length === 0) {
+          if (sliced.length > 0) {
+            localStorage.setItem(CACHE_KEY, JSON.stringify(sliced));
+            localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
+          } else {
             localStorage.removeItem(CACHE_KEY);
             localStorage.removeItem(CACHE_TS_KEY);
           }
@@ -140,7 +131,7 @@ export default function Home() {
     })();
 
     return () => controller.abort();
-  }, [initialProducts.length]);
+  }, []);
 
   return (
     <>
