@@ -26,9 +26,9 @@ export default function ProductMediaCarousel({ images = [], videos = [], alt = '
         {media.map((url, idx) => (
           <SwiperSlide key={idx}>
             {url.match(/\.(mp4|webm)$/i) ? (
-              <video src={url} className="w-full h-full object-cover" controls autoPlay muted loop playsInline />
+              <video src={url} className="w-full h-full object-contain bg-black" controls autoPlay muted loop playsInline />
             ) : (
-              <OptimizedImage src={url} alt={alt} className="w-full h-full object-cover" />
+              <OptimizedImage src={url} alt={alt} className="w-full h-full object-contain bg-black" />
             )}
           </SwiperSlide>
         ))}
