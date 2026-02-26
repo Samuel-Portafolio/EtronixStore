@@ -29,25 +29,18 @@ export default function OptimizedImage({
       setHasError(true);
       return;
     }
+
     let normalizedSrc = src;
 
-    // Soporta 'uploads/...' y '/uploads/...'
-    if (/^\/?uploads\//i.test(src)) {
-      let backendUrl =
+    if (src.startsWith("/uploads")) {
+      const backendUrl =
         import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, "") ||
-        (typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.host}` : "http://localhost:3000");
-
-      // Evitar mixed-content: si la página es https y el backend usa http, forzamos https
-      if (typeof window !== 'undefined' && backendUrl.startsWith('http:') && window.location.protocol === 'https:') {
-        backendUrl = backendUrl.replace(/^http:/, 'https:');
-      }
-
-      const path = src.startsWith('/') ? src : `/${src}`;
-      normalizedSrc = `${backendUrl}${path}`;
+        "http://localhost:3000";
+      normalizedSrc = `${backendUrl}${src}`;
     } else if (
-      !src.startsWith('http://') &&
-      !src.startsWith('https://') &&
-      !src.startsWith('/')
+      !src.startsWith("http://") &&
+      !src.startsWith("https://") &&
+      !src.startsWith("/")
     ) {
       normalizedSrc = `/${src}`;
     }
