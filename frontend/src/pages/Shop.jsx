@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { NoResults, ProductSkeleton } from "../components/EmptyState";
+import { CATEGORIES } from "../constants/categories";
 import { Helmet } from "react-helmet-async";
 import OptimizedImage from '../components/OptimizedImage';
 import ProductMediaCarousel from '../components/ProductMediaCarousel';
@@ -74,6 +75,11 @@ export default function Shop() {
       );
     }
 
+    // Filtrar por categoría
+    if (selectedCategory && selectedCategory !== 'all') {
+      filtered = filtered.filter(p => p.category === selectedCategory);
+    }
+
     filtered = filtered.filter(p =>
       p.price >= priceRange.min && p.price <= priceRange.max
     );
@@ -103,7 +109,7 @@ export default function Shop() {
 
     setFilteredProducts(filtered);
     setPage(1);
-  }, [debouncedQuery, products, sortBy, priceRange]);
+  }, [debouncedQuery, products, sortBy, priceRange, selectedCategory]);
 
   const addToCart = (p) => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -232,8 +238,30 @@ export default function Shop() {
                 </div>
               </div>
 
-              {/* ORDENAR Y FILTRO DE PRECIO */}
+              {/* FILTROS: Categoría, Ordenar, Precio */}
               <div className="flex flex-col md:flex-row gap-4 mb-6">
+                {/* Filtro de Categoría */}
+                <div className="flex-1">
+                  <label className="block text-sm text-gray-300 mb-2">Filtrar por Categoría</label>
+                  <select
+                    value={selectedCategory}
+                    onChange={e => {
+                      const value = e.target.value;
+                      const params = new URLSearchParams(location.search);
+                      if (value === 'all') {
+                        params.delete('category');
+                      } else {
+                        params.set('category', value);
+                      }
+                      window.history.replaceState({}, '', `${location.pathname}?${params.toString()}`);
+                    }}
+                    className="w-full px-4 py-3 rounded-xl bg-gray-900/80 border border-cyan-500/30 text-white placeholder-gray-400 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/30 transition-all"
+                  >
+                    {CATEGORIES.map(cat => (
+                      <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>
+                    ))}
+                  </select>
+                </div>
 
                 {/* Ordenar */}
                 <div className="flex-1">
@@ -241,7 +269,7 @@ export default function Shop() {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white"
+                    className="w-full px-4 py-3 rounded-xl bg-gray-900/80 border border-cyan-500/30 text-white placeholder-gray-400 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/30 transition-all"
                   >
                     <option value="newest">Más recientes</option>
                     <option value="price-asc">Precio: Menor a Mayor</option>
@@ -261,7 +289,7 @@ export default function Shop() {
                       placeholder={`Min $${priceStats.min.toLocaleString('es-CO')}`}
                       value={tempPriceRange.min}
                       onChange={(e) => setTempPriceRange(prev => ({ ...prev, min: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white"
+                      className="w-full px-4 py-3 rounded-xl bg-gray-900/80 border border-cyan-500/30 text-white placeholder-gray-400 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/30 transition-all"
                     />
                     <input
                       type="number"
