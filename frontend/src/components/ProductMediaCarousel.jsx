@@ -1,9 +1,3 @@
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/pagination';
-import OptimizedImage from './OptimizedImage';
-
 export default function ProductMediaCarousel({ images = [], videos = [], alt = '', aspect = 'aspect-4/5' }) {
   const media = [...(images || []), ...(videos || [])];
   
@@ -16,8 +10,8 @@ export default function ProductMediaCarousel({ images = [], videos = [], alt = '
   }
   
   return (
-    <div className="w-full max-w-[480px] mx-auto">
-      {/* 🔥 SOLUCIÓN: Contenedor con aspect ratio SEPARADO del Swiper */}
+    // ✅ Responsive: max-w-md en móvil, max-w-lg en tablet, sin límite en desktop
+    <div className="w-full max-w-md sm:max-w-lg lg:max-w-none mx-auto">
       <div className={`${aspect} relative overflow-hidden rounded-xl`}>
         <Swiper
           modules={[Autoplay, Pagination]}
@@ -25,7 +19,6 @@ export default function ProductMediaCarousel({ images = [], videos = [], alt = '
           pagination={{ clickable: true }}
           loop={media.length > 1}
           className="absolute inset-0 w-full h-full"
-          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
         >
           {media.map((url, idx) => (
             <SwiperSlide key={idx} className="w-full h-full">

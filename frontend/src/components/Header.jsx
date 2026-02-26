@@ -85,18 +85,27 @@ export default function Header({ onToggleSidebar }) {
                 </span>
               </Link>
               {/* Desktop Navigation (kept for md+) */}
-              <nav className="hidden md:flex items-center gap-8 ml-8">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.to}
-                    to={link.to}
-                    className={`relative font-bold text-sm transition-colors group ${location.pathname === link.to ? "text-cyan-400" : "text-gray-300 hover:text-white"}`}
-                  >
-                    {link.label}
-                    <span className={`absolute -bottom-1 left-0 w-full h-0.5 bg-linear-to-r from-cyan-400 to-blue-500 transform origin-left transition-transform ${location.pathname === link.to ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`} />
-                  </Link>
-                ))}
-              </nav>
+              {/* Desktop Navigation */}
+<nav className="hidden lg:flex items-center gap-8 ml-8">
+  {navLinks.map((link) => (
+    <Link
+      key={link.to}
+      to={link.to}
+      className={`relative font-bold text-sm transition-colors group ${
+        location.pathname === link.to 
+          ? "text-cyan-400" 
+          : "text-gray-300 hover:text-white"
+      }`}
+    >
+      {link.label}
+      <span className={`absolute -bottom-1 left-0 w-full h-0.5 bg-linear-to-r from-cyan-400 to-blue-500 transform origin-left transition-transform ${
+        location.pathname === link.to 
+          ? "scale-x-100" 
+          : "scale-x-0 group-hover:scale-x-100"
+      }`} />
+    </Link>
+  ))}
+</nav>
             </div>
 
             {/* Right: actions (cart) */}

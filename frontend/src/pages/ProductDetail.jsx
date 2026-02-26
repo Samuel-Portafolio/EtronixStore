@@ -210,22 +210,21 @@ export default function ProductDetail() {
         </div>
 
         {/* Layout Principal */}
-        <div className="grid md:grid-cols-2 gap-8 lg:gap-12 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
           {/* Carrusel */}
-          {/* Carrusel */}
-<div className="h-fit md:sticky md:top-24">
-  <div className="w-full"> {/* Wrapper adicional */}
-    <ProductMediaCarousel
-      images={Array.isArray(product.images) ? product.images : product.image ? [product.image] : []}
-      videos={Array.isArray(product.videos) ? product.videos : []}
-      alt={product.title}
-      aspect="aspect-square"
-    />
-  </div>
-</div>
+          <div className="w-full max-w-2xl mx-auto lg:max-w-none">
+            <div className="lg:sticky lg:top-24">
+              <ProductMediaCarousel
+                images={Array.isArray(product.images) ? product.images : product.image ? [product.image] : []}
+                videos={Array.isArray(product.videos) ? product.videos : []}
+                alt={product.title}
+                aspect="aspect-square"
+              />
+            </div>
+          </div>
 
           {/* Info Producto */}
-          <div>
+          <div className="w-full max-w-2xl mx-auto lg:max-w-none">
             {product.category && (
               <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-4 bg-linear-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 border border-cyan-400/30">
                 {product.category}
@@ -245,8 +244,8 @@ export default function ProductDetail() {
             </div>
 
             <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold mb-8 ${product.stock > 0
-                ? 'bg-green-500/20 text-green-400 border border-green-400/30'
-                : 'bg-red-500/20 text-red-400 border border-red-400/30'
+              ? 'bg-green-500/20 text-green-400 border border-green-400/30'
+              : 'bg-red-500/20 text-red-400 border border-red-400/30'
               }`}>
               <span className="material-symbols-outlined text-xl">
                 {product.stock > 0 ? 'check_circle' : 'cancel'}

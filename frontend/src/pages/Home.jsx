@@ -223,56 +223,54 @@ export default function Home() {
       <main className="relative min-h-screen z-10">
         {/* HERO */}
         <section className="relative">
-          <div className="max-w-7xl mx-auto px-6 lg:px-12 pt-0 pb-20">
-            <div className="grid grid-cols-12 gap-8 lg:gap-12 items-center">
-              <div className="order-2 lg:order-1 col-span-12 lg:col-span-7 flex items-center justify-center">
-                <div className="relative flex justify-start items-center h-[400px] lg:h-[600px] xl:h-[700px] overflow-visible">
-                  <OptimizedImage
-                    src={hero}
-                    alt="Logo Etronix - Accesorios tecnológicos"
-                    width={900}
-                    height={300}
-                    className="absolute left-0 top-1/3 -translate-y-1/2 w-screen max-w-none lg:w-[700px] xl:w-[900px] 2xl:w-[1200px] h-auto object-left object-contain drop-shadow-[0_20px_50px_rgba(59,130,246,0.45)] z-0 mt-10 lg:mt-16 xl:mt-24"
-                    priority
-                  />
-                </div>
-              </div>
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-0 pb-12 sm:pb-16 lg:pb-20">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+      {/* Imagen - Full width en móvil, 7 cols en desktop */}
+      <div className="order-2 lg:order-1 lg:col-span-7 flex items-center justify-center">
+        <div className="relative flex justify-center lg:justify-start items-center h-[300px] sm:h-[400px] lg:h-[600px] xl:h-[700px] w-full overflow-hidden">
+          <OptimizedImage
+            src={hero}
+            alt="Logo Etronix"
+            className="w-full h-auto max-w-[280px] sm:max-w-[400px] lg:max-w-[700px] xl:max-w-[900px] object-contain"
+            priority
+          />
+        </div>
+      </div>
 
-              <div className="order-1 lg:order-2 col-span-12 lg:col-span-5 flex flex-col items-center lg:items-start justify-center text-center lg:text-left">
-                <h1 className="text-5xl lg:text-6xl font-extrabold leading-tight text-white mb-6 relative z-10 text-center lg:text-left lg:-mt-16 xl:-mt-24">
-                  <span className="block ml-10 lg:ml-10">Transforma</span>
-                  <span className="block ml-44 lg:ml-44">tu</span>
-                  <span className="block ml-8 lg:ml-8">experiencia</span>
-                  <span className="block ml-30 lg:ml-30 bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                    móvil
-                  </span>
-                </h1>
+      {/* Texto - Full width en móvil, 5 cols en desktop */}
+      <div className="order-1 lg:order-2 lg:col-span-5 flex flex-col items-center lg:items-start text-center lg:text-left">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight text-white mb-6">
+          <span className="block">Transforma</span>
+          <span className="block">tu</span>
+          <span className="block">experiencia</span>
+          <span className="block bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+            móvil
+          </span>
+        </h1>
 
-                <p className="text-gray-300 text-lg lg:text-xl mb-10 leading-relaxed max-w-md text-center lg:text-left">
-                  En Etronix encuentras calidad, innovación y estilo. Potencia tu mundo digital con accesorios premium.
-                </p>
+        <p className="text-base sm:text-lg lg:text-xl text-gray-300 mb-8 max-w-md">
+          En Etronix encuentras calidad, innovación y estilo.
+        </p>
 
-                <div className="flex flex-wrap gap-5 justify-center lg:justify-start">
-                  <Link
-                    to="/shop"
-                    className="inline-flex items-center gap-2 px-8 py-4 font-bold rounded-xl bg-linear-to-r from-cyan-400 to-blue-500 text-gray-900 shadow-lg hover:-translate-y-1 hover:shadow-cyan-400/50 transition-all"
-                  >
-                    Explorar ahora
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </Link>
-                  <Link
-                    to="/offers"
-                    className="inline-flex items-center gap-2 px-8 py-4 font-bold rounded-xl border-2 border-white/30 text-white hover:bg-white/10 hover:border-cyan-400/50 backdrop-blur-md transition-all"
-                  >
-                    Ver ofertas
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* Botones responsive */}
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <Link
+            to="/shop"
+            className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 font-bold rounded-xl bg-linear-to-r from-cyan-400 to-blue-500 text-gray-900"
+          >
+            Explorar ahora
+          </Link>
+          <Link
+            to="/offers"
+            className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 font-bold rounded-xl border-2 border-white/30 text-white"
+          >
+            Ver ofertas
+          </Link>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
         {/* FEATURED PRODUCTS */}
         <section className="pb-20">

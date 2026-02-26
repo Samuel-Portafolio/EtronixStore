@@ -247,57 +247,28 @@ export default function Checkout() {
           </h1>
 
           {!showPayment ? (
-            <div className="grid lg:grid-cols-2 gap-8">
-              {/* Formulario */}
-              <div className="backdrop-blur-xl bg-linear-to-r from-white/15 to-white/5 rounded-2xl border border-white/20 shadow-xl p-6">
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input name="name" value={formData.name} onChange={handleInputChange} placeholder="Nombre completo" className="p-3 rounded bg-gray-800 text-white" required />
-                    <input name="phone" value={formData.phone} onChange={handleInputChange} placeholder="Teléfono" className="p-3 rounded bg-gray-800 text-white" required />
-                    <input name="email" value={formData.email} onChange={handleInputChange} placeholder="Email" type="email" className="p-3 rounded bg-gray-800 text-white" required />
-                    <input name="city" value={formData.city} onChange={handleInputChange} placeholder="Ciudad" className="p-3 rounded bg-gray-800 text-white" required />
-                  </div>
-                  <input name="address" value={formData.address} onChange={handleInputChange} placeholder="Dirección" className="p-3 rounded bg-gray-800 text-white w-full" required />
-                  <textarea name="notes" value={formData.notes} onChange={handleInputChange} placeholder="Notas (opcional)" className="p-3 rounded bg-gray-800 text-white w-full" />
-                  {/* Errores */}
-                  {Object.values(errors).length > 0 && (
-                    <div className="text-red-500 font-bold">
-                      {Object.values(errors).map((err, idx) => (
-                        <div key={idx}>{err}</div>
-                      ))}
-                    </div>
-                  )}
-                  <button type="submit" className="w-full px-4 py-3 bg-cyan-500 text-white font-black rounded-xl mt-2">
-                    Continuar con el pago
-                  </button>
-                </form>
-              </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+  {/* Formulario */}
+  <div className="w-full max-w-2xl mx-auto lg:max-w-none">
+    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+      {/* Campos en grid responsive */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <input name="name" className="..." />
+        <input name="phone" className="..." />
+        <input name="email" className="..." />
+        <input name="city" className="..." />
+      </div>
+      {/* Resto del formulario */}
+    </form>
+  </div>
 
-              {/* Resumen */}
-              <div>
-                <div className="backdrop-blur-xl bg-linear-to-r from-white/15 to-white/5 rounded-2xl border border-white/20 shadow-xl p-6 sticky top-24">
-                  <h2 className="text-2xl font-black text-white mb-4">Resumen del Carrito</h2>
-                  <ul className="mb-6">
-                    {cart.map((item) => (
-                      <li key={item._id} className="flex justify-between items-center py-2 border-b border-white/10">
-                        <span className="text-white font-bold">{item.title}</span>
-                        <span className="text-cyan-400 font-black">x{item.quantity}</span>
-                        <span className="text-white">${(item.price * item.quantity).toLocaleString("es-CO")}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="flex items-center justify-between text-lg font-black text-white">
-                    <span>Total:</span>
-                    <span className="text-2xl bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                      ${total.toLocaleString("es-CO")}
-                    </span>
-                  </div>
-                  <div className="mt-4 text-gray-300 text-sm">
-                    Productos: <span className="font-black text-cyan-400">{totalItems}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+  {/* Resumen */}
+  <div className="w-full max-w-2xl mx-auto lg:max-w-none">
+    <div className="lg:sticky lg:top-24">
+      {/* Resumen del carrito */}
+    </div>
+  </div>
+</div>
           ) : (
             <div className="max-w-2xl mx-auto">
               <div className="backdrop-blur-xl bg-linear-to-r from-white/15 to-white/5 rounded-2xl border border-white/20 shadow-xl p-6 mb-6">
