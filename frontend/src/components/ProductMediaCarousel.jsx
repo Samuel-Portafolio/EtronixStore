@@ -1,3 +1,9 @@
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import OptimizedImage from './OptimizedImage';
+
 export default function ProductMediaCarousel({ images = [], videos = [], alt = '', aspect = 'aspect-4/5' }) {
   const media = [...(images || []), ...(videos || [])];
   
