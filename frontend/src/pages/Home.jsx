@@ -255,7 +255,7 @@ export default function Home() {
               </div>
 
               <div className="order-1 lg:order-2 col-span-12 lg:col-span-5 flex flex-col items-center lg:items-start justify-center text-center lg:text-left">
-                <h1 className="text-5xl lg:text-6xl font-extrabold leading-tight text-white mb-6 relative z-10 text-center lg:text-left -mt-10 lg:-mt-16 xl:-mt-24">
+                <h1 className="text-5xl lg:text-6xl font-extrabold leading-tight text-white mb-6 relative z-10 text-center lg:text-left lg:-mt-16 xl:-mt-24">
                   <span className="block ml-10 lg:ml-10">Transforma</span>
                   <span className="block ml-44 lg:ml-44">tu</span>
                   <span className="block ml-8 lg:ml-8">experiencia</span>
