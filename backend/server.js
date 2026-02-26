@@ -8,6 +8,8 @@ import dotenv from "dotenv";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import compression from "compression";
+import { v2 as cloudinary } from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 
 import Product from "./src/models/Product.js";
 import Order from "./src/models/Order.js";
@@ -45,48 +47,107 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // -------------------------
-// CONFIGURACIÓN DE MULTER
+// CONFIGURACIÓN DE CLOUDINARY
 // -------------------------
-const storage = multer.diskStorage({
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Storage para imágenes en Cloudinary
+const imageStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "etronix/products",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    transformation: [{ width: 1000, height: 1000, crop: "limit", quality: "auto" }],
+  },
+});
+
+// Storage local para videos (Cloudinary gratis no soporta videos grandes)
+const videoStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    if (file.fieldname === "imageFiles") {
-      cb(null, "uploads/images/");
-    } else if (file.fieldname === "videoFiles") {
-      cb(null, "uploads/videos/");
-    } else {
-      cb(new Error("Tipo de archivo no soportado"));
-    }
+    cb(null, "uploads/videos/");
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix =
-      Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, uniqueSuffix + "-" + file.originalname);
   },
 });
 
-const upload = multer({
-  storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+// Multer para imágenes (Cloudinary)
+const uploadImages = multer({
+  storage: imageStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
   fileFilter: (req, file, cb) => {
     if (
-      file.fieldname === "videoFiles" &&
-      file.mimetype.startsWith("video/")
-    ) {
-      cb(null, true);
-    } else if (
-      file.fieldname === "imageFiles" &&
-      (file.mimetype.startsWith("image/jpeg") ||
-        file.mimetype.startsWith("image/png") ||
-        file.mimetype.startsWith("image/webp"))
+      file.mimetype.startsWith("image/jpeg") ||
+      file.mimetype.startsWith("image/png") ||
+      file.mimetype.startsWith("image/webp")
     ) {
       cb(null, true);
     } else {
-      cb(new Error("Solo se permiten archivos de video o imagen"));
+      cb(new Error("Solo se permiten imágenes (JPG, PNG, WEBP)"));
     }
   },
 });
 
-// Crear carpetas de uploads si no existen
+// Multer para videos (local)
+const uploadVideos = multer({
+  storage: videoStorage,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("video/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Solo se permiten archivos de video"));
+    }
+  },
+});
+
+// Multer combinado para productos
+const upload = multer({
+  storage: multer.memoryStorage(), // Temporal, se procesa manualmente
+  limits: { fileSize: 50 * 1024 * 1024 },
+});
+
+// Función para subir imagen a Cloudinary desde buffer
+const uploadToCloudinary = (buffer, folder = "etronix/products") => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        resource_type: "image",
+        transformation: [{ width: 1000, height: 1000, crop: "limit", quality: "auto" }],
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result.secure_url);
+      }
+    );
+    uploadStream.end(buffer);
+  });
+};
+
+// Función para subir video a Cloudinary
+const uploadVideoToCloudinary = (buffer, folder = "etronix/videos") => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        resource_type: "video",
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result.secure_url);
+      }
+    );
+    uploadStream.end(buffer);
+  });
+};
+
+// Crear carpetas de uploads si no existen (para fallback local)
 if (!fs.existsSync("uploads/videos/")) {
   fs.mkdirSync("uploads/videos/", { recursive: true });
 }
@@ -531,22 +592,43 @@ app.post(
         videos.push(videoUrls);
     }
 
-    // Archivos de video subidos
+    // Archivos de video subidos (usar URLs de YouTube en su lugar para evitar problemas)
     if (req.files && req.files.videoFiles) {
-      videos = videos.concat(
-        req.files.videoFiles.map(
-          (f) => `/uploads/videos/${f.filename}`
-        )
-      );
+      // Para videos, subir a Cloudinary si están configuradas las credenciales
+      for (const file of req.files.videoFiles) {
+        try {
+          if (process.env.CLOUDINARY_CLOUD_NAME) {
+            const url = await uploadVideoToCloudinary(file.buffer);
+            videos.push(url);
+          } else {
+            // Fallback: guardar localmente (no funciona en Render)
+            const filename = `${Date.now()}-${file.originalname}`;
+            fs.writeFileSync(`uploads/videos/${filename}`, file.buffer);
+            videos.push(`/uploads/videos/${filename}`);
+          }
+        } catch (err) {
+          logger.error("Error subiendo video:", err.message);
+        }
+      }
     }
 
-    // Archivos de imágenes subidos
+    // Archivos de imágenes subidos - CLOUDINARY
     if (req.files && req.files.imageFiles) {
-      imagesArr = imagesArr.concat(
-        req.files.imageFiles.map(
-          (f) => `/uploads/images/${f.filename}`
-        )
-      );
+      for (const file of req.files.imageFiles) {
+        try {
+          if (process.env.CLOUDINARY_CLOUD_NAME) {
+            const url = await uploadToCloudinary(file.buffer);
+            imagesArr.push(url);
+          } else {
+            // Fallback: guardar localmente
+            const filename = `${Date.now()}-${file.originalname}`;
+            fs.writeFileSync(`uploads/images/${filename}`, file.buffer);
+            imagesArr.push(`/uploads/images/${filename}`);
+          }
+        } catch (err) {
+          logger.error("Error subiendo imagen:", err.message);
+        }
+      }
     }
 
     // 🔥 CORRECCIÓN: Procesar specs correctamente
@@ -645,21 +727,32 @@ app.patch(
     if (description !== undefined) updateData.description = description;
     if (sku !== undefined) updateData.sku = sku;
 
-    // Manejar imágenes
-    if (images !== undefined) {
+    // Manejar imágenes - CLOUDINARY
+    if (images !== undefined || (req.files && req.files.imageFiles)) {
       let imagesArr = Array.isArray(images) ? images : images ? [images] : [];
       
       if (req.files && req.files.imageFiles) {
-        imagesArr = imagesArr.concat(
-          req.files.imageFiles.map((f) => `/uploads/images/${f.filename}`)
-        );
+        for (const file of req.files.imageFiles) {
+          try {
+            if (process.env.CLOUDINARY_CLOUD_NAME) {
+              const url = await uploadToCloudinary(file.buffer);
+              imagesArr.push(url);
+            } else {
+              const filename = `${Date.now()}-${file.originalname}`;
+              fs.writeFileSync(`uploads/images/${filename}`, file.buffer);
+              imagesArr.push(`/uploads/images/${filename}`);
+            }
+          } catch (err) {
+            logger.error("Error subiendo imagen:", err.message);
+          }
+        }
       }
       
       updateData.images = imagesArr;
       updateData.image = image || imagesArr[0] || "";
     }
 
-    // Manejar videos
+    // Manejar videos - CLOUDINARY
     if (videoUrls !== undefined || (req.files && req.files.videoFiles)) {
       let videos = [];
       
@@ -670,9 +763,20 @@ app.patch(
       }
       
       if (req.files && req.files.videoFiles) {
-        videos = videos.concat(
-          req.files.videoFiles.map((f) => `/uploads/videos/${f.filename}`)
-        );
+        for (const file of req.files.videoFiles) {
+          try {
+            if (process.env.CLOUDINARY_CLOUD_NAME) {
+              const url = await uploadVideoToCloudinary(file.buffer);
+              videos.push(url);
+            } else {
+              const filename = `${Date.now()}-${file.originalname}`;
+              fs.writeFileSync(`uploads/videos/${filename}`, file.buffer);
+              videos.push(`/uploads/videos/${filename}`);
+            }
+          } catch (err) {
+            logger.error("Error subiendo video:", err.message);
+          }
+        }
       }
       
       updateData.videos = videos;
