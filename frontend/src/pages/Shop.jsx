@@ -6,6 +6,9 @@ import OptimizedImage from '../components/OptimizedImage';
 
 export default function Shop() {
   const location = useLocation();
+  // Obtener categoría desde query param
+  const params = new URLSearchParams(location.search);
+  const selectedCategory = params.get("category") || "";
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
