@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { NoResults, ProductSkeleton } from "../components/EmptyState";
 import { Helmet } from "react-helmet-async";
 import OptimizedImage from '../components/OptimizedImage';
+import ProductMediaCarousel from '../components/ProductMediaCarousel';
 
 export default function Shop() {
   const location = useLocation();
@@ -315,29 +316,13 @@ export default function Shop() {
                               </span>
                             )}
 
-                            {p.image ? (
-                              <OptimizedImage
-                                src={p.image}
-                                alt={p.title}
-                                width={400}
-                                height={400}
-                                loading="lazy"
-                                className="w-full h-full object-cover"
-                              />
-                            ) : p.videos?.[0] ? (
-                              <video
-                                src={p.videos[0]}
-                                className="w-full h-full object-cover"
-                                autoPlay
-                                muted
-                                loop
-                                playsInline
-                              />
-                            ) : (
-                              <div className="h-full w-full flex items-center justify-center bg-cyan-500/10">
-                                <span className="text-white/50 text-3xl">📱</span>
-                              </div>
-                            )}
+                            {/* Carrusel de imágenes/videos */}
+                            <ProductMediaCarousel
+                              images={Array.isArray(p.images) ? p.images : p.image ? [p.image] : []}
+                              videos={Array.isArray(p.videos) ? p.videos : []}
+                              alt={p.title}
+                              aspect="aspect-square"
+                            />
                           </div>
                         </Link>
 

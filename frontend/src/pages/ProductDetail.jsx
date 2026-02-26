@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import OptimizedImage from "../components/OptimizedImage";
+import ProductMediaCarousel from "../components/ProductMediaCarousel";
 
 const API_URL = import.meta.env.VITE_API_URL;
 const BACKEND_BASE = API_URL.replace(/\/api\/?$/, "");
@@ -29,118 +30,6 @@ function getYouTubeEmbedUrl(url) {
   return url;
 }
 
-function ProductMediaCarousel({ product }) {
-  const images = Array.isArray(product.images)
-    ? product.images
-    : product.image
-      ? [product.image]
-      : [];
-
-  const videos = Array.isArray(product.videos) ? product.videos : [];
-  const media = [...images, ...videos];
-
-  const [current, setCurrent] = useState(0);
-
-  const currentUrl = resolveMediaUrl(media[current]);
-
-  const isVideo = (url) => {
-    return (
-      typeof url === "string" &&
-      (url.includes("youtube.com") ||
-        url.includes("youtu.be") ||
-        url.endsWith(".mp4"))
-    );
-  };
-
-  const handlePrev = () =>
-    setCurrent((prev) => (prev === 0 ? media.length - 1 : prev - 1));
-  const handleNext = () =>
-    setCurrent((prev) => (prev === media.length - 1 ? 0 : prev + 1));
-
-  if (media.length === 0) {
-    return (
-      <div className="aspect-square rounded-xl overflow-hidden bg-linear-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center">
-        <span className="material-symbols-outlined text-6xl text-gray-400">
-          image
-        </span>
-      </div>
-    );
-  }
-
-  return (
-    <div className="relative aspect-square rounded-xl overflow-hidden bg-black/20 flex items-center justify-center">
-      {media.length > 1 && (
-        <button
-          onClick={handlePrev}
-          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 z-10 transition-all"
-        >
-          <span className="material-symbols-outlined text-3xl">
-            chevron_left
-          </span>
-        </button>
-      )}
-
-      <div className="w-full h-full flex items-center justify-center">
-        {isVideo(currentUrl) ? (
-          currentUrl.includes("youtube.com") || currentUrl.includes("youtu.be") ? (
-            <iframe
-              width="100%"
-              height="100%"
-              src={getYouTubeEmbedUrl(currentUrl)}
-              title="Video del producto"
-              className="w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          ) : (
-            <video
-              autoPlay
-              muted
-              loop
-              playsInline
-              controls
-              className="w-full h-full object-contain rounded-xl"
-            >
-              <source src={currentUrl} type="video/mp4" />
-              Tu navegador no soporta el video.
-            </video>
-          )
-        ) : (
-          <OptimizedImage
-            src={currentUrl}
-            alt={product.title}
-            className="w-full h-full object-cover"
-            priority={true}
-          />
-        )}
-      </div>
-
-      {media.length > 1 && (
-        <>
-          <button
-            onClick={handleNext}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white rounded-full p-2 z-10 transition-all"
-          >
-            <span className="material-symbols-outlined text-3xl">
-              chevron_right
-            </span>
-          </button>
-
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-            {media.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrent(idx)}
-                className={`w-3 h-3 rounded-full transition-all ${idx === current ? "bg-cyan-400 w-8" : "bg-white/40"
-                  } border border-white/50`}
-              />
-            ))}
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -324,7 +213,12 @@ export default function ProductDetail() {
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12 mb-12">
           {/* Carrusel */}
           <div className="h-fit md:sticky md:top-24">
-            <ProductMediaCarousel product={product} />
+            <ProductMediaCarousel
+              images={Array.isArray(product.images) ? product.images : product.image ? [product.image] : []}
+              videos={Array.isArray(product.videos) ? product.videos : []}
+              alt={product.title}
+              aspect="aspect-square"
+            />
           </div>
 
           {/* Info Producto */}
