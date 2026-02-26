@@ -38,6 +38,15 @@ const ProductCard = memo(function ProductCard({ product, idx }) {
               loading="lazy"
               placeholder="blur"
             />
+          ) : product.videos?.[0] ? (
+            <video
+              src={product.videos[0]}
+              className="h-full w-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+            />
           ) : (
             <div className="h-full w-full flex items-center justify-center bg-linear-to-br from-cyan-500/20 to-blue-500/20">
               <span className="text-white/50 text-4xl">📱</span>
@@ -73,7 +82,7 @@ export default function Home() {
   const [loading, setLoading] = useState(() => initialProducts.length === 0);
   const [showLightRays, setShowLightRays] = useState(false);
 
-    const seoData = generateMetaTags({
+  const seoData = generateMetaTags({
     title: null, // Usar título por defecto
     path: ''
   });
@@ -93,7 +102,7 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-useEffect(() => {
+  useEffect(() => {
     const CACHE_KEY = "featuredProducts";
     const CACHE_TS_KEY = "featuredProductsTs";
 
@@ -118,7 +127,7 @@ useEffect(() => {
             localStorage.removeItem(CACHE_KEY);
             localStorage.removeItem(CACHE_TS_KEY);
           }
-        } catch {}
+        } catch { }
       } catch (error) {
         if (error.name !== "AbortError") {
           console.error("Error cargando productos:", error);
@@ -135,7 +144,7 @@ useEffect(() => {
 
   return (
     <>
-       <Helmet>
+      <Helmet>
         <title>{seoData.title}</title>
         <meta name="description" content={seoData.description} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -149,20 +158,20 @@ useEffect(() => {
         <meta name="twitter:description" content={seoData.description} />
         <meta name="twitter:image" content={seoData.image || 'https://etronix-store.com/logo.png'} />
         <link rel="canonical" href="https://etronix-store.com/" />
-        
+
         {/* Open Graph */}
         <meta property="og:title" content={seoData.openGraph.title} />
         <meta property="og:description" content={seoData.openGraph.description} />
         <meta property="og:url" content={seoData.openGraph.url} />
         <meta property="og:image" content={seoData.openGraph.image} />
         <meta property="og:type" content="website" />
-        
+
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={seoData.twitter.title} />
         <meta name="twitter:description" content={seoData.twitter.description} />
         <meta name="twitter:image" content={seoData.twitter.image} />
-        
+
         {/* Schema.org */}
         <script type="application/ld+json">
           {JSON.stringify({
@@ -187,38 +196,38 @@ useEffect(() => {
           })}
         </script>
         <script type="application/ld+json">
-    {JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "Etronix",
-      "url": "https://etronix-store.com/",
-      "description": "Etronix es una tienda online especializada en accesorios y tecnología premium para celulares en Colombia. Ofrecemos garantía extendida, envíos rápidos y atención personalizada todos los días.",
-      "contactPoint": [{
-        "@type": "ContactPoint",
-        "telephone": "+57-3207208410",
-        "contactType": "customer service",
-        "availableLanguage": ["Spanish"]
-      }],
-      "sameAs": [
-        "https://instagram.com/Etronix2025"
-      ]
-    })}
-  </script>
-  <script type="application/ld+json">
-    {JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "Store",
-      "name": "Etronix",
-      "image": "https://etronix-store.com/logo.png",
-      "url": "https://etronix-store.com/",
-      "telephone": "+57-3207208410",
-      "address": {
-        "@type": "PostalAddress",
-        "addressCountry": "CO"
-      },
-      "openingHours": "Todos los días"
-    })}
-  </script>
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Etronix",
+            "url": "https://etronix-store.com/",
+            "description": "Etronix es una tienda online especializada en accesorios y tecnología premium para celulares en Colombia. Ofrecemos garantía extendida, envíos rápidos y atención personalizada todos los días.",
+            "contactPoint": [{
+              "@type": "ContactPoint",
+              "telephone": "+57-3207208410",
+              "contactType": "customer service",
+              "availableLanguage": ["Spanish"]
+            }],
+            "sameAs": [
+              "https://instagram.com/Etronix2025"
+            ]
+          })}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Store",
+            "name": "Etronix",
+            "image": "https://etronix-store.com/logo.png",
+            "url": "https://etronix-store.com/",
+            "telephone": "+57-3207208410",
+            "address": {
+              "@type": "PostalAddress",
+              "addressCountry": "CO"
+            },
+            "openingHours": "Todos los días"
+          })}
+        </script>
       </Helmet>
 
       {/* ✅ Fondo SIMPLE primero (sin WebGL) */}

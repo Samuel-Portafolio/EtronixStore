@@ -135,15 +135,15 @@ export default function Shop() {
   };
 
   // Título dinámico basado en categoría
-  const pageTitle = selectedCategory 
+  const pageTitle = selectedCategory
     ? `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} | Etronix Store Colombia`
     : "Tienda de Accesorios para Celulares | Etronix Store Colombia";
-  
+
   const pageDescription = selectedCategory
     ? `Compra ${selectedCategory} para celulares en Colombia. Envío a todo el país. Pago seguro con MercadoPago.`
     : "Explora nuestro catálogo de audífonos, cargadores, cables, protectores y más accesorios para celulares. Envío a toda Colombia.";
 
-  const canonicalUrl = selectedCategory 
+  const canonicalUrl = selectedCategory
     ? `https://etronix-store.com/shop?category=${selectedCategory}`
     : "https://etronix-store.com/shop";
 
@@ -153,7 +153,7 @@ export default function Shop() {
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
         <link rel="canonical" href={canonicalUrl} />
-        
+
         {/* Open Graph */}
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
@@ -161,12 +161,12 @@ export default function Shop() {
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Etronix Store" />
         <meta property="og:image" content="https://etronix-store.com/og-image.jpg" />
-        
+
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
-        
+
         {/* Schema.org ItemList para catálogo */}
         <script type="application/ld+json">
           {JSON.stringify({
@@ -233,7 +233,7 @@ export default function Shop() {
 
               {/* ORDENAR Y FILTRO DE PRECIO */}
               <div className="flex flex-col md:flex-row gap-4 mb-6">
-                
+
                 {/* Ordenar */}
                 <div className="flex-1">
                   <label className="block text-sm text-gray-300 mb-2">Ordenar por</label>
@@ -323,6 +323,15 @@ export default function Shop() {
                                 height={400}
                                 loading="lazy"
                                 className="w-full h-full object-cover"
+                              />
+                            ) : p.videos?.[0] ? (
+                              <video
+                                src={p.videos[0]}
+                                className="w-full h-full object-cover"
+                                autoPlay
+                                muted
+                                loop
+                                playsInline
                               />
                             ) : (
                               <div className="h-full w-full flex items-center justify-center bg-cyan-500/10">

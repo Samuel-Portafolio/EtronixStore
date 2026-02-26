@@ -33,8 +33,8 @@ function ProductMediaCarousel({ product }) {
   const images = Array.isArray(product.images)
     ? product.images
     : product.image
-    ? [product.image]
-    : [];
+      ? [product.image]
+      : [];
 
   const videos = Array.isArray(product.videos) ? product.videos : [];
   const media = [...images, ...videos];
@@ -93,7 +93,14 @@ function ProductMediaCarousel({ product }) {
               allowFullScreen
             />
           ) : (
-            <video controls className="w-full h-full object-contain rounded-xl">
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              controls
+              className="w-full h-full object-contain rounded-xl"
+            >
               <source src={currentUrl} type="video/mp4" />
               Tu navegador no soporta el video.
             </video>
@@ -124,9 +131,8 @@ function ProductMediaCarousel({ product }) {
               <button
                 key={idx}
                 onClick={() => setCurrent(idx)}
-                className={`w-3 h-3 rounded-full transition-all ${
-                  idx === current ? "bg-cyan-400 w-8" : "bg-white/40"
-                } border border-white/50`}
+                className={`w-3 h-3 rounded-full transition-all ${idx === current ? "bg-cyan-400 w-8" : "bg-white/40"
+                  } border border-white/50`}
               />
             ))}
           </div>
@@ -193,16 +199,16 @@ export default function ProductDetail() {
 
   // 🔥 CORRECCIÓN: Procesar y validar specs correctamente
   const specsArray = [];
-  
+
   if (product.specs && typeof product.specs === 'object' && !Array.isArray(product.specs)) {
     Object.entries(product.specs).forEach(([key, value]) => {
       // Filtrar campos vacíos, null, undefined, o strings vacíos
-      if (key && 
-          value !== null && 
-          value !== undefined && 
-          value !== '' && 
-          String(value).trim() !== '') {
-        
+      if (key &&
+        value !== null &&
+        value !== undefined &&
+        value !== '' &&
+        String(value).trim() !== '') {
+
         // Formatear el valor
         let displayValue;
         if (Array.isArray(value)) {
@@ -210,7 +216,7 @@ export default function ProductDetail() {
         } else {
           displayValue = String(value).trim();
         }
-        
+
         // Solo agregar si el valor formateado no está vacío
         if (displayValue) {
           specsArray.push({ key, value: displayValue });
@@ -274,7 +280,7 @@ export default function ProductDetail() {
         <title>{product.title} | Etronix Store Colombia</title>
         <meta name="description" content={product.description || `Compra ${product.title} en Etronix Store. Envío a toda Colombia. Pago seguro con MercadoPago.`} />
         <link rel="canonical" href={productUrl} />
-        
+
         {/* Open Graph */}
         <meta property="og:type" content="product" />
         <meta property="og:title" content={`${product.title} | Etronix Store`} />
@@ -284,13 +290,13 @@ export default function ProductDetail() {
         <meta property="og:site_name" content="Etronix Store" />
         <meta property="product:price:amount" content={product.price} />
         <meta property="product:price:currency" content="COP" />
-        
+
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={`${product.title} | Etronix Store`} />
         <meta name="twitter:description" content={product.description || `Compra ${product.title}`} />
         <meta name="twitter:image" content={imageUrl} />
-        
+
         {/* Schema.org JSON-LD */}
         <script type="application/ld+json">
           {JSON.stringify(productSchema)}
@@ -346,11 +352,10 @@ export default function ProductDetail() {
               )}
             </div>
 
-            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold mb-8 ${
-              product.stock > 0 
-                ? 'bg-green-500/20 text-green-400 border border-green-400/30' 
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold mb-8 ${product.stock > 0
+                ? 'bg-green-500/20 text-green-400 border border-green-400/30'
                 : 'bg-red-500/20 text-red-400 border border-red-400/30'
-            }`}>
+              }`}>
               <span className="material-symbols-outlined text-xl">
                 {product.stock > 0 ? 'check_circle' : 'cancel'}
               </span>
