@@ -1,5 +1,3 @@
-// frontend/vite.config.js
-
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import viteCompression from 'vite-plugin-compression'
@@ -14,8 +12,8 @@ export default defineConfig({
         ]
       }
     }),
-    
-    viteCompression({ 
+
+    viteCompression({
       algorithm: 'brotliCompress',
       threshold: 512,
     })
@@ -23,13 +21,26 @@ export default defineConfig({
 
   build: {
     target: 'es2020',
-    minify: false,   // mantenlo así mientras probamos
+    minify: false, // mantenlo así mientras probamos
 
     rollupOptions: {
-      // ❌ ELIMINAMOS manualChunks COMPLETO
-      // output: {...} queda solo con filename
       output: {
+        // Nombres estables para facilitar debug y evitar colisiones de caché
         chunkFileNames: 'js/[name]-[hash:8].js',
+        entryFileNames: 'js/[name]-[hash:8].js',
+        assetFileNames: 'assets/[name]-[hash:8][extname]',
+
+        // Separar vendors en chunks estables que raramente cambian
+        // Esto reduce la probabilidad de que un deploy rompa chunks en uso
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react-router')) return 'vendor-router'
+            if (id.includes('react-dom') || id.includes('react/')) return 'vendor-react'
+            if (id.includes('react-helmet')) return 'vendor-helmet'
+            // Todo lo demás de node_modules va a un chunk vendor genérico
+            return 'vendor'
+          }
+        },
       },
 
       treeshake: {

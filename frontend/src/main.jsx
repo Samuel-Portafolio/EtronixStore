@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import Layout from "./components/Layout.jsx";
+import ChunkErrorBoundary from "./components/ChunkErrorBoundary";
 import "./index.css";
 
 // Lazy loading para todas las páginas
@@ -18,6 +19,7 @@ const FAQPage = lazy(() => import("./pages/FAQPage.jsx"));
 const About = lazy(() => import("./pages/About.jsx"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail.jsx"));
 const AdminProductEdit = lazy(() => import("./pages/AdminProductEdit.jsx"));
+
 
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -41,6 +43,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
+    errorElement: <ChunkErrorBoundary />,
     children: [
       { 
         index: true, 
