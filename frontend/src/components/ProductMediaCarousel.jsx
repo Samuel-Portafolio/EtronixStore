@@ -16,16 +16,16 @@ export default function ProductMediaCarousel({ images = [], videos = [], alt = '
   }
   
   return (
-    <div className={`w-full ${aspect} overflow-hidden`}>
+    <div className={`w-full max-w-[480px] mx-auto ${aspect}`}>
       <Swiper
         modules={[Autoplay, Pagination]}
         autoplay={{ delay: 2500, disableOnInteraction: false }}
         pagination={{ clickable: true }}
-        className="rounded-xl w-full h-full"
+        className="rounded-xl overflow-hidden w-full h-full"
         loop={media.length > 1}
       >
         {media.map((url, idx) => (
-          <SwiperSlide key={idx} className="w-full h-full">
+          <SwiperSlide key={idx}>
             {url.match(/\.(mp4|webm)$/i) ? (
               <video 
                 src={url} 
