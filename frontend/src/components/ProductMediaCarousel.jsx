@@ -6,6 +6,7 @@ import OptimizedImage from './OptimizedImage';
 
 export default function ProductMediaCarousel({ images = [], videos = [], alt = '', aspect = 'aspect-4/5' }) {
   const media = [...(images || []), ...(videos || [])];
+  
   if (media.length === 0) {
     return (
       <div className={`${aspect} flex items-center justify-center bg-gray-200 rounded-xl`}>
@@ -13,22 +14,34 @@ export default function ProductMediaCarousel({ images = [], videos = [], alt = '
       </div>
     );
   }
+  
   return (
-    <div className={`w-full max-w-[480px] mx-auto ${aspect}`} style={{ maxWidth: '100vw' }}>
+    <div className={`w-full ${aspect} overflow-hidden`}>
       <Swiper
         modules={[Autoplay, Pagination]}
         autoplay={{ delay: 2500, disableOnInteraction: false }}
         pagination={{ clickable: true }}
-        className={`rounded-xl overflow-hidden w-full h-full`}
-        style={{ width: '100%', height: '100%' }}
-        navigation={false}
+        className="rounded-xl w-full h-full"
+        loop={media.length > 1}
       >
         {media.map((url, idx) => (
-          <SwiperSlide key={idx}>
+          <SwiperSlide key={idx} className="w-full h-full">
             {url.match(/\.(mp4|webm)$/i) ? (
-              <video src={url} className="w-full h-full object-cover" controls autoPlay muted loop playsInline />
+              <video 
+                src={url} 
+                className="w-full h-full object-cover" 
+                controls 
+                autoPlay 
+                muted 
+                loop 
+                playsInline 
+              />
             ) : (
-              <OptimizedImage src={url} alt={alt} className="w-full h-full object-cover" />
+              <OptimizedImage 
+                src={url} 
+                alt={alt} 
+                className="w-full h-full object-cover" 
+              />
             )}
           </SwiperSlide>
         ))}
