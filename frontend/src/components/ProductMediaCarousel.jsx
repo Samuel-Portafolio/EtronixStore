@@ -1,7 +1,6 @@
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination } from 'swiper/modules';
+import { Autoplay, Pagination } from 'swiper/modules';
 import 'swiper/css';
-import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import OptimizedImage from './OptimizedImage';
 
@@ -16,11 +15,12 @@ export default function ProductMediaCarousel({ images = [], videos = [], alt = '
   }
   return (
     <Swiper
-      modules={[Navigation, Pagination]}
-      navigation
+      modules={[Autoplay, Pagination]}
+      autoplay={{ delay: 2500, disableOnInteraction: false }}
       pagination={{ clickable: true }}
       className={`rounded-xl overflow-hidden ${aspect}`}
       style={{ width: '100%', height: '100%' }}
+      navigation={false}
     >
       {media.map((url, idx) => (
         <SwiperSlide key={idx}>
