@@ -14,21 +14,21 @@ export default function ProductMediaCarousel({ images = [], videos = [], alt = '
     );
   }
   return (
-    <div className={`w-full max-w-[480px] mx-auto ${aspect} relative`} style={{ maxWidth: '100vw', zIndex: 1 }}>
+    <div className={`w-full max-w-[480px] mx-auto ${aspect}`} style={{ maxWidth: '100vw' }}>
       <Swiper
         modules={[Autoplay, Pagination]}
         autoplay={{ delay: 2500, disableOnInteraction: false }}
         pagination={{ clickable: true }}
-        className={`rounded-xl overflow-visible w-full h-full`}
+        className={`rounded-xl overflow-hidden w-full h-full`}
         style={{ width: '100%', height: '100%' }}
         navigation={false}
       >
         {media.map((url, idx) => (
           <SwiperSlide key={idx}>
             {url.match(/\.(mp4|webm)$/i) ? (
-              <video src={url} className="w-full h-full object-contain bg-black" controls autoPlay muted loop playsInline />
+              <video src={url} className="w-full h-full object-cover" controls autoPlay muted loop playsInline />
             ) : (
-              <OptimizedImage src={url} alt={alt} className="w-full h-full object-contain bg-black" />
+              <OptimizedImage src={url} alt={alt} className="w-full h-full object-cover" />
             )}
           </SwiperSlide>
         ))}
