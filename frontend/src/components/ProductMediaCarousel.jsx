@@ -17,37 +17,39 @@ export default function ProductMediaCarousel({ images = [], videos = [], alt = '
   
   return (
     <div className="w-full max-w-[480px] mx-auto">
-        <div className={aspect}>
-      <Swiper
-        modules={[Autoplay, Pagination]}
-        autoplay={{ delay: 2500, disableOnInteraction: false }}
-        pagination={{ clickable: true }}
-        className="rounded-xl overflow-hidden w-full h-full"
-        loop={media.length > 1}
-      >
-        {media.map((url, idx) => (
-          <SwiperSlide key={idx}>
-            {url.match(/\.(mp4|webm)$/i) ? (
-              <video 
-                src={url} 
-                className="w-full h-full object-cover" 
-                controls 
-                autoPlay 
-                muted 
-                loop 
-                playsInline 
-              />
-            ) : (
-              <OptimizedImage 
-                src={url} 
-                alt={alt} 
-                className="w-full h-full object-cover" 
-              />
-            )}
-          </SwiperSlide>
-        ))}
-      </Swiper>
-    </div>
+      {/* 🔥 SOLUCIÓN: Contenedor con aspect ratio SEPARADO del Swiper */}
+      <div className={`${aspect} relative overflow-hidden rounded-xl`}>
+        <Swiper
+          modules={[Autoplay, Pagination]}
+          autoplay={{ delay: 2500, disableOnInteraction: false }}
+          pagination={{ clickable: true }}
+          loop={media.length > 1}
+          className="absolute inset-0 w-full h-full"
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+        >
+          {media.map((url, idx) => (
+            <SwiperSlide key={idx} className="w-full h-full">
+              {url.match(/\.(mp4|webm)$/i) ? (
+                <video 
+                  src={url} 
+                  className="w-full h-full object-cover" 
+                  controls 
+                  autoPlay 
+                  muted 
+                  loop 
+                  playsInline 
+                />
+              ) : (
+                <OptimizedImage 
+                  src={url} 
+                  alt={alt} 
+                  className="w-full h-full object-cover" 
+                />
+              )}
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
     </div>
   );
 }
