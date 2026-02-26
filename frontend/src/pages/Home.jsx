@@ -248,7 +248,7 @@ export default function Home() {
                     alt="Logo Etronix - Accesorios tecnológicos"
                     width={900}
                     height={300}
-                    className="absolute left-0 top-1/3 -translate-y-1/2 w-screen max-w-none lg:w-[700px] xl:w-[900px] 2xl:w-[1200px] h-auto object-left object-contain drop-shadow-[0_20px_50px_rgba(59,130,246,0.45)] z-0 mt-10 lg:mt-16 xl:mt-24"
+                    className="absolute left-0 top-1/3 -translate-y-1/2 w-full sm:w-screen max-w-none lg:w-[700px] xl:w-[900px] 2xl:w-[1200px] h-auto object-left object-contain drop-shadow-[0_20px_50px_rgba(59,130,246,0.45)] z-0 mt-10 lg:mt-16 xl:mt-24"
                     priority
                   />
                 </div>
