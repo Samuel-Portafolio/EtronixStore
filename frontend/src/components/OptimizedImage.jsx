@@ -187,13 +187,9 @@ export default function OptimizedImage({
             setHasError(true);
             setIsLoaded(true);
           }}
-          className={`
-            max-w-full max-h-full
-            object-contain
-            transition-opacity duration-500
-            ${isLoaded ? "opacity-100" : "opacity-0"}
-            ${hasError ? "hidden" : ""}
-          `}
+          className={
+            `max-w-full max-h-full object-contain transition-opacity duration-500 ${isLoaded ? "opacity-100" : "opacity-0"} ${hasError ? "hidden" : ""}` + (className ? ` ${className}` : "")
+          }
           sizes={sizes}
           {...props}
         />
