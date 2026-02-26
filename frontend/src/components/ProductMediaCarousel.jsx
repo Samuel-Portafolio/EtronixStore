@@ -14,12 +14,12 @@ export default function ProductMediaCarousel({ images = [], videos = [], alt = '
     );
   }
   return (
-    <div className={`w-full max-w-[480px] mx-auto ${aspect}`} style={{ maxWidth: '100vw' }}>
+    <div className={`w-full max-w-[480px] mx-auto ${aspect} relative`} style={{ maxWidth: '100vw', zIndex: 1 }}>
       <Swiper
         modules={[Autoplay, Pagination]}
         autoplay={{ delay: 2500, disableOnInteraction: false }}
         pagination={{ clickable: true }}
-        className={`rounded-xl overflow-hidden w-full h-full`}
+        className={`rounded-xl overflow-visible w-full h-full`}
         style={{ width: '100%', height: '100%' }}
         navigation={false}
       >
