@@ -185,8 +185,19 @@ export default function AdminProductEdit() {
       formData.append("image", images[0] || "");
       formData.append("sku", form.sku || "");
       
-      images.forEach((img) => formData.append("images", img));
-      videoUrls.forEach((url) => formData.append("videoUrls", url));
+formData.append("imagesCount", images.length.toString());
+if (images.length > 0) {
+  images.forEach((img) => formData.append("images", img));
+} else {
+  formData.append("images", ""); // señal de "borrar todo"
+}
+
+formData.append("videoUrlsCount", videoUrls.length.toString());
+if (videoUrls.length > 0) {
+  videoUrls.forEach((url) => formData.append("videoUrls", url));
+} else {
+  formData.append("videoUrls", ""); // señal de "borrar todo"
+}
       
       // Enviar specs como JSON string
       formData.append("specs", JSON.stringify(specsObj));

@@ -728,59 +728,64 @@ app.patch(
     if (sku !== undefined) updateData.sku = sku;
 
     // Manejar imágenes - CLOUDINARY
-    if (images !== undefined || (req.files && req.files.imageFiles)) {
-      let imagesArr = Array.isArray(images) ? images : images ? [images] : [];
-      
-      if (req.files && req.files.imageFiles) {
-        for (const file of req.files.imageFiles) {
-          try {
-            if (process.env.CLOUDINARY_CLOUD_NAME) {
-              const url = await uploadToCloudinary(file.buffer);
-              imagesArr.push(url);
-            } else {
-              const filename = `${Date.now()}-${file.originalname}`;
-              fs.writeFileSync(`uploads/images/${filename}`, file.buffer);
-              imagesArr.push(`/uploads/images/${filename}`);
-            }
-          } catch (err) {
-            logger.error("Error subiendo imagen:", err.message);
-          }
+    {
+  let imagesArr = Array.isArray(images) 
+    ? images.filter(Boolean) 
+    : (images && images !== "" ? [images] : []);
+
+  if (req.files && req.files.imageFiles) {
+    for (const file of req.files.imageFiles) {
+      try {
+        if (process.env.CLOUDINARY_CLOUD_NAME) {
+          const url = await uploadToCloudinary(file.buffer);
+          imagesArr.push(url);
+        } else {
+          const filename = `${Date.now()}-${file.originalname}`;
+          fs.writeFileSync(`uploads/images/${filename}`, file.buffer);
+          imagesArr.push(`/uploads/images/${filename}`);
         }
+      } catch (err) {
+        logger.error("Error subiendo imagen:", err.message);
       }
-      
-      updateData.images = imagesArr;
-      updateData.image = image || imagesArr[0] || "";
     }
+  }
+
+  updateData.images = imagesArr;
+  updateData.image = image || imagesArr[0] || "";
+}
 
     // Manejar videos - CLOUDINARY
-    if (videoUrls !== undefined || (req.files && req.files.videoFiles)) {
-      let videos = [];
-      
-      if (videoUrls) {
-        if (Array.isArray(videoUrls)) videos = videos.concat(videoUrls);
-        else if (typeof videoUrls === "string" && videoUrls.trim() !== "")
-          videos.push(videoUrls);
-      }
-      
-      if (req.files && req.files.videoFiles) {
-        for (const file of req.files.videoFiles) {
-          try {
-            if (process.env.CLOUDINARY_CLOUD_NAME) {
-              const url = await uploadVideoToCloudinary(file.buffer);
-              videos.push(url);
-            } else {
-              const filename = `${Date.now()}-${file.originalname}`;
-              fs.writeFileSync(`uploads/videos/${filename}`, file.buffer);
-              videos.push(`/uploads/videos/${filename}`);
-            }
-          } catch (err) {
-            logger.error("Error subiendo video:", err.message);
-          }
-        }
-      }
-      
-      updateData.videos = videos;
+    {
+  let videos = [];
+  
+  if (videoUrls) {
+    if (Array.isArray(videoUrls)) {
+      videos = videoUrls.filter(v => v && v.trim() !== "");
+    } else if (typeof videoUrls === "string" && videoUrls.trim() !== "") {
+      videos.push(videoUrls);
     }
+    // si videoUrls === "" significa "borrar todo" → videos queda []
+  }
+
+  if (req.files && req.files.videoFiles) {
+    for (const file of req.files.videoFiles) {
+      try {
+        if (process.env.CLOUDINARY_CLOUD_NAME) {
+          const url = await uploadVideoToCloudinary(file.buffer);
+          videos.push(url);
+        } else {
+          const filename = `${Date.now()}-${file.originalname}`;
+          fs.writeFileSync(`uploads/videos/${filename}`, file.buffer);
+          videos.push(`/uploads/videos/${filename}`);
+        }
+      } catch (err) {
+        logger.error("Error subiendo video:", err.message);
+      }
+    }
+  }
+
+  updateData.videos = videos;
+}
 
     // 🔥 CORRECCIÓN: Procesar specs correctamente SIN features especiales
     if (specs !== undefined) {
