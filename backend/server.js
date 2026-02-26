@@ -537,7 +537,7 @@ app.get(
   image: p.image || (Array.isArray(p.images) && p.images[0]) || "",
 }));
 
-    productCache.set(cacheKey, items, 300);
+    productCache.set(cacheKey, items, 5);
     res.json(items);
   })
 );
