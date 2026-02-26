@@ -222,13 +222,84 @@ export default function ProductDetail() {
   const hasSpecs = specsArray.length > 0;
   const hasFaqs = Array.isArray(product.faqs) && product.faqs.length > 0;
 
+  // Obtener imagen principal para SEO
+  const mainImage = product.images?.[0] || product.image || '';
+  const imageUrl = mainImage.startsWith('http') ? mainImage : `https://etronix-store.com${mainImage}`;
+  const productUrl = `https://etronix-store.com/product/${product._id}`;
+
+  // Schema.org de Producto para Google Rich Snippets
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.title,
+    "description": product.description || `${product.title} - Compra en Etronix Store`,
+    "image": imageUrl,
+    "sku": product._id,
+    "brand": {
+      "@type": "Brand",
+      "name": product.brand || "Etronix"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": productUrl,
+      "priceCurrency": "COP",
+      "price": product.price,
+      "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "seller": {
+        "@type": "Organization",
+        "name": "Etronix Store"
+      }
+    }
+  };
+
+  // Schema de FAQ si el producto tiene preguntas frecuentes
+  const faqSchema = hasFaqs ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": product.faqs.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  } : null;
+
   // Eliminados logs innecesarios
 
   return (
     <>
       <Helmet>
-        <title>{product.title} | Etronix Store</title>
-        <meta name="description" content={product.description || `Compra ${product.title} en Etronix Store`} />
+        <title>{product.title} | Etronix Store Colombia</title>
+        <meta name="description" content={product.description || `Compra ${product.title} en Etronix Store. Envío a toda Colombia. Pago seguro con MercadoPago.`} />
+        <link rel="canonical" href={productUrl} />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="product" />
+        <meta property="og:title" content={`${product.title} | Etronix Store`} />
+        <meta property="og:description" content={product.description || `Compra ${product.title} en Etronix Store`} />
+        <meta property="og:image" content={imageUrl} />
+        <meta property="og:url" content={productUrl} />
+        <meta property="og:site_name" content="Etronix Store" />
+        <meta property="product:price:amount" content={product.price} />
+        <meta property="product:price:currency" content="COP" />
+        
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${product.title} | Etronix Store`} />
+        <meta name="twitter:description" content={product.description || `Compra ${product.title}`} />
+        <meta name="twitter:image" content={imageUrl} />
+        
+        {/* Schema.org JSON-LD */}
+        <script type="application/ld+json">
+          {JSON.stringify(productSchema)}
+        </script>
+        {faqSchema && (
+          <script type="application/ld+json">
+            {JSON.stringify(faqSchema)}
+          </script>
+        )}
       </Helmet>
 
       <div className="fixed inset-0 bg-linear-to-br from-gray-900 via-slate-900 to-black z-0" />

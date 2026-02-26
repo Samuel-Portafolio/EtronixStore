@@ -82,31 +82,41 @@
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://etronix-store.com/" />
+    <meta property="og:site_name" content="Etronix Store" />
     <meta
       property="og:title"
-      content="Etronix Store – Accesorios para celulares y tecnología"
+      content="Etronix Store – Accesorios para celulares y tecnología en Colombia"
     />
     <meta
       property="og:description"
-      content="Encuentra los mejores accesorios para celulares: audífonos, cargadores, cables, protectores de pantalla y más."
+      content="Tienda online de accesorios para celulares: audífonos, cargadores, cables, protectores. Envío a toda Colombia. Pago seguro con MercadoPago."
     />
-    <meta property="og:image" content="/og-image.jpg" />
+    <meta property="og:image" content="https://etronix-store.com/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="es_CO" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@etronixstore" />
     <meta
       name="twitter:title"
-      content="Etronix Store – Accesorios para celulares"
+      content="Etronix Store – Accesorios para celulares en Colombia"
     />
     <meta
       name="twitter:description"
-      content="Los mejores accesorios para celulares: audífonos, cargadores, cables y más."
+      content="Audífonos, cargadores, cables y más. Envío a toda Colombia. Pago seguro."
     />
+    <meta name="twitter:image" content="https://etronix-store.com/og-image.jpg" />
 
     <!-- Canonical URL -->
     <link rel="canonical" href="https://etronix-store.com/" />
 
-    <!-- JSON-LD Schema -->
+    <!-- Geo Tags -->
+    <meta name="geo.region" content="CO" />
+    <meta name="geo.placename" content="Colombia" />
+
+    <!-- JSON-LD Schema - Organization -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -114,13 +124,63 @@
         "name": "Etronix Store",
         "url": "https://etronix-store.com",
         "logo": "https://etronix-store.com/logo.png",
-        "description": "Tienda especializada en accesorios para celulares y tecnología",
+        "description": "Tienda online especializada en accesorios para celulares y tecnología en Colombia",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "CO",
+          "addressLocality": "Medellín",
+          "addressRegion": "Antioquia"
+        },
         "contactPoint": {
           "@type": "ContactPoint",
           "telephone": "+57-320-720-8410",
           "contactType": "customer service",
           "availableLanguage": ["Spanish"]
+        },
+        "sameAs": [
+          "https://www.instagram.com/etronixstore",
+          "https://www.facebook.com/etronixstore"
+        ]
+      }
+    </script>
+
+    <!-- JSON-LD Schema - WebSite (para Google Search Box) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Etronix Store",
+        "url": "https://etronix-store.com",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://etronix-store.com/shop?q={search_term_string}",
+          "query-input": "required name=search_term_string"
         }
+      }
+    </script>
+
+    <!-- JSON-LD Schema - Store -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Store",
+        "name": "Etronix Store",
+        "url": "https://etronix-store.com",
+        "image": "https://etronix-store.com/og-image.jpg",
+        "description": "Tienda online de accesorios para celulares en Colombia",
+        "priceRange": "$$",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "CO"
+        },
+        "openingHoursSpecification": {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+          "opens": "08:00",
+          "closes": "18:00"
+        },
+        "paymentAccepted": ["Credit Card", "Debit Card", "PSE", "Cash"],
+        "currenciesAccepted": "COP"
       }
     </script>
   </head>

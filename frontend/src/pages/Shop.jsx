@@ -131,11 +131,54 @@ export default function Shop() {
     setPriceRange({ min, max });
   };
 
+  // Título dinámico basado en categoría
+  const pageTitle = selectedCategory 
+    ? `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} | Etronix Store Colombia`
+    : "Tienda de Accesorios para Celulares | Etronix Store Colombia";
+  
+  const pageDescription = selectedCategory
+    ? `Compra ${selectedCategory} para celulares en Colombia. Envío a todo el país. Pago seguro con MercadoPago.`
+    : "Explora nuestro catálogo de audífonos, cargadores, cables, protectores y más accesorios para celulares. Envío a toda Colombia.";
+
+  const canonicalUrl = selectedCategory 
+    ? `https://etronix-store.com/shop?category=${selectedCategory}`
+    : "https://etronix-store.com/shop";
+
   return (
     <>
       <Helmet>
-        <title>Tienda de Accesorios | Etronix Store</title>
-        <meta name="description" content="Explora nuestro catálogo completo de accesorios tecnológicos." />
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <link rel="canonical" href={canonicalUrl} />
+        
+        {/* Open Graph */}
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Etronix Store" />
+        <meta property="og:image" content="https://etronix-store.com/og-image.jpg" />
+        
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        
+        {/* Schema.org ItemList para catálogo */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": pageTitle,
+            "description": pageDescription,
+            "url": canonicalUrl,
+            "isPartOf": {
+              "@type": "WebSite",
+              "name": "Etronix Store",
+              "url": "https://etronix-store.com"
+            }
+          })}
+        </script>
       </Helmet>
 
       <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black"></div>

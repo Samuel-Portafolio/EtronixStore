@@ -8,3 +8,10 @@ Sitemap: https://etronix-store.com/sitemap.xml
 # Rutas que no queremos indexar
 Disallow: /admin
 Disallow: /checkout
+Disallow: /success
+Disallow: /failure
+Disallow: /pending
+
+# Bloquear parámetros innecesarios
+Disallow: /*?*utm_
+Disallow: /*?*fbclid

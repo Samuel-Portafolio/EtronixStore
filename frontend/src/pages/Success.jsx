@@ -27,7 +27,7 @@ export default function Success() {
 
             <p className="text-lg text-gray-200 mb-8">
               Tu orden <span className="font-black text-cyan-400">{orderId}</span> fue confirmada exitosamente.<br />
-              Pronto recibirás la confirmación y el número de seguimiento por WhatsApp y correo electrónico.
+              Gracias por comprar en <span className="font-black text-cyan-400">Etronix Store</span>.
             </p>
 
             <div className="flex flex-col gap-4 mt-6">
