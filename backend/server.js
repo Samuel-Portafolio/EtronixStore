@@ -522,6 +522,7 @@ app.get(
         price: 1,
         image: 1,
         images: 1,
+        videos: 1,
         stock: 1,
         category: 1,
         description: 1,
