@@ -212,14 +212,17 @@ export default function ProductDetail() {
         {/* Layout Principal */}
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12 mb-12">
           {/* Carrusel */}
-          <div className="h-fit md:sticky md:top-24">
-            <ProductMediaCarousel
-              images={Array.isArray(product.images) ? product.images : product.image ? [product.image] : []}
-              videos={Array.isArray(product.videos) ? product.videos : []}
-              alt={product.title}
-              aspect="aspect-square"
-            />
-          </div>
+          {/* Carrusel */}
+<div className="h-fit md:sticky md:top-24">
+  <div className="w-full"> {/* Wrapper adicional */}
+    <ProductMediaCarousel
+      images={Array.isArray(product.images) ? product.images : product.image ? [product.image] : []}
+      videos={Array.isArray(product.videos) ? product.videos : []}
+      alt={product.title}
+      aspect="aspect-square"
+    />
+  </div>
+</div>
 
           {/* Info Producto */}
           <div>
