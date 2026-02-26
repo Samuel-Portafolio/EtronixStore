@@ -134,67 +134,18 @@ export default function Sidebar({ open = false, onClose }) {
                     </NavLink>
                   </li>
 
-                  <li className="space-y-2">
-                    {/* Botón principal productos */}
-                    <button
-                      onClick={() => setProductsOpen((s) => !s)}
+                  <li>
+                    <NavLink
+                      to="/shop"
+                      className={({ isActive }) =>
+                        `${itemBase} ${isActive ? itemActive : itemInactive}`
+                      }
                       onMouseEnter={() => preloadRoute('/shop')}
-                      className={`${itemBase} w-full justify-between ${
-                        location.pathname.startsWith("/shop") ? itemActive : itemInactive
-                      }`}
-                      aria-expanded={productsOpen}
-                      aria-controls="menu-products"
+                      onClick={onClose}
                     >
-                      <span className="flex items-center gap-3">
-                        <span className="material-symbols-outlined text-xl">storefront</span>
-                        <span>Productos</span>
-                      </span>
-                      <span
-                        className={`material-symbols-outlined text-lg transition-transform ${
-                          productsOpen ? "rotate-180" : ""
-                        }`}
-                      >
-                        expand_more
-                      </span>
-                    </button>
-
-                    {/* Submenú con colapso suave */}
-                    <div
-                      id="menu-products"
-                      className={`
-                        overflow-hidden transition-[grid-template-rows,opacity] duration-300
-                        ${productsOpen ? "opacity-100" : "opacity-0"}
-                      `}
-                      style={{
-                        display: "grid",
-                        gridTemplateRows: productsOpen ? "1fr" : "0fr",
-                      }}
-                    >
-                      <ul className="min-h-0 pl-3">
-                        <li className="mt-2">
-                          <button
-                            onClick={() => goToCategory("all")}
-                            onMouseEnter={() => preloadRoute('/shop')}
-                            className={`${itemBase} ${itemInactive} w-full justify-start text-[13px]`}
-                          >
-                            <span className="material-symbols-outlined text-[18px] text-gray-400">
-                              apps
-                            </span>
-                            Todos los productos
-                          </button>
-                        </li>
-                        {CATEGORIES.filter((c) => c.id !== "all").map((cat) => (
-                          <li key={cat.id}>
-                            <button
-                              onClick={() => goToCategory(cat.id)}
-                              className={`${itemBase} ${itemInactive} w-full justify-start text-[13px]`}
-                            >
-                              {cat.name}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                      <span className="material-symbols-outlined text-xl">storefront</span>
+                      <span>Productos</span>
+                    </NavLink>
                   </li>
 
                   <li>
