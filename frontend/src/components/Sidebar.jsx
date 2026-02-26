@@ -184,7 +184,7 @@ export default function Sidebar({ open = false, onClose }) {
                 <HeaderLabel title="Atajos útiles" />
                 <div className="mt-3 grid grid-cols-2 gap-3">
                   <QuickLink
-                    to="/support"
+                    to="/faq"
                     icon="support_agent"
                     label="Soporte"
                     gradient="from-emerald-500 to-green-500"
