@@ -239,11 +239,6 @@ export default function ProductDetail() {
               <p className="text-5xl font-black bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                 ${product.price.toLocaleString("es-CO")}
               </p>
-              {product.stock > 0 && product.stock < 5 && (
-                <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-sm font-bold border border-amber-400/30">
-                  ⚡ Últimas {product.stock} unidades
-                </span>
-              )}
             </div>
 
             <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold mb-8 ${product.stock > 0
