@@ -25,33 +25,17 @@ const getInitialProducts = () => {
   }
 };
 
+import ProductMediaCarousel from "../components/ProductMediaCarousel";
+
 const ProductCard = memo(function ProductCard({ product, idx }) {
+  // Soporte para múltiples imágenes y videos
+  const images = Array.isArray(product.images) ? product.images : product.image ? [product.image] : [];
+  const videos = Array.isArray(product.videos) ? product.videos : [];
   return (
     <article className="group relative rounded-2xl bg-linear-to-br from-white/15 to-white/5 border border-white/20 p-4 shadow-xl hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-300 hover:-translate-y-2 hover:border-cyan-400/50">
       <Link to={`/products/${product._id}`} className="block">
         <div className="aspect-4/5 rounded-xl bg-white/5 overflow-hidden mb-4 border border-white/10">
-          {product.image ? (
-            <OptimizedImage
-              src={product.image}
-              alt={product.title}
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-              loading="lazy"
-              placeholder="blur"
-            />
-          ) : product.videos?.[0] ? (
-            <video
-              src={product.videos[0]}
-              className="h-full w-full object-cover"
-              autoPlay
-              muted
-              loop
-              playsInline
-            />
-          ) : (
-            <div className="h-full w-full flex items-center justify-center bg-linear-to-br from-cyan-500/20 to-blue-500/20">
-              <span className="text-white/50 text-4xl">📱</span>
-            </div>
-          )}
+          <ProductMediaCarousel images={images} videos={videos} alt={product.title} aspect="aspect-4/5" />
         </div>
 
         <h3 className="text-[15px] font-bold text-white line-clamp-1 mb-2">
