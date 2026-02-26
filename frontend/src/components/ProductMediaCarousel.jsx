@@ -16,7 +16,8 @@ export default function ProductMediaCarousel({ images = [], videos = [], alt = '
   }
   
   return (
-    <div className={`w-full max-w-[480px] mx-auto ${aspect}`}>
+    <div className="w-full max-w-[480px] mx-auto">
+        <div className={aspect}>
       <Swiper
         modules={[Autoplay, Pagination]}
         autoplay={{ delay: 2500, disableOnInteraction: false }}
@@ -46,6 +47,7 @@ export default function ProductMediaCarousel({ images = [], videos = [], alt = '
           </SwiperSlide>
         ))}
       </Swiper>
+    </div>
     </div>
   );
 }
