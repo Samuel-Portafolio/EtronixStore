@@ -4,7 +4,6 @@ import { Helmet } from "react-helmet-async";
 import OptimizedImage from "../components/OptimizedImage";
 import { generateMetaTags } from "../config/seo";
 import { SEO_CONFIG } from "../config/seo";
-// ❌ NO importar LightRays aquí - lo cargaremos después del FCP
 
 import hero from "../assets/logoEtronix.webp";
 
@@ -249,14 +248,14 @@ export default function Home() {
                     alt="Logo Etronix - Accesorios tecnológicos"
                     width={900}
                     height={300}
-                    className="absolute left-0 top-1/3 -translate-y-1/2 w-screen max-w-none lg:w-[700px] xl:w-[900px] 2xl:w-[1200px] h-auto object-left object-contain drop-shadow-[0_20px_50px_rgba(59,130,246,0.45)] z-0"
+                    className="absolute left-0 top-1/3 -translate-y-1/2 w-screen max-w-none lg:w-[700px] xl:w-[900px] 2xl:w-[1200px] h-auto object-left object-contain drop-shadow-[0_20px_50px_rgba(59,130,246,0.45)] z-0 mt-10 lg:mt-16 xl:mt-24"
                     priority
                   />
                 </div>
               </div>
 
               <div className="order-1 lg:order-2 col-span-12 lg:col-span-5 flex flex-col items-center lg:items-start justify-center text-center lg:text-left">
-                <h1 className="text-5xl lg:text-6xl font-extrabold leading-tight text-white mb-6 relative z-10 text-center lg:text-left">
+                <h1 className="text-5xl lg:text-6xl font-extrabold leading-tight text-white mb-6 relative z-10 text-center lg:text-left -mt-10 lg:-mt-16 xl:-mt-24">
                   <span className="block ml-10 lg:ml-10">Transforma</span>
                   <span className="block ml-44 lg:ml-44">tu</span>
                   <span className="block ml-8 lg:ml-8">experiencia</span>
