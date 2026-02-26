@@ -255,16 +255,16 @@ export default function Home() {
               </div>
 
               <div className="order-1 lg:order-2 col-span-12 lg:col-span-5 flex flex-col items-center lg:items-start justify-center text-center lg:text-left">
-                <h1 className="text-5xl lg:text-6xl font-extrabold leading-tight text-white mb-6 relative z-10 text-center lg:text-left lg:-mt-16 xl:-mt-24">
-                  <span className="block lg:ml-10">Transforma</span>
-                  <span className="block lg:ml-44">tu</span>
-                  <span className="block lg:ml-8">experiencia</span>
-                  <span className="block lg:ml-32 bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                <h1 className="text-5xl lg:text-6xl font-extrabold leading-tight text-white mb-6 relative z-10 text-center -mt-16 xl:-mt-24">
+                  <span className="block">Transforma</span>
+                  <span className="block">tu</span>
+                  <span className="block">experiencia</span>
+                  <span className="block bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                     móvil
                   </span>
                 </h1>
 
-                <p className="text-gray-300 text-lg lg:text-xl mb-10 leading-relaxed max-w-md text-center lg:text-left">
+                <p className="text-gray-300 text-lg lg:text-xl mb-10 leading-relaxed max-w-md text-center">
                   En Etronix encuentras calidad, innovación y estilo. Potencia tu mundo digital con accesorios premium.
                 </p>
 
