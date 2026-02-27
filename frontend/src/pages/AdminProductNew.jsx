@@ -177,18 +177,18 @@ export default function AdminProductNew() {
         </Helmet>
 
 
-        <div className="flex items-center gap-4 mb-8">
-          <button
-            type="button"
-            onClick={() => navigate("/admin")}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-cyan-400/40 text-cyan-400 hover:bg-cyan-400/10 transition-colors font-bold text-sm shrink-0"
-          >
-            ← Panel Admin
-          </button>
-          <h1 className="text-3xl font-black text-cyan-400 flex-1 text-center">
-            Agregar Nuevo Producto
-          </h1>
-        </div>
+        <div className="mb-8">
+  <button
+    type="button"
+    onClick={() => navigate("/admin")}
+    className="flex items-center gap-2 px-4 py-2 rounded-lg border border-cyan-400/40 text-cyan-400 hover:bg-cyan-400/10 transition-colors font-bold text-sm mb-4"
+  >
+    ← Panel Admin
+  </button>
+  <h1 className="text-3xl font-black text-cyan-400 text-center">
+    Agregar Nuevo Producto
+  </h1>
+</div>
 
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
           {/* Datos principales */}

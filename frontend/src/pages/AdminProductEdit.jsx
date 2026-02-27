@@ -260,19 +260,17 @@ export default function AdminProductEdit() {
           <meta name="robots" content="noindex, nofollow" />
         </Helmet>
 
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-2">
-            <button
-              type="button"
-              onClick={() => navigate("/admin")}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-cyan-400/40 text-cyan-400 hover:bg-cyan-400/10 transition-colors font-bold text-sm shrink-0"
-            >
-              ← Panel Admin
-            </button>
-            <h1 className="text-3xl font-black text-cyan-400 flex-1 text-center">Editar Producto</h1>
-          </div>
-          <p className="text-center text-gray-500 text-sm">ID: {id}</p>
-        </div>
+<div className="mb-8">
+  <button
+    type="button"
+    onClick={() => navigate("/admin")}
+    className="flex items-center gap-2 px-4 py-2 rounded-lg border border-cyan-400/40 text-cyan-400 hover:bg-cyan-400/10 transition-colors font-bold text-sm mb-4"
+  >
+    ← Panel Admin
+  </button>
+  <h1 className="text-3xl font-black mb-2 text-cyan-400 text-center">Editar Producto</h1>
+  <p className="text-center text-gray-500 text-sm">ID: {id}</p>
+</div>
 
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
           {/* Datos principales */}
