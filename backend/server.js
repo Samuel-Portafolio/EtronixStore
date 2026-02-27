@@ -342,25 +342,61 @@ async function decreaseStock(order) {
 }
 
 async function decreaseStockAtomic(order, session) {
-  const updated = [];
-  try {
-    for (const item of order.items) {
-      const qty = Number(item.quantity || 1);
-      if (!item?.productId || qty <= 0) continue;
-      const res = await Product.updateOne(
-        { _id: item.productId, stock: { $gte: qty } },
-        { $inc: { stock: -qty } },
-        { session }
-      );
-      if (res.modifiedCount !== 1) throw new InsufficientStockError(`Producto ${item.productId}`, "?", qty);
-      updated.push({ id: item.productId, qty });
+  const MAX_RETRIES = 3;
+  let attempt = 0;
+  
+  while (attempt < MAX_RETRIES) {
+    try {
+      const updated = [];
+      
+      for (const item of order.items) {
+        const qty = Number(item.quantity || 1);
+        if (!item?.productId || qty <= 0) continue;
+        
+        // ✅ CORRECCIÓN: findOneAndUpdate es atómico
+        const product = await Product.findOneAndUpdate(
+          { 
+            _id: item.productId, 
+            stock: { $gte: qty } // Solo actualiza SI hay stock
+          },
+          { $inc: { stock: -qty } },
+          { 
+            session,
+            new: true, // Devuelve el doc actualizado
+            runValidators: true 
+          }
+        );
+        
+        if (!product) {
+          // Stock insuficiente - ROLLBACK automático por la sesión
+          throw new InsufficientStockError(
+            `Producto ${item.productId}`,
+            "desconocido",
+            qty
+          );
+        }
+        
+        updated.push({ id: item.productId, qty, newStock: product.stock });
+      }
+      
+      logger.info('✅ Stock actualizado atómicamente:', updated);
+      return updated;
+      
+    } catch (err) {
+      attempt++;
+      
+      // Si es error de write conflict, reintentar
+      if (err.code === 112 && attempt < MAX_RETRIES) {
+        logger.warn(`⚠️ Write conflict, reintentando (${attempt}/${MAX_RETRIES})...`);
+        await new Promise(resolve => setTimeout(resolve, 100 * attempt)); // Backoff exponencial
+        continue;
+      }
+      
+      throw err; // Propagar otros errores
     }
-  } catch (err) {
-    if (!session) {
-      for (const u of updated) await Product.updateOne({ _id: u.id }, { $inc: { stock: u.qty } });
-    }
-    throw err;
   }
+  
+  throw new Error('No se pudo completar la transacción después de varios intentos');
 }
 
 app.use("/api/stats", statsRouter);
