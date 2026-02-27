@@ -254,7 +254,7 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: function(origin, callback) {
+    origin: function (origin, callback) {
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) return callback(null, true);
       return callback(new Error('Not allowed by CORS'));
@@ -685,8 +685,16 @@ app.post(
     const FRONTEND_BASE = String(process.env.FRONTEND_URL || req.headers.origin || "http://localhost:5173").trim().replace(/\/$/, "");
     const backendBase = String(process.env.BACKEND_PUBLIC_URL || `${req.protocol}://${req.get("host")}`).trim().replace(/\/$/, "");
 
-    const preferenceBody = {
-      items: normalizedItems.map((i) => ({ title: i.title, quantity: Number(i.quantity || 1), currency_id: "COP", unit_price: Number(i.unit_price) })),
+const preferenceBody = {
+  items: normalizedItems.map((i) => ({
+    id: String(i.productId),
+    title: i.title,
+    description: i.title,
+    category_id: "others",
+    quantity: Number(i.quantity || 1),
+    currency_id: "COP",
+    unit_price: Number(i.unit_price),
+  })),
       back_urls: {
         success: `${FRONTEND_BASE}/success?order=${order._id}`,
         failure: `${FRONTEND_BASE}/failure?order=${order._id}`,
@@ -842,7 +850,7 @@ app.get(
   asyncHandler(async (req, res) => {
     const { page = 1, limit = 20, status, search } = req.query;
     const query = {};
-    if (status && ["pending","paid","failed","processing","shipped","delivered"].includes(status)) query.status = status;
+    if (status && ["pending", "paid", "failed", "processing", "shipped", "delivered"].includes(status)) query.status = status;
     if (search) {
       if (search.length > 100) throw new AppError("Búsqueda inválida", 400);
       query.$or = [
