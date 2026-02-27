@@ -76,9 +76,10 @@ export default function Shop() {
     }
 
     // Filtrar por categoría
-    if (selectedCategory && selectedCategory !== 'all') {
-      filtered = filtered.filter(p => p.category === selectedCategory);
-    }
+      if (selectedCategory && selectedCategory !== 'all') {
+        const normalize = str => (str || '').toLowerCase().replace(/\s+/g, '');
+        filtered = filtered.filter(p => normalize(p.category) === normalize(selectedCategory));
+      }
 
     filtered = filtered.filter(p =>
       p.price >= priceRange.min && p.price <= priceRange.max
