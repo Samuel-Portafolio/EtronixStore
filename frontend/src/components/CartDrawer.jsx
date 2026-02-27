@@ -64,14 +64,19 @@ export default function CartDrawer({ open, onClose }) {
         />
       )}
 
-      {/* Drawer - 100% Responsive */}
+      {/* Drawer - 100% Responsive con safe-area para iOS */}
       <div
         className={`fixed top-0 right-0 h-full w-full sm:w-[440px] lg:w-[480px] bg-white shadow-2xl z-50 transform transition-transform duration-300 flex flex-col ${
           open ? 'translate-x-0' : 'translate-x-full'
         }`}
+        style={{ 
+          height: '100vh', 
+          height: '100dvh', // Dynamic viewport height para móviles
+          maxHeight: '-webkit-fill-available' // Safari iOS fix
+        }}
       >
         {/* Header - Responsive padding y tamaños */}
-        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50 shrink-0">
           <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
             <svg className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -95,8 +100,8 @@ export default function CartDrawer({ open, onClose }) {
           </button>
         </div>
 
-        {/* Contenido - Responsive padding */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5">
+        {/* Contenido - Con min-height 0 para permitir scroll */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 min-h-0">
           {cart.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-4">
               <svg className="w-16 h-16 sm:w-20 sm:h-20 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -215,9 +220,9 @@ export default function CartDrawer({ open, onClose }) {
           )}
         </div>
 
-        {/* Footer - Responsive */}
+        {/* Footer - Siempre visible (shrink-0) */}
         {cart.length > 0 && (
-          <div className="border-t border-gray-200 p-4 sm:p-5 bg-gray-50">
+          <div className="shrink-0 border-t border-gray-200 p-4 sm:p-5 bg-gray-50 safe-bottom">
             {/* Total - Responsive text */}
             <div className="flex items-center justify-between mb-4 sm:mb-5">
               <span className="text-base sm:text-lg text-gray-700 font-semibold">Total:</span>
