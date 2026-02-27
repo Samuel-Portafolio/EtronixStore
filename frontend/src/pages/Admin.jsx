@@ -302,7 +302,7 @@ export default function Admin() {
                           </div>
                           <div className="border-t border-white/10 pt-3 flex justify-between items-end">
                             <span className="text-[10px] font-bold text-slate-500">TOTAL PAGADO</span>
-                            <span className="text-xl font-black text-white bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                            <span className="text-xl font-black bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                               ${order.total?.toLocaleString()}
                             </span>
                           </div>
