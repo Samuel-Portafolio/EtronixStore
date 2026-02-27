@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import OptimizedImage from "../components/OptimizedImage";
 import { generateMetaTags } from "../config/seo";
 import { SEO_CONFIG } from "../config/seo";
+import ProductMediaCarousel from "../components/ProductMediaCarousel";
 
 import hero from "../assets/logoEtronix.webp";
 
@@ -14,23 +15,10 @@ const BENEFITS = [
   { icon: "💬", t: "Soporte humano", d: "WhatsApp cuando lo necesites" },
 ];
 
-const getInitialProducts = () => {
-  try {
-    const cachedRaw = localStorage.getItem("featuredProducts");
-    if (!cachedRaw) return [];
-    const parsed = JSON.parse(cachedRaw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-};
-
-import ProductMediaCarousel from "../components/ProductMediaCarousel";
-
 const ProductCard = memo(function ProductCard({ product, idx }) {
-  // Soporte para múltiples imágenes y videos
   const images = Array.isArray(product.images) ? product.images : product.image ? [product.image] : [];
   const videos = Array.isArray(product.videos) ? product.videos : [];
+  
   return (
     <article className="group relative rounded-2xl bg-linear-to-br from-white/15 to-white/5 border border-white/20 p-4 shadow-xl hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-300 hover:-translate-y-2 hover:border-cyan-400/50">
       <Link to={`/products/${product._id}`} className="block">
@@ -61,54 +49,52 @@ const ProductCard = memo(function ProductCard({ product, idx }) {
 });
 
 export default function Home() {
-  const initialProducts = getInitialProducts();
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showLightRays, setShowLightRays] = useState(false);
 
   const seoData = generateMetaTags({
-    title: null, // Usar título por defecto
+    title: null,
     path: ''
   });
 
-  // ✅ OPTIMIZACIÓN: Solo cargar LightRays DESPUÉS del First Contentful Paint
+  // Cargar LightRays después del contenido principal
   useEffect(() => {
-    // Esperar a que el contenido principal esté renderizado
     const timer = setTimeout(() => {
-      // Usar requestIdleCallback si está disponible
       if ('requestIdleCallback' in window) {
         requestIdleCallback(() => setShowLightRays(true), { timeout: 3000 });
       } else {
         setShowLightRays(true);
       }
-    }, 1500); // Delay de 1.5s después del mount
+    }, 1500);
 
     return () => clearTimeout(timer);
   }, []);
 
+  // Fetch de productos (SIN caché inicial)
   useEffect(() => {
-    const CACHE_KEY = "featuredProducts";
-    const CACHE_TS_KEY = "featuredProductsTs";
-
     const controller = new AbortController();
 
-    // SIEMPRE hacer fetch — mostrar caché mientras llega la respuesta (stale-while-revalidate)
-    // El bloqueo por TTL causaba que ediciones del admin no se reflejaran en Home
-
-useEffect(() => {
-  (async () => {
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
-      const data = await res.json();
-      const sliced = Array.isArray(data) ? data.slice(0, 5) : [];
-      setFeaturedProducts(sliced);
-    } catch (error) {
-      console.error("Error cargando productos:", error);
-    } finally {
-      setLoading(false);
-    }
-  })();
-}, [])
+    (async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/products`,
+          { 
+            signal: controller.signal,
+            cache: 'no-cache'
+          }
+        );
+        const data = await res.json();
+        const sliced = Array.isArray(data) ? data.slice(0, 5) : [];
+        setFeaturedProducts(sliced);
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error("Error cargando productos:", error);
+        }
+      } finally {
+        setLoading(false);
+      }
+    })();
 
     return () => controller.abort();
   }, []);
@@ -201,63 +187,58 @@ useEffect(() => {
         </script>
       </Helmet>
 
-      {/* ✅ Fondo SIMPLE primero (sin WebGL) */}
       <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black">
-        {/* ✅ Solo cargar LightRays cuando el contenido principal esté listo */}
-        {/*showLightRays && <LazyLightRays />}*/}
+        {/*showLightRays && <LazyLightRays />*/}
       </div>
 
       <main className="relative min-h-screen z-10">
         {/* HERO */}
         <section className="relative">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-0 pb-12 sm:pb-16 lg:pb-20">
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-      {/* Imagen - Full width en móvil, 7 cols en desktop */}
-      <div className="order-2 lg:order-1 lg:col-span-7 flex items-center justify-center">
-        <div className="relative flex justify-center lg:justify-start items-center h-[300px] sm:h-[400px] lg:h-[600px] xl:h-[700px] w-full overflow-hidden">
-          <OptimizedImage
-            src={hero}
-            alt="Logo Etronix"
-            className="w-full h-auto max-w-[280px] sm:max-w-[400px] lg:max-w-[700px] xl:max-w-[900px] object-contain"
-            priority
-          />
-        </div>
-      </div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 pt-0 pb-12 sm:pb-16 lg:pb-20">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              <div className="order-2 lg:order-1 lg:col-span-7 flex items-center justify-center">
+                <div className="relative flex justify-center lg:justify-start items-center h-[300px] sm:h-[400px] lg:h-[600px] xl:h-[700px] w-full overflow-hidden">
+                  <OptimizedImage
+                    src={hero}
+                    alt="Logo Etronix"
+                    className="w-full h-auto max-w-[280px] sm:max-w-[400px] lg:max-w-[700px] xl:max-w-[900px] object-contain"
+                    priority
+                  />
+                </div>
+              </div>
 
-      {/* Texto - Full width en móvil, 5 cols en desktop */}
-      <div className="order-1 lg:order-2 lg:col-span-5 flex flex-col items-center lg:items-start text-center lg:text-left">
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight text-white mb-6">
-          <span className="block">Transforma</span>
-          <span className="block">tu</span>
-          <span className="block">experiencia</span>
-          <span className="block bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-            móvil
-          </span>
-        </h1>
+              <div className="order-1 lg:order-2 lg:col-span-5 flex flex-col items-center lg:items-start text-center lg:text-left">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight text-white mb-6">
+                  <span className="block">Transforma</span>
+                  <span className="block">tu</span>
+                  <span className="block">experiencia</span>
+                  <span className="block bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                    móvil
+                  </span>
+                </h1>
 
-        <p className="text-base sm:text-lg lg:text-xl text-gray-300 mb-8 max-w-md">
-          En Etronix encuentras calidad, innovación y estilo.
-        </p>
+                <p className="text-base sm:text-lg lg:text-xl text-gray-300 mb-8 max-w-md">
+                  En Etronix encuentras calidad, innovación y estilo.
+                </p>
 
-        {/* Botones responsive */}
-        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-          <Link
-            to="/shop"
-            className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 font-bold rounded-xl bg-linear-to-r from-cyan-400 to-blue-500 text-gray-900"
-          >
-            Explorar ahora
-          </Link>
-          <Link
-            to="/offers"
-            className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 font-bold rounded-xl border-2 border-white/30 text-white"
-          >
-            Ver ofertas
-          </Link>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+                <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                  <Link
+                    to="/shop"
+                    className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 font-bold rounded-xl bg-linear-to-r from-cyan-400 to-blue-500 text-gray-900"
+                  >
+                    Explorar ahora
+                  </Link>
+                  <Link
+                    to="/offers"
+                    className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 font-bold rounded-xl border-2 border-white/30 text-white"
+                  >
+                    Ver ofertas
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* FEATURED PRODUCTS */}
         <section className="pb-20">
@@ -272,7 +253,7 @@ useEffect(() => {
               </Link>
             </div>
 
-            {loading && featuredProducts.length === 0 ? (
+            {loading ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className="rounded-2xl bg-white/10 border border-white/20 p-4 shadow-lg">
@@ -314,7 +295,6 @@ useEffect(() => {
   );
 }
 
-// ✅ Componente separado para cargar LightRays de forma lazy
 function LazyLightRays() {
   const [LightRaysComponent, setLightRaysComponent] = useState(null);
 
