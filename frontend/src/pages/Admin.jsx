@@ -15,28 +15,23 @@ export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminCode, setAdminCode] = useState("");
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const [view, setView] = useState("dashboard"); // "orders" | "products"
-
-  // Ya no hay sesión persistente → siempre pide código
+  const [view, setView] = useState("dashboard");
 
   useEffect(() => {
-    // Verificar si hay adminCode y si la sesión no ha expirado
     const code = localStorage.getItem("adminCode") || "";
     const loginTime = parseInt(localStorage.getItem("adminLoginTime"), 10) || 0;
     const now = Date.now();
-    const maxSession = 60 * 60 * 1000; // 1 hora en ms
+    const maxSession = 60 * 60 * 1000; 
     if (code && loginTime && now - loginTime < maxSession) {
       setAdminCode(code);
       setIsAuthenticated(true);
     } else {
-      // Si expiró, limpiar y pedir login
       localStorage.removeItem("adminCode");
       localStorage.removeItem("adminLoginTime");
       setIsAuthenticated(false);
       setAdminCode("");
     }
     setCheckingAuth(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleLoginSuccess = (code) => {
@@ -45,11 +40,8 @@ export default function Admin() {
   };
 
   const handleLogout = () => {
-    try {
-      // Por si acaso aún quedan cosas viejas
-      localStorage.removeItem("adminCode");
-      localStorage.removeItem("adminLoginTime");
-    } catch (e) {}
+    localStorage.removeItem("adminCode");
+    localStorage.removeItem("adminLoginTime");
     setIsAuthenticated(false);
     setAdminCode("");
     setOrders([]);
@@ -61,30 +53,22 @@ export default function Admin() {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
         headers: { "x-admin-code": adminCode },
       });
-
       if (res.status === 401 || res.status === 403) {
         handleLogout();
         return;
       }
-
       const data = await res.json();
       const ordersList = data.orders || data;
 
-      // Notificación de nuevos pedidos
       if (lastOrderCount > 0 && ordersList.length > lastOrderCount) {
-        if (audioRef.current) {
-          audioRef.current.play().catch(() => {});
-        }
+        if (audioRef.current) audioRef.current.play().catch(() => {});
         if (typeof Notification !== "undefined" && Notification.permission === "granted") {
-          try {
-            new Notification("¡Nuevo pedido!", {
-              body: `Tienes ${ordersList.length - lastOrderCount} pedido(s) nuevo(s)`,
-              icon: "/favicon.ico",
-            });
-          } catch (e) {}
+          new Notification("¡Nuevo pedido!", {
+            body: `Tienes ${ordersList.length - lastOrderCount} pedido(s) nuevo(s)`,
+            icon: "/favicon.ico",
+          });
         }
       }
-
       setOrders(ordersList);
       setLastOrderCount(ordersList.length);
     } catch (err) {
@@ -96,16 +80,31 @@ export default function Admin() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-
     if (typeof Notification !== "undefined" && Notification.permission === "default") {
       Notification.requestPermission();
     }
-
     fetchOrders();
     const interval = setInterval(fetchOrders, 30000);
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, adminCode]);
+
+  const updateOrderStatus = async (orderId, newStatus) => {
+    if (!adminCode) return;
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/${orderId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "x-admin-code": adminCode },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (res.ok) {
+        setOrders((prev) => prev.map((o) => (o._id === orderId ? { ...o, status: newStatus } : o)));
+      } else {
+        alert("Error actualizando el estado");
+      }
+    } catch (err) {
+      alert("Error de conexión");
+    }
+  };
 
   const statusColors = {
     pending: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30",
@@ -117,584 +116,238 @@ export default function Admin() {
   };
 
   const statusLabels = {
-    pending: "Pendiente",
-    paid: "Pagado",
-    failed: "Fallido",
-    processing: "Procesando",
-    shipped: "Enviado",
-    delivered: "Entregado",
+    pending: "Pendiente", paid: "Pagado", failed: "Fallido",
+    processing: "Procesando", shipped: "Enviado", delivered: "Entregado",
   };
 
-  const updateOrderStatus = async (orderId, newStatus) => {
-    if (!adminCode) return;
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/orders/${orderId}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            "x-admin-code": adminCode,
-          },
-          body: JSON.stringify({ status: newStatus }),
-        }
-      );
+  const filteredOrders = orders.filter((o) => filter === "all" ? true : o.status === filter);
 
-      if (res.ok) {
-        setOrders((prev) =>
-          prev.map((o) =>
-            o._id === orderId ? { ...o, status: newStatus } : o
-          )
-        );
-      } else if (res.status === 401 || res.status === 403) {
-        alert("Sesión expirada. Por favor inicia sesión nuevamente.");
-        handleLogout();
-      } else {
-        alert("Error actualizando el estado");
-      }
-    } catch (err) {
-      console.error("Error:", err);
-      alert("Error actualizando el estado");
-    }
-  };
+  const orderStats = [
+    { label: "Total", value: orders.length, color: "from-gray-400 to-gray-600", icon: "summarize" },
+    { label: "Pendientes", value: orders.filter(o => o.status === "pending").length, color: "from-yellow-400 to-yellow-600", icon: "pending" },
+    { label: "Pagados", value: orders.filter(o => o.status === "paid").length, color: "from-green-400 to-green-600", icon: "paid" },
+    { label: "Procesando", value: orders.filter(o => o.status === "processing").length, color: "from-blue-400 to-blue-600", icon: "sync" },
+    { label: "Enviados", value: orders.filter(o => o.status === "shipped").length, color: "from-purple-400 to-purple-600", icon: "local_shipping" },
+    { label: "Entregados", value: orders.filter(o => o.status === "delivered").length, color: "from-teal-400 to-teal-600", icon: "check_circle" },
+  ];
 
-  const filteredOrders = orders.filter((order) => {
-    if (filter === "all") return true;
-    return order.status === filter;
-  });
-
-  const orderStats = {
-    total: orders.length,
-    pending: orders.filter((o) => o.status === "pending").length,
-    paid: orders.filter((o) => o.status === "paid").length,
-    processing: orders.filter((o) => o.status === "processing").length,
-    shipped: orders.filter((o) => o.status === "shipped").length,
-    delivered: orders.filter((o) => o.status === "delivered").length,
-  };
-
-  // Estado de “verificando”
   if (checkingAuth) {
     return (
-      <>
-        <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black">
-          <LightRays
-            raysOrigin="top-center"
-            raysColor="#00d4ff"
-            raysSpeed={1.5}
-            lightSpread={0.9}
-            rayLength={1.2}
-            followMouse
-            mouseInfluence={0.12}
-            noiseAmount={0.06}
-            distortion={0.03}
-            className="w-full h-full pointer-events-none opacity-70"
-          />
-        </div>
-        <div className="relative min-h-screen flex items-center justify-center z-10">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-400 border-t-transparent"></div>
-        </div>
-      </>
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-400 border-t-transparent"></div>
+      </div>
     );
   }
 
-  // No autenticado → pantalla de login con fondo negro
   if (!isAuthenticated) {
     return (
-      <>
-        <Helmet>
-          <title>Acceso Administrador | Etronix Store</title>
-          <meta name="robots" content="noindex, nofollow" />
-        </Helmet>
-
-        <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black">
-          <LightRays
-            raysOrigin="top-center"
-            raysColor="#00d4ff"
-            raysSpeed={1.5}
-            lightSpread={0.9}
-            rayLength={1.2}
-            followMouse
-            mouseInfluence={0.12}
-            noiseAmount={0.06}
-            distortion={0.03}
-            className="w-full h-full pointer-events-none opacity-70"
-          />
+      <div className="relative min-h-screen bg-slate-950 flex items-center justify-center p-4">
+        <Helmet><title>Acceso Admin | Etronix</title></Helmet>
+        <div className="absolute inset-0 z-0">
+            <LightRays raysColor="#00d4ff" raysSpeed={1.5} className="opacity-50" />
         </div>
-
-        <div className="relative min-h-screen z-10 flex items-center justify-center">
+        <div className="relative z-10 w-full max-w-md">
           <AdminLogin onLoginSuccess={handleLoginSuccess} />
         </div>
-      </>
+      </div>
     );
   }
 
-  // Vista autenticada
   return (
-    <>
-      <Helmet>
-        <title>Panel de Administración | Etronix Store</title>
-        <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
+    <div className="min-h-screen bg-slate-950 text-slate-200">
+      <Helmet><title>Panel Admin | Etronix</title></Helmet>
+      
+      {/* Estilo para ocultar scrollbars */}
+      <style>{`.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}</style>
 
-      {/* Fondo negro */}
-      <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black">
-        <LightRays
-          raysOrigin="top-center"
-          raysColor="#00d4ff"
-          raysSpeed={1.5}
-          lightSpread={0.9}
-          rayLength={1.2}
-          followMouse
-          mouseInfluence={0.12}
-          noiseAmount={0.06}
-          distortion={0.03}
-          className="w-full h-full pointer-events-none opacity-60"
-        />
-      </div>
-
-      <div className="relative min-h-screen z-10">
-        <audio
-          ref={audioRef}
-          src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjKM0/LRgzgKGGS46+mjUhENUKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0"
-        />
-
-        {/* Header */}
-        <header className="sticky top-0 z-20 backdrop-blur-xl bg-gray-900/80 border-b border-white/10 shadow-lg">
-          <div className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-cyan-500 to-transparent opacity-50" />
-          <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="absolute inset-0 bg-linear-to-r from-cyan-500/30 to-blue-500/30 rounded-lg blur-md" />
-                <span className="relative material-symbols-outlined text-3xl text-cyan-400">
-                  dashboard
-                </span>
-              </div>
-              <h1 className="text-2xl font-black bg-linear-to-r from-cyan-400 via-blue-400 to-cyan-300 bg-clip-text text-transparent">
-                Panel de Administración
+      {/* Header Adaptativo */}
+      <header className="sticky top-0 z-30 backdrop-blur-xl bg-slate-900/90 border-b border-white/10 shadow-2xl">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-cyan-400 text-2xl">shield_person</span>
+              <h1 className="font-black text-lg md:text-xl tracking-tighter bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                ETRONIX <span className="hidden sm:inline">ADMIN</span>
               </h1>
             </div>
-
-            <div className="flex items-center gap-3">
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setView("dashboard")}
-                  className={`px-4 py-2 rounded-xl font-black transition-all flex items-center gap-2 ${
-                    view === "dashboard"
-                      ? "bg-linear-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
-                      : "bg-white/10 text-gray-300 hover:bg-white/20"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-lg">dashboard</span>
-                  Dashboard
-                </button>
-                
-                <button
-                  onClick={() => setView("orders")}
-                  className={`px-4 py-2 rounded-xl font-black transition-all flex items-center gap-2 ${
-                    view === "orders"
-                      ? "bg-linear-to-r from-green-500 to-teal-500 text-white shadow-lg"
-                      : "bg-white/10 text-gray-300 hover:bg-white/20"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-lg">receipt_long</span>
-                  Pedidos
-                </button>
-                
-                <button
-                  onClick={() => setView("products")}
-                  className={`px-4 py-2 rounded-xl font-black transition-all flex items-center gap-2 ${
-                    view === "products"
-                      ? "bg-linear-to-r from-purple-500 to-pink-500 text-white shadow-lg"
-                      : "bg-white/10 text-gray-300 hover:bg-white/20"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-lg">inventory_2</span>
-                  Productos
-                </button>
-              </div>
-
-              <button
-                onClick={fetchOrders}
-                className="px-4 py-2 rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 text-white font-black shadow-lg hover:shadow-cyan-500/50 transition-all hover:-translate-y-0.5 flex items-center gap-2"
-              >
-                <span className="material-symbols-outlined text-lg">
-                  refresh
-                </span>
-                Actualizar
+            
+            <div className="flex items-center gap-2">
+              <button onClick={fetchOrders} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-cyan-400 transition-colors">
+                <span className="material-symbols-outlined">refresh</span>
               </button>
-
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 rounded-xl border-2 border-red-500/50 text-red-400 font-black hover:bg-red-500 hover:text-white transition-all flex items-center gap-2"
-              >
-                <span className="material-symbols-outlined text-lg">
-                  logout
-                </span>
-                Cerrar
-              </button>
-
-              <Link
-                to="/shop"
-                className="px-4 py-2 rounded-xl border-2 border-white/30 text-white font-black hover:bg-white/10 hover:border-cyan-400/50 transition-all flex items-center gap-1"
-              >
-                <span className="material-symbols-outlined text-base">
-                  arrow_back
-                </span>
-                Tienda
+              <Link to="/shop" className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-xl border border-white/10 text-xs font-bold">
+                <span className="material-symbols-outlined text-sm">store</span> Tienda
               </Link>
+              <button onClick={handleLogout} className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all border border-red-500/20 text-xs font-bold flex items-center gap-1">
+                <span className="material-symbols-outlined text-sm">logout</span>
+                <span className="hidden sm:inline">Salir</span>
+              </button>
             </div>
           </div>
-        </header>
 
-        <main className="max-w-7xl mx-auto px-4 pb-12">
-          {view === "dashboard" ? (
-            <div className="mt-8">
-              <div className="mb-8">
-                <h2 className="text-3xl font-black text-white mb-2">Dashboard</h2>
-                <p className="text-gray-400">Vista general de tu negocio</p>
-              </div>
-              <AdminDashboard adminCode={adminCode} />
+          {/* Nav Pestañas - Scroll lateral en móvil */}
+          <nav className="flex gap-1 pb-2 overflow-x-auto no-scrollbar">
+            {[
+              { id: "dashboard", label: "Dashboard", icon: "grid_view" },
+              { id: "orders", label: "Pedidos", icon: "receipt_long" },
+              { id: "products", label: "Productos", icon: "inventory_2" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setView(tab.id)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap ${
+                  view === tab.id 
+                  ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/20" 
+                  : "text-slate-400 hover:bg-white/5"
+                }`}
+              >
+                <span className="material-symbols-outlined text-lg">{tab.icon}</span>
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        {view === "dashboard" ? (
+          <AdminDashboard adminCode={adminCode} />
+        ) : view === "orders" ? (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+              {orderStats.map((stat) => (
+                <div key={stat.label} className="bg-white/5 border border-white/10 p-4 rounded-2xl flex flex-col items-center justify-center text-center">
+                  <span className={`material-symbols-outlined bg-linear-to-br ${stat.color} bg-clip-text text-transparent text-2xl mb-1`}>
+                    {stat.icon}
+                  </span>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
+                  <p className="text-2xl font-black text-white">{stat.value}</p>
+                </div>
+              ))}
             </div>
-          ) : view === "orders" ? (
-            <>
-              {/* Estadísticas */}
-              <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8 mt-8">
-                {[
-                  {
-                    label: "Total",
-                    value: orderStats.total,
-                    color: "from-gray-600 to-gray-700",
-                    icon: "summarize",
-                  },
-                  {
-                    label: "Pendientes",
-                    value: orderStats.pending,
-                    color: "from-yellow-600 to-yellow-700",
-                    icon: "pending",
-                  },
-                  {
-                    label: "Pagados",
-                    value: orderStats.paid,
-                    color: "from-green-600 to-green-700",
-                    icon: "paid",
-                  },
-                  {
-                    label: "Procesando",
-                    value: orderStats.processing,
-                    color: "from-blue-600 to-blue-700",
-                    icon: "sync",
-                  },
-                  {
-                    label: "Enviados",
-                    value: orderStats.shipped,
-                    color: "from-purple-600 to-purple-700",
-                    icon: "local_shipping",
-                  },
-                  {
-                    label: "Entregados",
-                    value: orderStats.delivered,
-                    color: "from-teal-600 to-teal-700",
-                    icon: "check_circle",
-                  },
-                ].map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="backdrop-blur-xl bg-linear-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 p-4 flex flex-col items-center justify-center shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all"
-                  >
-                    <span
-                      className={`material-symbols-outlined text-3xl mb-2 bg-linear-to-r ${stat.color} bg-clip-text text-transparent`}
-                    >
-                      {stat.icon}
-                    </span>
-                    <p className="text-sm font-bold text-gray-300">
-                      {stat.label}
-                    </p>
-                    <p className="text-3xl font-black text-white">
-                      {stat.value}
-                    </p>
-                  </div>
-                ))}
-              </div>
 
-              {/* Filtros */}
-              <div className="mb-8 flex flex-wrap gap-2 justify-center">
-                {[
-                  { value: "all", label: "Todos", icon: "list" },
-                  { value: "pending", label: "Pendientes", icon: "pending" },
-                  { value: "paid", label: "Pagados", icon: "paid" },
-                  {
-                    value: "processing",
-                    label: "Procesando",
-                    icon: "sync",
-                  },
-                  {
-                    value: "shipped",
-                    label: "Enviados",
-                    icon: "local_shipping",
-                  },
-                  {
-                    value: "delivered",
-                    label: "Entregados",
-                    icon: "check_circle",
-                  },
-                  { value: "failed", label: "Fallidos", icon: "cancel" },
-                ].map((filterOption) => (
-                  <button
-                    key={filterOption.value}
-                    onClick={() => setFilter(filterOption.value)}
-                    className={`px-5 py-2.5 rounded-xl font-black transition-all flex items-center gap-2 shadow-lg ${
-                      filter === filterOption.value
-                        ? "bg-linear-to-r from-cyan-500 to-blue-500 text-white shadow-cyan-500/50"
-                        : "backdrop-blur-md bg-white/10 border-2 border-white/20 text-gray-300 hover:bg-white/20 hover:border-cyan-400/50"
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-lg">
-                      {filterOption.icon}
-                    </span>
-                    {filterOption.label}
-                  </button>
-                ))}
-              </div>
+            {/* Filtros Scrollable */}
+            <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
+              {Object.keys(statusLabels).concat("all").reverse().map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap border transition-all ${
+                    filter === f 
+                    ? "bg-white text-slate-900 border-white" 
+                    : "bg-transparent border-white/20 text-slate-400"
+                  }`}
+                >
+                  {f === "all" ? "Todos" : statusLabels[f]}
+                </button>
+              ))}
+            </div>
 
-              {/* Lista de pedidos */}
-              {loading ? (
-                <div className="flex justify-center items-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-400 border-t-transparent"></div>
-                </div>
-              ) : filteredOrders.length === 0 ? (
-                <div className="backdrop-blur-xl bg-linear-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 p-8 text-center shadow-xl">
-                  <p className="text-gray-300 text-lg font-bold">
-                    {filter === "all"
-                      ? "No hay pedidos aún"
-                      : `No hay pedidos ${filter}`}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {filteredOrders.map((order) => (
-                    <div
-                      key={order._id}
-                      className="backdrop-blur-xl bg-linear-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 p-6 shadow-xl hover:shadow-2xl hover:border-cyan-400/50 transition-all"
-                    >
-                      {/* Encabezado del pedido */}
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4 pb-4 border-b border-white/10">
-                        <div className="flex items-center gap-3">
-                          <span className="material-symbols-outlined text-2xl text-cyan-400">
-                            receipt_long
-                          </span>
-                          <div>
-                            <p className="text-xs text-gray-400 mb-1 font-bold">
-                              ID: {order._id}
-                            </p>
-                            <p className="text-sm text-gray-300">
-                              📅{" "}
-                              {new Date(order.createdAt).toLocaleString(
-                                "es-CO"
-                              )}
-                            </p>
-                          </div>
+            {/* Lista de Pedidos */}
+            {loading ? (
+              <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-8 w-8 border-2 border-cyan-400 border-t-transparent"></div></div>
+            ) : filteredOrders.length === 0 ? (
+              <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10">
+                <p className="text-slate-500 font-bold">No se encontraron pedidos.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredOrders.map((order) => (
+                  <div key={order._id} className="bg-slate-900/50 border border-white/10 rounded-3xl p-4 sm:p-6 hover:border-cyan-500/30 transition-colors shadow-xl">
+                    {/* ID y Status */}
+                    <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                          <span className="material-symbols-outlined">shopping_bag</span>
                         </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-slate-500 uppercase">ID Pedido</p>
+                          <p className="text-xs font-mono text-slate-300">#{order._id.slice(-8)}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase border ${statusColors[order.status]}`}>
+                          {statusLabels[order.status]}
+                        </span>
+                        <select
+                          value={order.status}
+                          onChange={(e) => updateOrderStatus(order._id, e.target.value)}
+                          className="bg-slate-800 border-none text-xs rounded-lg px-2 py-1 focus:ring-1 ring-cyan-500 outline-none"
+                        >
+                          {Object.entries(statusLabels).map(([val, lab]) => (
+                            <option key={val} value={val}>{lab}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
 
-                        <div className="flex flex-col md:items-end gap-2">
-                          <span
-                            className={`px-4 py-1.5 rounded-xl text-xs font-black border ${
-                              statusColors[order.status]
-                            }`}
-                          >
-                            {statusLabels[order.status]}
-                          </span>
-
-                          {order.status !== "failed" && (
-                            <select
-                              value={order.status}
-                              onChange={(e) =>
-                                updateOrderStatus(order._id, e.target.value)
-                              }
-                              className="text-xs px-3 py-1.5 rounded-lg backdrop-blur-md bg-white/10 border border-white/20 text-gray-200 font-bold"
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {/* Cliente */}
+                      <div className="space-y-3">
+                        <h4 className="text-[10px] font-black text-cyan-500 uppercase tracking-widest flex items-center gap-2">
+                          <span className="material-symbols-outlined text-sm">person</span> Datos de Entrega
+                        </h4>
+                        <div className="bg-white/5 rounded-2xl p-4 space-y-2">
+                          <p className="text-sm font-bold text-white">{order.buyer?.name}</p>
+                          <p className="text-xs text-slate-400 flex items-center gap-2">
+                            <span className="material-symbols-outlined text-xs">location_on</span>
+                            {order.buyer?.address}, {order.buyer?.city}
+                          </p>
+                          <div className="flex flex-wrap gap-2 pt-2">
+                            <a 
+                              href={`https://wa.me/57${order.buyer?.phone?.replace(/\s/g, "")}`}
+                              target="_blank" 
+                              className="flex items-center gap-1 bg-green-500/20 text-green-400 px-3 py-1.5 rounded-xl text-[10px] font-black hover:bg-green-500 hover:text-white transition-all"
                             >
-                              <option value="pending" className="bg-gray-900">
-                                Pendiente
-                              </option>
-                              <option value="paid" className="bg-gray-900">
-                                Pagado
-                              </option>
-                              <option
-                                value="processing"
-                                className="bg-gray-900"
-                              >
-                                Procesando
-                              </option>
-                              <option value="shipped" className="bg-gray-900">
-                                Enviado
-                              </option>
-                              <option
-                                value="delivered"
-                                className="bg-gray-900"
-                              >
-                                Entregado
-                              </option>
-                              <option value="failed" className="bg-gray-900">
-                                Fallido
-                              </option>
-                            </select>
-                          )}
+                              <span className="material-symbols-outlined text-xs">chat</span> WHATSAPP
+                            </a>
+                            {order.buyer?.email && (
+                              <p className="text-[10px] bg-white/5 px-3 py-1.5 rounded-xl text-slate-400 truncate max-w-[150px]">
+                                {order.buyer.email}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
 
-                      <div className="grid md:grid-cols-2 gap-6">
-                        {/* Información del cliente */}
-                        <div className="backdrop-blur-md bg-white/5 rounded-xl p-4 border border-white/10">
-                          <h3 className="text-sm font-black text-white mb-3 flex items-center gap-2">
-                            <span className="material-symbols-outlined text-base text-cyan-400">
-                              person
-                            </span>
-                            Información del Cliente
-                          </h3>
-                          <div className="space-y-2 text-sm">
-                            <div>
-                              <span className="font-bold text-gray-300">
-                                Nombre:
-                              </span>
-                              <p className="text-white">
-                                {order.buyer?.name || "Sin nombre"}
-                              </p>
-                            </div>
-
-                            <div>
-                              <span className="font-bold text-gray-300">
-                                Teléfono:
-                              </span>
-                              <p className="text-white">
-                                {order.buyer?.phone || "Sin teléfono"}
-                              </p>
-                              {order.buyer?.phone && (
-                                <a
-                                  href={`https://wa.me/57${order.buyer.phone.replace(
-                                    /\s/g,
-                                    ""
-                                  )}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-green-400 hover:text-green-300 font-bold text-xs mt-1 inline-flex items-center gap-1"
-                                >
-                                  <span className="material-symbols-outlined text-base">
-                                    whatsapp
-                                  </span>{" "}
-                                  WhatsApp
-                                </a>
-                              )}
-                            </div>
-
-                            {order.buyer?.email && (
-                              <div>
-                                <span className="font-bold text-gray-300">
-                                  Email:
-                                </span>
-                                <p className="text-white break-all">
-                                  {order.buyer.email}
-                                </p>
-                              </div>
-                            )}
-
-                            <div>
-                              <span className="font-bold text-gray-300">
-                                Dirección:
-                              </span>
-                              <p className="text-white">
-                                {order.buyer?.address || "Sin dirección"}
-                              </p>
-                            </div>
-
-                            <div>
-                              <span className="font-bold text-gray-300">
-                                Ciudad:
-                              </span>
-                              <p className="text-white">
-                                {order.buyer?.city || "Sin ciudad"}
-                              </p>
-                            </div>
-
-                            {order.buyer?.notes && (
-                              <div>
-                                <span className="font-bold text-gray-300">
-                                  Notas:
-                                </span>
-                                <p className="text-gray-300 italic">
-                                  "{order.buyer.notes}"
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Productos */}
-                        <div className="backdrop-blur-md bg-white/5 rounded-xl p-4 border border-white/10">
-                          <h3 className="text-sm font-black text-white mb-3 flex items-center gap-2">
-                            <span className="material-symbols-outlined text-base text-cyan-400">
-                              inventory_2
-                            </span>
-                            Productos
-                          </h3>
-                          <div className="space-y-2">
-                            {order.items.map((item, idx) => (
-                              <div
-                                key={idx}
-                                className="flex justify-between items-start text-sm backdrop-blur-md bg-white/5 p-3 rounded-lg border border-white/10"
-                              >
-                                <div className="flex-1">
-                                  <p className="font-black text-white">
-                                    {item.title}
-                                  </p>
-                                  <p className="text-xs text-gray-400">
-                                    $
-                                    {item.unit_price?.toLocaleString("es-CO")}{" "}
-                                    x {item.quantity}
-                                  </p>
-                                </div>
-                                <span className="font-black bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                                  $
-                                  {(
-                                    item.unit_price * item.quantity
-                                  ).toLocaleString("es-CO")}
-                                </span>
+                      {/* Resumen Productos */}
+                      <div className="space-y-3">
+                        <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-widest flex items-center gap-2">
+                          <span className="material-symbols-outlined text-sm">inventory</span> Resumen de Compra
+                        </h4>
+                        <div className="bg-white/5 rounded-2xl p-4">
+                          <div className="max-h-32 overflow-y-auto pr-2 space-y-2 mb-3 no-scrollbar">
+                            {order.items.map((item, i) => (
+                              <div key={i} className="flex justify-between text-xs">
+                                <span className="text-slate-400"><b className="text-white">{item.quantity}x</b> {item.title}</span>
+                                <span className="font-bold">${(item.unit_price * item.quantity).toLocaleString()}</span>
                               </div>
                             ))}
                           </div>
-
-                          {/* Total */}
-                          <div className="mt-4 pt-4 border-t border-white/20 flex justify-between items-center">
-                            <span className="font-black text-white">
-                              TOTAL:
-                            </span>
-                            <span className="text-2xl font-black bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                              $
-                              {order.total?.toLocaleString("es-CO")}
+                          <div className="border-t border-white/10 pt-3 flex justify-between items-end">
+                            <span className="text-[10px] font-bold text-slate-500">TOTAL PAGADO</span>
+                            <span className="text-xl font-black text-white bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                              ${order.total?.toLocaleString()}
                             </span>
                           </div>
-
-                          {order.mp_payment_id && (
-                            <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
-                              <span className="material-symbols-outlined text-base text-cyan-400">
-                                credit_card
-                              </span>
-                              ID Pago MP: {order.mp_payment_id}
-                            </p>
-                          )}
                         </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            // Vista de gestión de productos
-            <div className="mt-8">
-              <ProductAdmin adminCode={adminCode} />
-            </div>
-          )}
-        </main>
-      </div>
-    </>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+             <ProductAdmin adminCode={adminCode} />
+          </div>
+        )}
+      </main>
+
+      {/* Audio para notificaciones */}
+      <audio ref={audioRef} src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjKM0/LRgzgKGGS46+mjUhENUKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0" />
+    </div>
   );
 }
