@@ -38,13 +38,13 @@ export default function AdminProductEdit() {
         });
         if (!res.ok) throw new Error("No se encontró el producto");
         const data = await res.json();
-        
+
         console.log('📦 Producto cargado:', data);
         console.log('📋 Specs originales:', data.specs);
-        
+
         // 🔥 CORRECCIÓN COMPLETA: Normalizar specs correctamente
         const normalizedSpecs = [];
-        
+
         if (data.specs && typeof data.specs === 'object' && !Array.isArray(data.specs)) {
           // Es un objeto, convertir a array
           Object.entries(data.specs).forEach(([key, value]) => {
@@ -63,14 +63,14 @@ export default function AdminProductEdit() {
             }
           });
         }
-        
+
         // Si no hay specs válidas, agregar una vacía
         if (normalizedSpecs.length === 0) {
           normalizedSpecs.push({ key: "", value: "" });
         }
-        
+
         console.log('✅ Specs normalizadas:', normalizedSpecs);
-        
+
         setForm({
           ...data,
           images: Array.isArray(data.images) ? data.images.filter(Boolean) : [data.image || ""].filter(Boolean),
@@ -157,17 +157,17 @@ export default function AdminProductEdit() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    
+
     try {
       const images = form.images.filter((img) => img && img.trim() !== "");
       const videoUrls = form.videos.filter((v) => v && v.trim() !== "");
-      
+
       // 🔥 CORRECCIÓN: Convertir specs a objeto plano SIN features
       const specsObj = {};
       form.specs.forEach((spec) => {
         const key = spec.key?.trim();
         const value = spec.value?.trim();
-        
+
         // Solo agregar si AMBOS existen y no están vacíos
         if (key && value && key !== "" && value !== "") {
           specsObj[key] = value;
@@ -184,31 +184,31 @@ export default function AdminProductEdit() {
       formData.append("description", form.description || "");
       formData.append("image", images[0] || "");
       formData.append("sku", form.sku || "");
-      
-formData.append("imagesCount", images.length.toString());
-if (images.length > 0) {
-  images.forEach((img) => formData.append("images", img));
-} else {
-  formData.append("images", ""); // señal de "borrar todo"
-}
 
-formData.append("videoUrlsCount", videoUrls.length.toString());
-if (videoUrls.length > 0) {
-  videoUrls.forEach((url) => formData.append("videoUrls", url));
-} else {
-  formData.append("videoUrls", ""); // señal de "borrar todo"
-}
-      
+      formData.append("imagesCount", images.length.toString());
+      if (images.length > 0) {
+        images.forEach((img) => formData.append("images", img));
+      } else {
+        formData.append("images", ""); // señal de "borrar todo"
+      }
+
+      formData.append("videoUrlsCount", videoUrls.length.toString());
+      if (videoUrls.length > 0) {
+        videoUrls.forEach((url) => formData.append("videoUrls", url));
+      } else {
+        formData.append("videoUrls", ""); // señal de "borrar todo"
+      }
+
       // Enviar specs como JSON string
       formData.append("specs", JSON.stringify(specsObj));
-      
+
       // FAQs válidas solamente
       const validFaqs = form.faqs.filter(faq => faq.question?.trim() && faq.answer?.trim());
       validFaqs.forEach((faq, i) => {
         formData.append(`faqs[${i}][question]`, faq.question);
         formData.append(`faqs[${i}][answer]`, faq.answer);
       });
-      
+
       imageFiles.forEach((file) => formData.append("imageFiles", file));
       videoFiles.forEach((file) => formData.append("videoFiles", file));
 
@@ -245,7 +245,7 @@ if (videoUrls.length > 0) {
       </div>
     );
   }
-  
+
   if (error && !form) {
     return (
       <div className="text-center text-red-400 font-bold py-8">{error}</div>
@@ -259,48 +259,57 @@ if (videoUrls.length > 0) {
           <title>Editar Producto | Admin | Etronix Store</title>
           <meta name="robots" content="noindex, nofollow" />
         </Helmet>
-        
+
         <div className="mb-8">
-          <h1 className="text-3xl font-black mb-2 text-cyan-400 text-center">Editar Producto</h1>
+          <div className="flex items-center gap-4 mb-2">
+            <button
+              type="button"
+              onClick={() => navigate("/admin")}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-cyan-400/40 text-cyan-400 hover:bg-cyan-400/10 transition-colors font-bold text-sm shrink-0"
+            >
+              ← Panel Admin
+            </button>
+            <h1 className="text-3xl font-black text-cyan-400 flex-1 text-center">Editar Producto</h1>
+          </div>
           <p className="text-center text-gray-500 text-sm">ID: {id}</p>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
           {/* Datos principales */}
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-3 sm:p-6 space-y-4 border border-cyan-200 dark:border-cyan-900">
             <h2 className="text-xl font-bold text-cyan-500 mb-4">Datos principales</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4">
-              <input 
-                name="title" 
-                value={form.title} 
-                onChange={handleChange} 
-                placeholder="Nombre del producto" 
-                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm" 
-                required 
+              <input
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                placeholder="Nombre del producto"
+                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm"
+                required
               />
-              <input 
-                name="price" 
-                value={form.price} 
-                onChange={handleChange} 
-                placeholder="Precio" 
-                type="number" 
-                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm" 
-                required 
+              <input
+                name="price"
+                value={form.price}
+                onChange={handleChange}
+                placeholder="Precio"
+                type="number"
+                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm"
+                required
               />
-              <input 
-                name="stock" 
-                value={form.stock} 
-                onChange={handleChange} 
-                placeholder="Stock" 
-                type="number" 
-                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm" 
-                required 
+              <input
+                name="stock"
+                value={form.stock}
+                onChange={handleChange}
+                placeholder="Stock"
+                type="number"
+                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm"
+                required
               />
-              <select 
-                name="category" 
-                value={form.category} 
-                onChange={handleChange} 
-                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm" 
+              <select
+                name="category"
+                value={form.category}
+                onChange={handleChange}
+                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm"
               >
                 <option value="celulares">Celulares</option>
                 <option value="audifonos">Audífonos</option>
@@ -310,12 +319,12 @@ if (videoUrls.length > 0) {
                 <option value="protectores">Protectores</option>
               </select>
             </div>
-            <textarea 
-              name="description" 
-              value={form.description} 
-              onChange={handleChange} 
-              placeholder="Descripción" 
-              className="p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border w-full" 
+            <textarea
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              placeholder="Descripción"
+              className="p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border w-full"
               rows="4"
             />
           </div>
@@ -327,16 +336,16 @@ if (videoUrls.length > 0) {
               <label className="font-bold text-cyan-400 mb-2 block">Imágenes por URL</label>
               {form.images.map((img, idx) => (
                 <div key={idx} className="flex gap-2 mb-2 items-center">
-                  <input 
-                    type="text" 
-                    value={img} 
-                    onChange={(e) => handleImageChange(idx, e.target.value)} 
-                    placeholder={`URL Imagen #${idx + 1}`} 
-                    className="p-2 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white flex-1 border" 
+                  <input
+                    type="text"
+                    value={img}
+                    onChange={(e) => handleImageChange(idx, e.target.value)}
+                    placeholder={`URL Imagen #${idx + 1}`}
+                    className="p-2 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white flex-1 border"
                   />
-                  <button 
-                    type="button" 
-                    onClick={() => handleRemoveImage(idx)} 
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(idx)}
                     className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                   >
                     Eliminar
@@ -346,26 +355,26 @@ if (videoUrls.length > 0) {
                   )}
                 </div>
               ))}
-              <button 
-                type="button" 
-                onClick={handleAddImage} 
+              <button
+                type="button"
+                onClick={handleAddImage}
                 className="px-3 py-1 bg-cyan-500 text-white rounded font-bold hover:bg-cyan-600"
               >
                 + Agregar Imagen
               </button>
             </div>
-            
+
             <div>
               <label className="font-bold text-cyan-400 mb-2 block">Subir nuevas imágenes</label>
               <label className="inline-block px-4 py-2 bg-cyan-500 text-white rounded font-bold cursor-pointer hover:bg-cyan-600 transition-colors">
                 <span className="material-symbols-outlined align-middle mr-2">upload</span>
                 Elegir archivos
-                <input 
-                  type="file" 
-                  accept="image/jpeg,image/png,image/webp" 
-                  multiple 
-                  onChange={handleImageFilesChange} 
-                  className="hidden" 
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  onChange={handleImageFilesChange}
+                  className="hidden"
                 />
               </label>
               <div className="flex gap-2 flex-wrap mt-2">
@@ -373,11 +382,11 @@ if (videoUrls.length > 0) {
                   <span className="text-gray-400 italic text-sm">Sin archivos nuevos seleccionados</span>
                 )}
                 {imageFiles.map((file, idx) => (
-                  <img 
-                    key={idx} 
-                    src={URL.createObjectURL(file)} 
-                    alt="preview" 
-                    className="w-16 h-16 object-cover rounded border" 
+                  <img
+                    key={idx}
+                    src={URL.createObjectURL(file)}
+                    alt="preview"
+                    className="w-16 h-16 object-cover rounded border"
                   />
                 ))}
               </div>
@@ -391,30 +400,30 @@ if (videoUrls.length > 0) {
               <label className="font-bold text-cyan-400 mb-2 block">Videos por URL (YouTube o directo)</label>
               {form.videos.map((v, idx) => (
                 <div key={idx} className="flex gap-2 mb-2 items-center">
-                  <input 
-                    type="text" 
-                    value={v} 
-                    onChange={(e) => handleVideoUrlChange(idx, e.target.value)} 
-                    placeholder={`URL Video #${idx + 1}`} 
-                    className="p-2 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white flex-1 border" 
+                  <input
+                    type="text"
+                    value={v}
+                    onChange={(e) => handleVideoUrlChange(idx, e.target.value)}
+                    placeholder={`URL Video #${idx + 1}`}
+                    className="p-2 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white flex-1 border"
                   />
-                  <button 
-                    type="button" 
-                    onClick={() => handleRemoveVideoUrl(idx)} 
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveVideoUrl(idx)}
                     className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                   >
                     Eliminar
                   </button>
                   {v && v.trim() !== "" && (
                     v.includes("youtube.com") || v.includes("youtu.be") ? (
-                      <iframe 
-                        src={getYouTubeEmbedUrl(v)} 
-                        width="80" 
-                        height="45" 
-                        title="preview" 
-                        frameBorder="0" 
-                        allowFullScreen 
-                        className="rounded border" 
+                      <iframe
+                        src={getYouTubeEmbedUrl(v)}
+                        width="80"
+                        height="45"
+                        title="preview"
+                        frameBorder="0"
+                        allowFullScreen
+                        className="rounded border"
                       />
                     ) : (
                       <video src={v} width="80" height="45" controls className="rounded border" />
@@ -422,26 +431,26 @@ if (videoUrls.length > 0) {
                   )}
                 </div>
               ))}
-              <button 
-                type="button" 
-                onClick={handleAddVideoUrl} 
+              <button
+                type="button"
+                onClick={handleAddVideoUrl}
                 className="px-3 py-1 bg-cyan-500 text-white rounded font-bold hover:bg-cyan-600"
               >
                 + Agregar Video
               </button>
             </div>
-            
+
             <div>
               <label className="font-bold text-cyan-400 mb-2 block">Subir videos (MP4)</label>
               <label className="inline-block px-4 py-2 bg-cyan-500 text-white rounded font-bold cursor-pointer hover:bg-cyan-600 transition-colors">
                 <span className="material-symbols-outlined align-middle mr-2">upload</span>
                 Elegir archivos
-                <input 
-                  type="file" 
-                  accept="video/mp4,video/webm" 
-                  multiple 
-                  onChange={handleVideoFilesChange} 
-                  className="hidden" 
+                <input
+                  type="file"
+                  accept="video/mp4,video/webm"
+                  multiple
+                  onChange={handleVideoFilesChange}
+                  className="hidden"
                 />
               </label>
               <div className="flex gap-2 flex-wrap mt-2">
@@ -449,13 +458,13 @@ if (videoUrls.length > 0) {
                   <span className="text-gray-400 italic text-sm">Sin archivos nuevos seleccionados</span>
                 )}
                 {videoFiles.map((file, idx) => (
-                  <video 
-                    key={idx} 
-                    src={URL.createObjectURL(file)} 
-                    width="80" 
-                    height="45" 
-                    controls 
-                    className="rounded border" 
+                  <video
+                    key={idx}
+                    src={URL.createObjectURL(file)}
+                    width="80"
+                    height="45"
+                    controls
+                    className="rounded border"
                   />
                 ))}
               </div>
@@ -468,32 +477,32 @@ if (videoUrls.length > 0) {
             <h2 className="text-xl font-bold text-cyan-500 mb-4">Preguntas Frecuentes</h2>
             {form.faqs.map((faq, idx) => (
               <div key={idx} className="space-y-2 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                <input 
-                  type="text" 
-                  value={faq.question} 
-                  onChange={(e) => handleArrayChange("faqs", idx, "question", e.target.value)} 
-                  placeholder="Pregunta" 
-                  className="w-full p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white border focus:border-cyan-400 outline-none" 
+                <input
+                  type="text"
+                  value={faq.question}
+                  onChange={(e) => handleArrayChange("faqs", idx, "question", e.target.value)}
+                  placeholder="Pregunta"
+                  className="w-full p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white border focus:border-cyan-400 outline-none"
                 />
-                <textarea 
-                  value={faq.answer} 
-                  onChange={(e) => handleArrayChange("faqs", idx, "answer", e.target.value)} 
-                  placeholder="Respuesta" 
-                  className="w-full p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white border focus:border-cyan-400 outline-none" 
+                <textarea
+                  value={faq.answer}
+                  onChange={(e) => handleArrayChange("faqs", idx, "answer", e.target.value)}
+                  placeholder="Respuesta"
+                  className="w-full p-2 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white border focus:border-cyan-400 outline-none"
                   rows="3"
                 />
-                <button 
-                  type="button" 
-                  onClick={() => handleRemoveArrayItem("faqs", idx)} 
+                <button
+                  type="button"
+                  onClick={() => handleRemoveArrayItem("faqs", idx)}
                   className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
                 >
                   Eliminar
                 </button>
               </div>
             ))}
-            <button 
-              type="button" 
-              onClick={() => handleAddArrayItem("faqs", { question: "", answer: "" })} 
+            <button
+              type="button"
+              onClick={() => handleAddArrayItem("faqs", { question: "", answer: "" })}
               className="w-full px-4 py-2 bg-cyan-500 text-white rounded-lg font-bold hover:bg-cyan-600"
             >
               + Agregar Pregunta
@@ -508,16 +517,16 @@ if (videoUrls.length > 0) {
           )}
 
           <div className="flex gap-4">
-            <button 
+            <button
               type="button"
               onClick={() => navigate("/admin")}
               className="flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
               Cancelar
             </button>
-            <button 
-              type="submit" 
-              disabled={loading} 
+            <button
+              type="submit"
+              disabled={loading}
               className="flex-1 px-4 py-3 bg-cyan-500 text-white font-black rounded-xl shadow-lg hover:bg-cyan-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (

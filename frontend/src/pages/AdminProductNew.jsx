@@ -103,7 +103,7 @@ export default function AdminProductNew() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    
+
     try {
       if (adminCode) {
         localStorage.setItem("adminCode", adminCode);
@@ -111,7 +111,7 @@ export default function AdminProductNew() {
 
       const images = form.images.filter((img) => img && img.trim() !== "");
       const videoUrls = form.videos.filter((v) => v && v.trim() !== "");
-      
+
       // 🔥 CORRECCIÓN: Convertir specs a objeto plano sin tratamiento especial de features
       const specsObj = {};
       form.specs.forEach((spec) => {
@@ -127,13 +127,13 @@ export default function AdminProductNew() {
       formData.append("category", form.category);
       formData.append("description", form.description);
       formData.append("image", images[0] || "");
-      
+
       images.forEach((img) => formData.append("images", img));
       videoUrls.forEach((url) => formData.append("videoUrls", url));
-      
+
       // Enviar specs como JSON string
       formData.append("specs", JSON.stringify(specsObj));
-      
+
       // Enviar FAQs individualmente
       form.faqs.forEach((faq, i) => {
         if (faq.question && faq.answer) {
@@ -141,7 +141,7 @@ export default function AdminProductNew() {
           formData.append(`faqs[${i}][answer]`, faq.answer);
         }
       });
-      
+
       form.imageFiles.forEach((file) => formData.append("imageFiles", file));
       form.videoFiles.forEach((file) => formData.append("videoFiles", file));
       formData.append("sku", form.sku || "");
@@ -175,48 +175,57 @@ export default function AdminProductNew() {
           <title>Nuevo Producto | Admin | Etronix Store</title>
           <meta name="robots" content="noindex, nofollow" />
         </Helmet>
-      
-        
-        <h1 className="text-3xl font-black mb-8 text-cyan-400 text-center">
-          Agregar Nuevo Producto
-        </h1>
+
+
+        <div className="flex items-center gap-4 mb-8">
+          <button
+            type="button"
+            onClick={() => navigate("/admin")}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-cyan-400/40 text-cyan-400 hover:bg-cyan-400/10 transition-colors font-bold text-sm shrink-0"
+          >
+            ← Panel Admin
+          </button>
+          <h1 className="text-3xl font-black text-cyan-400 flex-1 text-center">
+            Agregar Nuevo Producto
+          </h1>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
           {/* Datos principales */}
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-3 sm:p-6 space-y-4 border border-cyan-200 dark:border-cyan-900">
             <h2 className="text-xl font-bold text-cyan-500 mb-4">Datos principales</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4">
-              <input 
-                name="title" 
-                value={form.title} 
-                onChange={handleChange} 
-                placeholder="Nombre del producto" 
-                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm" 
-                required 
+              <input
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                placeholder="Nombre del producto"
+                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm"
+                required
               />
-              <input 
-                name="price" 
-                value={form.price} 
-                onChange={handleChange} 
-                placeholder="Precio" 
-                type="number" 
-                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm" 
-                required 
+              <input
+                name="price"
+                value={form.price}
+                onChange={handleChange}
+                placeholder="Precio"
+                type="number"
+                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm"
+                required
               />
-              <input 
-                name="stock" 
-                value={form.stock} 
-                onChange={handleChange} 
-                placeholder="Stock disponible" 
-                type="number" 
-                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm" 
-                required 
+              <input
+                name="stock"
+                value={form.stock}
+                onChange={handleChange}
+                placeholder="Stock disponible"
+                type="number"
+                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm"
+                required
               />
-              <select 
-                name="category" 
-                value={form.category} 
-                onChange={handleChange} 
-                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm" 
+              <select
+                name="category"
+                value={form.category}
+                onChange={handleChange}
+                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm"
               >
                 <option value="celulares">Celulares</option>
                 <option value="audifonos">Audífonos</option>
@@ -226,12 +235,12 @@ export default function AdminProductNew() {
                 <option value="protectores">Protectores</option>
               </select>
             </div>
-            <textarea 
-              name="description" 
-              value={form.description} 
-              onChange={handleChange} 
-              placeholder="Descripción del producto" 
-              className="p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border w-full" 
+            <textarea
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+              placeholder="Descripción del producto"
+              className="p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border w-full"
               rows="4"
             />
           </div>
@@ -243,16 +252,16 @@ export default function AdminProductNew() {
               <label className="font-bold text-cyan-400 mb-2 block">Imágenes por URL</label>
               {form.images.map((img, idx) => (
                 <div key={idx} className="flex gap-2 mb-2 items-center">
-                  <input 
-                    type="text" 
-                    value={img} 
-                    onChange={(e) => handleImageChange(idx, e.target.value)} 
-                    placeholder={`URL Imagen #${idx + 1}`} 
-                    className="p-2 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white flex-1 border" 
+                  <input
+                    type="text"
+                    value={img}
+                    onChange={(e) => handleImageChange(idx, e.target.value)}
+                    placeholder={`URL Imagen #${idx + 1}`}
+                    className="p-2 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white flex-1 border"
                   />
-                  <button 
-                    type="button" 
-                    onClick={() => handleRemoveImage(idx)} 
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(idx)}
                     className="px-2 py-1 bg-red-500 text-white rounded"
                   >
                     Eliminar
@@ -262,26 +271,26 @@ export default function AdminProductNew() {
                   )}
                 </div>
               ))}
-              <button 
-                type="button" 
-                onClick={handleAddImage} 
+              <button
+                type="button"
+                onClick={handleAddImage}
                 className="px-3 py-1 bg-cyan-500 text-white rounded font-bold"
               >
                 Agregar Imagen por URL
               </button>
             </div>
-            
+
             <div>
               <label className="font-bold text-cyan-400 mb-2 block">Subir Imágenes (archivos)</label>
               <label className="inline-block px-4 py-2 bg-cyan-500 text-white rounded font-bold cursor-pointer hover:bg-cyan-600 transition-colors">
                 <span className="material-symbols-outlined align-middle mr-2">upload</span>
                 Elegir archivos
-                <input 
-                  type="file" 
-                  accept="image/jpeg,image/png,image/webp" 
-                  multiple 
-                  onChange={handleImageFilesChange} 
-                  className="hidden" 
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  onChange={handleImageFilesChange}
+                  className="hidden"
                 />
               </label>
               <div className="flex gap-2 flex-wrap mt-2">
@@ -289,11 +298,11 @@ export default function AdminProductNew() {
                   <span className="text-gray-400 italic">Sin archivos seleccionados</span>
                 )}
                 {form.imageFiles.map((file, idx) => (
-                  <img 
-                    key={idx} 
-                    src={URL.createObjectURL(file)} 
-                    alt="preview" 
-                    className="w-16 h-16 object-cover rounded border" 
+                  <img
+                    key={idx}
+                    src={URL.createObjectURL(file)}
+                    alt="preview"
+                    className="w-16 h-16 object-cover rounded border"
                   />
                 ))}
               </div>
@@ -307,30 +316,30 @@ export default function AdminProductNew() {
               <label className="font-bold text-cyan-400 mb-2 block">Videos por URL (YouTube o directo)</label>
               {form.videos.map((v, idx) => (
                 <div key={idx} className="flex gap-2 mb-2 items-center">
-                  <input 
-                    type="text" 
-                    value={v} 
-                    onChange={(e) => handleVideoUrlChange(idx, e.target.value)} 
-                    placeholder={`URL Video #${idx + 1}`} 
-                    className="p-2 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white flex-1 border" 
+                  <input
+                    type="text"
+                    value={v}
+                    onChange={(e) => handleVideoUrlChange(idx, e.target.value)}
+                    placeholder={`URL Video #${idx + 1}`}
+                    className="p-2 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white flex-1 border"
                   />
-                  <button 
-                    type="button" 
-                    onClick={() => handleRemoveVideoUrl(idx)} 
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveVideoUrl(idx)}
                     className="px-2 py-1 bg-red-500 text-white rounded"
                   >
                     Eliminar
                   </button>
                   {v && v.trim() !== "" && (
                     v.includes("youtube.com") || v.includes("youtu.be") ? (
-                      <iframe 
-                        src={getYouTubeEmbedUrl(v)} 
-                        width="80" 
-                        height="45" 
-                        title="preview" 
-                        frameBorder="0" 
-                        allowFullScreen 
-                        className="rounded border" 
+                      <iframe
+                        src={getYouTubeEmbedUrl(v)}
+                        width="80"
+                        height="45"
+                        title="preview"
+                        frameBorder="0"
+                        allowFullScreen
+                        className="rounded border"
                       />
                     ) : (
                       <video src={v} width="80" height="45" controls className="rounded border" />
@@ -338,26 +347,26 @@ export default function AdminProductNew() {
                   )}
                 </div>
               ))}
-              <button 
-                type="button" 
-                onClick={handleAddVideoUrl} 
+              <button
+                type="button"
+                onClick={handleAddVideoUrl}
                 className="px-3 py-1 bg-cyan-500 text-white rounded font-bold"
               >
                 Agregar Video por URL
               </button>
             </div>
-            
+
             <div>
               <label className="font-bold text-cyan-400 mb-2 block">Subir Videos (archivos MP4/WebM)</label>
               <label className="inline-block px-4 py-2 bg-cyan-500 text-white rounded font-bold cursor-pointer hover:bg-cyan-600 transition-colors">
                 <span className="material-symbols-outlined align-middle mr-2">upload</span>
                 Elegir archivos
-                <input 
-                  type="file" 
-                  accept="video/mp4,video/webm" 
-                  multiple 
-                  onChange={handleVideoFilesChange} 
-                  className="hidden" 
+                <input
+                  type="file"
+                  accept="video/mp4,video/webm"
+                  multiple
+                  onChange={handleVideoFilesChange}
+                  className="hidden"
                 />
               </label>
               <div className="flex gap-2 flex-wrap mt-2">
@@ -365,13 +374,13 @@ export default function AdminProductNew() {
                   <span className="text-gray-400 italic">Sin archivos seleccionados</span>
                 )}
                 {form.videoFiles.map((file, idx) => (
-                  <video 
-                    key={idx} 
-                    src={URL.createObjectURL(file)} 
-                    width="80" 
-                    height="45" 
-                    controls 
-                    className="rounded border" 
+                  <video
+                    key={idx}
+                    src={URL.createObjectURL(file)}
+                    width="80"
+                    height="45"
+                    controls
+                    className="rounded border"
                   />
                 ))}
               </div>
@@ -384,32 +393,32 @@ export default function AdminProductNew() {
             <h2 className="text-xl font-bold text-cyan-500 mb-4">Preguntas Frecuentes</h2>
             {form.faqs.map((faq, idx) => (
               <div key={idx} className="space-y-2 mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <input 
-                  type="text" 
-                  value={faq.question} 
-                  onChange={(e) => handleArrayChange("faqs", idx, "question", e.target.value)} 
-                  placeholder="Pregunta" 
-                  className="p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white w-full border" 
+                <input
+                  type="text"
+                  value={faq.question}
+                  onChange={(e) => handleArrayChange("faqs", idx, "question", e.target.value)}
+                  placeholder="Pregunta"
+                  className="p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white w-full border"
                 />
-                <textarea 
-                  value={faq.answer} 
-                  onChange={(e) => handleArrayChange("faqs", idx, "answer", e.target.value)} 
-                  placeholder="Respuesta" 
-                  className="p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white w-full border" 
+                <textarea
+                  value={faq.answer}
+                  onChange={(e) => handleArrayChange("faqs", idx, "answer", e.target.value)}
+                  placeholder="Respuesta"
+                  className="p-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white w-full border"
                   rows="3"
                 />
-                <button 
-                  type="button" 
-                  onClick={() => handleRemoveArrayItem("faqs", idx)} 
+                <button
+                  type="button"
+                  onClick={() => handleRemoveArrayItem("faqs", idx)}
                   className="px-2 py-1 bg-red-500 text-white rounded"
                 >
                   Eliminar Pregunta
                 </button>
               </div>
             ))}
-            <button 
-              type="button" 
-              onClick={() => handleAddArrayItem("faqs", { question: "", answer: "" })} 
+            <button
+              type="button"
+              onClick={() => handleAddArrayItem("faqs", { question: "", answer: "" })}
               className="px-3 py-1 bg-cyan-500 text-white rounded font-bold"
             >
               Agregar Pregunta
@@ -422,9 +431,9 @@ export default function AdminProductNew() {
             </div>
           )}
 
-          <button 
-            type="submit" 
-            disabled={loading} 
+          <button
+            type="submit"
+            disabled={loading}
             className="w-full px-4 py-3 bg-cyan-500 text-white font-black rounded-xl mt-2 shadow-lg hover:bg-cyan-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Guardando..." : "Crear Producto"}
