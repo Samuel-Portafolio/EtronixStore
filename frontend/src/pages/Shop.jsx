@@ -5,7 +5,6 @@ import { CATEGORIES } from "../constants/categories";
 import { Helmet } from "react-helmet-async";
 import OptimizedImage from '../components/OptimizedImage';
 import ProductMediaCarousel from '../components/ProductMediaCarousel';
-import { io } from "socket.io-client";
 
 export default function Shop() {
   const location = useLocation();
@@ -57,23 +56,6 @@ export default function Shop() {
         setLoading(false);
       }
     })();
-    // Socket.IO para actualización en tiempo real
-    const socket = io(import.meta.env.VITE_API_URL);
-    socket.on("productsUpdated", (data) => {
-      const productsArray = Array.isArray(data) ? data : [];
-      setProducts(productsArray);
-      setFilteredProducts(productsArray);
-      // Filtrar carrito si los productos cambiaron
-      if (productsArray.length === 0) {
-        localStorage.removeItem('cart');
-      } else {
-        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        const validIds = new Set(productsArray.map(p => p._id));
-        const filteredCart = cart.filter(item => validIds.has(item._id));
-        localStorage.setItem('cart', JSON.stringify(filteredCart));
-      }
-    });
-    return () => socket.disconnect();
   }, []);
 
   useEffect(() => {
