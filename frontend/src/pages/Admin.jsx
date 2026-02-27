@@ -274,11 +274,11 @@ export default function Admin() {
               </h1>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 w-full max-w-xs sm:max-w-none">
+              <div className="flex flex-col sm:flex-row gap-2 w-full">
                 <button
                   onClick={() => setView("dashboard")}
-                  className={`px-4 py-2 rounded-xl font-black transition-all flex items-center gap-2 ${
+                  className={`w-full sm:w-auto px-4 py-2 rounded-xl font-black transition-all flex items-center gap-2 justify-center ${
                     view === "dashboard"
                       ? "bg-linear-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
                       : "bg-white/10 text-gray-300 hover:bg-white/20"
@@ -287,10 +287,9 @@ export default function Admin() {
                   <span className="material-symbols-outlined text-lg">dashboard</span>
                   Dashboard
                 </button>
-                
                 <button
                   onClick={() => setView("orders")}
-                  className={`px-4 py-2 rounded-xl font-black transition-all flex items-center gap-2 ${
+                  className={`w-full sm:w-auto px-4 py-2 rounded-xl font-black transition-all flex items-center gap-2 justify-center ${
                     view === "orders"
                       ? "bg-linear-to-r from-green-500 to-teal-500 text-white shadow-lg"
                       : "bg-white/10 text-gray-300 hover:bg-white/20"
@@ -299,10 +298,9 @@ export default function Admin() {
                   <span className="material-symbols-outlined text-lg">receipt_long</span>
                   Pedidos
                 </button>
-                
                 <button
                   onClick={() => setView("products")}
-                  className={`px-4 py-2 rounded-xl font-black transition-all flex items-center gap-2 ${
+                  className={`w-full sm:w-auto px-4 py-2 rounded-xl font-black transition-all flex items-center gap-2 justify-center ${
                     view === "products"
                       ? "bg-linear-to-r from-purple-500 to-pink-500 text-white shadow-lg"
                       : "bg-white/10 text-gray-300 hover:bg-white/20"
