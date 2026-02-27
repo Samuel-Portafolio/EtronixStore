@@ -66,13 +66,14 @@ export default function CartDrawer({ open, onClose }) {
 
       {/* Drawer - 100% Responsive con safe-area para iOS */}
       <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-[440px] lg:w-[480px] bg-white shadow-2xl z-50 transform transition-transform duration-300 flex flex-col ${
+        className={`fixed top-0 right-0 w-full sm:w-[440px] lg:w-[480px] bg-white shadow-2xl z-50 transform transition-transform duration-300 flex flex-col ${
           open ? 'translate-x-0' : 'translate-x-full'
         }`}
-        style={{ 
-          height: '100vh', 
-          height: '100dvh', // Dynamic viewport height para móviles
-          maxHeight: '-webkit-fill-available' // Safari iOS fix
+        style={{
+          height: '100dvh',
+          maxHeight: '100dvh',
+          WebkitHeight: '100dvh',
+          WebkitMaxHeight: '100dvh',
         }}
       >
         {/* Header - Responsive padding y tamaños */}
@@ -100,8 +101,8 @@ export default function CartDrawer({ open, onClose }) {
           </button>
         </div>
 
-        {/* Contenido - Con min-height 0 para permitir scroll */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 min-h-0">
+        {/* Contenido - Scrollable, el footer siempre visible */}
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5">
           {cart.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-4">
               <svg className="w-16 h-16 sm:w-20 sm:h-20 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
