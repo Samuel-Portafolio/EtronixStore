@@ -344,10 +344,10 @@ useEffect(() => {
                     {paginatedProducts.map((p) => (
                       <div
                         key={p._id}
-                        className="bg-white/10 rounded-2xl border border-white/20 shadow-lg hover:shadow-cyan-500/30 transition-all overflow-hidden flex flex-col"
+                        className="bg-white/10 rounded-2xl border border-white/10 shadow-lg hover:shadow-cyan-500/30 transition-all flex flex-col p-4"
                       >
                         <Link to={`/products/${p._id}`}>
-                          <div className="relative aspect-4/5 bg-white/5 overflow-hidden">
+                          <div className="aspect-4/5 rounded-xl bg-white/5 overflow-hidden mb-4 border border-white/10">
                             {p.stock > 0 && p.stock < 5 && (
                               <span className="absolute top-2 right-2 px-2 py-1 rounded-lg bg-amber-500 text-white text-xs font-black">
                                 Últimas unidades
@@ -359,7 +359,7 @@ useEffect(() => {
                               images={Array.isArray(p.images) ? p.images : p.image ? [p.image] : []}
                               videos={Array.isArray(p.videos) ? p.videos : []}
                               alt={p.title}
-                              aspect="aspect-square"
+                              aspect="aspect-4/5"
                             />
                           </div>
                         </Link>
