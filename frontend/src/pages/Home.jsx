@@ -62,8 +62,8 @@ const ProductCard = memo(function ProductCard({ product, idx }) {
 
 export default function Home() {
   const initialProducts = getInitialProducts();
-  const [featuredProducts, setFeaturedProducts] = useState(initialProducts);
-  const [loading, setLoading] = useState(() => initialProducts.length === 0);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showLightRays, setShowLightRays] = useState(false);
 
   const seoData = generateMetaTags({
@@ -94,34 +94,21 @@ export default function Home() {
 
     // SIEMPRE hacer fetch — mostrar caché mientras llega la respuesta (stale-while-revalidate)
     // El bloqueo por TTL causaba que ediciones del admin no se reflejaran en Home
-    (async () => {
-      try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/products`,
-          { signal: controller.signal }
-        );
-        const data = await res.json();
-        const sliced = Array.isArray(data) ? data.slice(0, 5) : [];
-        setFeaturedProducts(sliced);
-        try {
-          if (sliced.length > 0) {
-            localStorage.setItem(CACHE_KEY, JSON.stringify(sliced));
-            localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
-          } else {
-            localStorage.removeItem(CACHE_KEY);
-            localStorage.removeItem(CACHE_TS_KEY);
-          }
-        } catch { }
-      } catch (error) {
-        if (error.name !== "AbortError") {
-          console.error("Error cargando productos:", error);
-        }
-        localStorage.removeItem(CACHE_KEY);
-        localStorage.removeItem(CACHE_TS_KEY);
-      } finally {
-        setLoading(false);
-      }
-    })();
+
+useEffect(() => {
+  (async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
+      const data = await res.json();
+      const sliced = Array.isArray(data) ? data.slice(0, 5) : [];
+      setFeaturedProducts(sliced);
+    } catch (error) {
+      console.error("Error cargando productos:", error);
+    } finally {
+      setLoading(false);
+    }
+  })();
+}, [])
 
     return () => controller.abort();
   }, []);
