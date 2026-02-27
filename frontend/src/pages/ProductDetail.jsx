@@ -214,12 +214,14 @@ export default function ProductDetail() {
           {/* Carrusel */}
           <div className="w-full max-w-2xl mx-auto lg:max-w-none">
             <div className="lg:sticky lg:top-24">
-              <ProductMediaCarousel
-                images={Array.isArray(product.images) ? product.images : product.image ? [product.image] : []}
-                videos={Array.isArray(product.videos) ? product.videos : []}
-                alt={product.title}
-                aspect="aspect-square"
-              />
+              <div className="aspect-4/5 rounded-2xl bg-white/5 overflow-hidden border border-white/10">
+                <ProductMediaCarousel
+                  images={Array.isArray(product.images) ? product.images : product.image ? [product.image] : []}
+                  videos={Array.isArray(product.videos) ? product.videos : []}
+                  alt={product.title}
+                  aspect="aspect-square"
+                />
+              </div>
             </div>
           </div>
 
