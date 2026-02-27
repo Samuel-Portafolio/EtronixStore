@@ -64,19 +64,19 @@ export default function CartDrawer({ open, onClose }) {
         />
       )}
 
-      {/* Drawer - 100% Responsive con safe-area para iOS */}
+      {/* Drawer - OPTIMIZADO PARA FOOTER VISIBLE EN TODOS LOS DISPOSITIVOS */}
       <div
-        className={`fixed top-0 right-0 w-full sm:w-[440px] lg:w-[480px] bg-white shadow-2xl z-50 transform transition-transform duration-300 flex flex-col ${
+        className={`fixed top-0 right-0 w-full sm:w-[440px] lg:w-[480px] bg-white shadow-2xl z-50 transform transition-transform duration-300 flex flex-col overflow-hidden ${
           open ? 'translate-x-0' : 'translate-x-full'
         }`}
-        style={{
-          height: '100svh',
-          maxHeight: '100svh',
-          WebkitHeight: '100svh',
-          WebkitMaxHeight: '100svh',
+        style={{ 
+          height: '100vh',
+          height: '100dvh',
+          maxHeight: '100vh',
+          maxHeight: '100dvh'
         }}
       >
-        {/* Header - Responsive padding y tamaños */}
+        {/* Header - SHRINK-0 para que nunca se comprima */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50 shrink-0">
           <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
             <svg className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,8 +101,8 @@ export default function CartDrawer({ open, onClose }) {
           </button>
         </div>
 
-        {/* Contenido - Scrollable, el footer siempre visible */}
-        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5">
+        {/* Contenido - FLEX-1 + MIN-H-0 para scroll correcto */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 min-h-0">
           {cart.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-4">
               <svg className="w-16 h-16 sm:w-20 sm:h-20 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,11 +221,11 @@ export default function CartDrawer({ open, onClose }) {
           )}
         </div>
 
-        {/* Footer - Siempre visible (shrink-0) */}
+        {/* Footer - SHRINK-0 GARANTIZA VISIBILIDAD EN TODOS LOS DISPOSITIVOS */}
         {cart.length > 0 && (
-          <div className="shrink-0 border-t border-gray-200 p-4 sm:p-5 bg-gray-50 safe-bottom">
+          <div className="shrink-0 border-t border-gray-200 p-4 sm:p-5 bg-gray-50">
             {/* Total - Responsive text */}
-            <div className="flex items-center justify-between mb-4 sm:mb-5">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
               <span className="text-base sm:text-lg text-gray-700 font-semibold">Total:</span>
               <span className="text-xl sm:text-2xl font-bold text-gray-900">
                 ${total.toLocaleString("es-CO")}
@@ -236,7 +236,7 @@ export default function CartDrawer({ open, onClose }) {
             <Link
               to="/checkout"
               onClick={onClose}
-              className="block w-full text-center bg-indigo-600 text-white py-3 sm:py-3.5 rounded-lg font-bold hover:bg-indigo-700 transition-colors text-sm sm:text-base shadow-lg hover:shadow-xl active:scale-98"
+              className="block w-full text-center bg-indigo-600 text-white py-3 sm:py-3.5 rounded-lg font-bold hover:bg-indigo-700 transition-colors text-sm sm:text-base shadow-lg hover:shadow-xl active:scale-[0.98]"
             >
               Finalizar Compra
             </Link>
