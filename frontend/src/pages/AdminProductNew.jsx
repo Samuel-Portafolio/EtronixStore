@@ -176,6 +176,13 @@ export default function AdminProductNew() {
           <meta name="robots" content="noindex, nofollow" />
         </Helmet>
         
+        <button>
+          <Link to="/admin" className="mb-4 text-sm text-cyan-500 hover:text-cyan-700 flex items-center gap-1">
+          <span className="material-symbols-outlined text-base">arrow_back</span>
+          Volver al Panel
+        </Link>
+        </button>
+        
         <h1 className="text-3xl font-black mb-8 text-cyan-400 text-center">
           Agregar Nuevo Producto
         </h1>
