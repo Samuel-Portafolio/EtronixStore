@@ -61,28 +61,6 @@ const ProductCard = memo(function ProductCard({ product, idx }) {
 });
 
 export default function Home() {
-    // Recarga automática de productos destacados cada 30 segundos
-    useEffect(() => {
-      const interval = setInterval(async () => {
-        try {
-          const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
-          const data = await res.json();
-          const sliced = Array.isArray(data) ? data.slice(0, 5) : [];
-          setFeaturedProducts(sliced);
-          if (sliced.length > 0) {
-            localStorage.setItem(CACHE_KEY, JSON.stringify(sliced));
-            localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
-          } else {
-            localStorage.removeItem(CACHE_KEY);
-            localStorage.removeItem(CACHE_TS_KEY);
-          }
-        } catch {
-          localStorage.removeItem(CACHE_KEY);
-          localStorage.removeItem(CACHE_TS_KEY);
-        }
-      }, 30000);
-      return () => clearInterval(interval);
-    }, []);
   const initialProducts = getInitialProducts();
   const [featuredProducts, setFeaturedProducts] = useState(initialProducts);
   const [loading, setLoading] = useState(() => initialProducts.length === 0);
