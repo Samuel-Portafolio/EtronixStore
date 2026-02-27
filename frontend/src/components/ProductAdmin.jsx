@@ -67,14 +67,14 @@ export default function ProductAdmin({ adminCode }) {
         <div className="text-center text-gray-400 font-bold py-8">No hay productos</div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full bg-white dark:bg-gray-900 rounded-xl shadow-xl">
+          <table className="min-w-full bg-white dark:bg-gray-900 rounded-xl shadow-xl text-xs md:text-sm">
             <thead>
               <tr className="bg-linear-to-r from-cyan-500 to-blue-500 text-white">
-                <th className="px-4 py-3 text-left font-bold">Título</th>
-                <th className="px-4 py-3 text-left font-bold">Precio</th>
-                <th className="px-4 py-3 text-left font-bold">Stock</th>
-                <th className="px-4 py-3 text-left font-bold">Categoría</th>
-                <th className="px-4 py-3 text-left font-bold">Acciones</th>
+                <th className="px-2 py-2 md:px-4 md:py-3 text-left font-bold whitespace-nowrap">Título</th>
+                <th className="px-2 py-2 md:px-4 md:py-3 text-left font-bold whitespace-nowrap">Precio</th>
+                <th className="px-2 py-2 md:px-4 md:py-3 text-left font-bold whitespace-nowrap">Stock</th>
+                <th className="px-2 py-2 md:px-4 md:py-3 text-left font-bold whitespace-nowrap">Categoría</th>
+                <th className="px-2 py-2 md:px-4 md:py-3 text-left font-bold whitespace-nowrap">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -83,33 +83,33 @@ export default function ProductAdmin({ adminCode }) {
                   key={product._id}
                   className="border-b border-gray-200 dark:border-gray-700 hover:bg-cyan-50 dark:hover:bg-gray-800 transition-all group"
                 >
-                  <td className="px-4 py-3 font-bold text-cyan-600 dark:text-cyan-400 flex items-center gap-2">
+                  <td className="px-2 py-2 md:px-4 md:py-3 font-bold text-cyan-600 dark:text-cyan-400 flex items-center gap-2 whitespace-nowrap">
                     <span className="material-symbols-outlined text-base text-cyan-400">smartphone</span>
                     {product.title}
                   </td>
-                  <td className="px-4 py-3 text-gray-700 dark:text-gray-200 font-bold">
+                  <td className="px-2 py-2 md:px-4 md:py-3 text-gray-700 dark:text-gray-200 font-bold whitespace-nowrap">
                     <span className="material-symbols-outlined text-base text-green-400">attach_money</span>
                     ${product.price?.toLocaleString("es-CO")}
                   </td>
-                  <td className="px-4 py-3 text-gray-700 dark:text-gray-200 font-bold">
+                  <td className="px-2 py-2 md:px-4 md:py-3 text-gray-700 dark:text-gray-200 font-bold whitespace-nowrap">
                     <span className="material-symbols-outlined text-base text-yellow-400">inventory</span>
                     {product.stock}
                   </td>
-                  <td className="px-4 py-3 text-gray-700 dark:text-gray-200 font-bold">
+                  <td className="px-2 py-2 md:px-4 md:py-3 text-gray-700 dark:text-gray-200 font-bold whitespace-nowrap">
                     <span className="material-symbols-outlined text-base text-purple-400">category</span>
                     {product.category}
                   </td>
-                  <td className="px-4 py-3 flex gap-2">
+                  <td className="px-2 py-2 md:px-4 md:py-3 flex gap-2 whitespace-nowrap">
                     <Link
                       to={`/admin/product/edit/${product._id}`}
-                      className="px-3 py-1 bg-linear-to-r from-blue-500 to-cyan-500 text-white rounded-lg font-bold hover:scale-105 hover:bg-blue-600 text-xs flex items-center gap-1 shadow group-hover:shadow-lg transition-all"
+                      className="px-2 py-1 md:px-3 md:py-1 bg-linear-to-r from-blue-500 to-cyan-500 text-white rounded-lg font-bold hover:scale-105 hover:bg-blue-600 text-xs flex items-center gap-1 shadow group-hover:shadow-lg transition-all"
                     >
                       <span className="material-symbols-outlined text-base">edit</span>
                       Editar
                     </Link>
                     <button
                       onClick={() => handleDelete(product._id)}
-                      className="px-3 py-1 bg-linear-to-r from-red-500 to-pink-500 text-white rounded-lg font-bold hover:scale-105 hover:bg-red-600 text-xs flex items-center gap-1 shadow group-hover:shadow-lg transition-all"
+                      className="px-2 py-1 md:px-3 md:py-1 bg-linear-to-r from-red-500 to-pink-500 text-white rounded-lg font-bold hover:scale-105 hover:bg-red-600 text-xs flex items-center gap-1 shadow group-hover:shadow-lg transition-all"
                     >
                       <span className="material-symbols-outlined text-base">delete</span>
                       Eliminar
@@ -119,6 +119,7 @@ export default function ProductAdmin({ adminCode }) {
               ))}
             </tbody>
           </table>
+          <div className="md:hidden text-gray-400 text-xs mt-2 text-center">Desliza la tabla &rarr;</div>
         </div>
       )}
     </div>

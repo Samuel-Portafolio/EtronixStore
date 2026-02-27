@@ -170,7 +170,7 @@ export default function AdminProductNew() {
 
   return (
     <div className="min-h-screen flex flex-col bg-linear-to-br from-gray-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-950 dark:to-cyan-950">
-      <div className="max-w-3xl mx-auto py-12 px-4">
+      <div className="w-full max-w-3xl mx-auto py-6 px-2 sm:py-10 sm:px-4">
         <Helmet>
           <title>Nuevo Producto | Admin | Etronix Store</title>
           <meta name="robots" content="noindex, nofollow" />
@@ -180,17 +180,17 @@ export default function AdminProductNew() {
           Agregar Nuevo Producto
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
           {/* Datos principales */}
-          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 space-y-4 border border-cyan-200 dark:border-cyan-900">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-3 sm:p-6 space-y-4 border border-cyan-200 dark:border-cyan-900">
             <h2 className="text-xl font-bold text-cyan-500 mb-4">Datos principales</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4">
               <input 
                 name="title" 
                 value={form.title} 
                 onChange={handleChange} 
                 placeholder="Nombre del producto" 
-                className="p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border" 
+                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm" 
                 required 
               />
               <input 
@@ -199,7 +199,7 @@ export default function AdminProductNew() {
                 onChange={handleChange} 
                 placeholder="Precio" 
                 type="number" 
-                className="p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border" 
+                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm" 
                 required 
               />
               <input 
@@ -208,14 +208,14 @@ export default function AdminProductNew() {
                 onChange={handleChange} 
                 placeholder="Stock disponible" 
                 type="number" 
-                className="p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border" 
+                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm" 
                 required 
               />
               <select 
                 name="category" 
                 value={form.category} 
                 onChange={handleChange} 
-                className="p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border"
+                className="p-2 sm:p-3 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border text-sm" 
               >
                 <option value="celulares">Celulares</option>
                 <option value="audifonos">Audífonos</option>
