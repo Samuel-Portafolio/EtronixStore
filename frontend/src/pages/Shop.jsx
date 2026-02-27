@@ -110,7 +110,7 @@ export default function Shop() {
 
     setFilteredProducts(filtered);
     setPage(1);
-  }, [debouncedQuery, products, sortBy, priceRange, selectedCategory]);
+  }, [debouncedQuery, products, sortBy, priceRange, selectedCategory, location]);
 
   const addToCart = (p) => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
