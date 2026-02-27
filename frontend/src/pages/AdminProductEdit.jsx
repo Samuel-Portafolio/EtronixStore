@@ -14,6 +14,12 @@ function getYouTubeEmbedUrl(url) {
   return url;
 }
 
+// Limpia todos los cachés del frontend relacionados a productos
+function clearProductCache() {
+  localStorage.removeItem('featuredProducts');
+  localStorage.removeItem('featuredProductsTs');
+}
+
 export default function AdminProductEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -225,6 +231,8 @@ export default function AdminProductEdit() {
       if (res.ok) {
         const updated = await res.json();
         console.log('✅ Producto actualizado:', updated);
+        // ✅ Invalida el caché del frontend para reflejar cambios de inmediato
+        clearProductCache();
         navigate("/admin");
       } else {
         const errorData = await res.json();

@@ -1,7 +1,11 @@
-
-
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+
+// Limpia todos los cachés del frontend relacionados a productos
+function clearProductCache() {
+  localStorage.removeItem('featuredProducts');
+  localStorage.removeItem('featuredProductsTs');
+}
 
 export default function ProductAdmin({ adminCode }) {
   const [products, setProducts] = useState([]);
@@ -36,6 +40,8 @@ export default function ProductAdmin({ adminCode }) {
         headers: { "x-admin-code": adminCode },
       });
       if (!res.ok) throw new Error("Error eliminando producto");
+      // ✅ Invalida el caché del frontend para reflejar cambios de inmediato
+      clearProductCache();
       setProducts((prev) => prev.filter((p) => p._id !== id));
     } catch (err) {
       alert("No se pudo eliminar el producto");

@@ -14,6 +14,12 @@ function getYouTubeEmbedUrl(url) {
   return url;
 }
 
+// Limpia todos los cachés del frontend relacionados a productos
+function clearProductCache() {
+  localStorage.removeItem('featuredProducts');
+  localStorage.removeItem('featuredProductsTs');
+}
+
 // Este es el componente para CREAR productos nuevos
 export default function AdminProductNew() {
   const navigate = useNavigate();
@@ -155,6 +161,8 @@ export default function AdminProductNew() {
       });
 
       if (res.ok) {
+        // ✅ Invalida el caché del frontend para reflejar cambios de inmediato
+        clearProductCache();
         navigate("/admin");
       } else {
         const errorData = await res.json();
