@@ -3,28 +3,32 @@
 
 const sanitize = (obj) => {
   if (obj === null || obj === undefined) return obj;
-  
+
   if (typeof obj === 'string') {
-    // Remover operadores MongoDB peligrosos
-    return obj.replace(/\$/g, '').replace(/\./g, '');
+    // Los strings como valores son seguros, no modificar
+    // (emails, URLs, descripciones, etc. no deben tocarse)
+    return obj;
   }
-  
+
   if (Array.isArray(obj)) {
     return obj.map(sanitize);
   }
-  
+
   if (typeof obj === 'object') {
     const sanitized = {};
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        // Remover keys que contengan $ o .
-        const sanitizedKey = key.replace(/\$/g, '').replace(/\./g, '');
-        sanitized[sanitizedKey] = sanitize(obj[key]);
+        // Descartar keys que empiecen con $ (operadores MongoDB como $gt, $where, $regex)
+        // Descartar keys que contengan . (notación de punto para acceder a subdocumentos)
+        if (key.startsWith('$') || key.includes('.')) {
+          continue;
+        }
+        sanitized[key] = sanitize(obj[key]);
       }
     }
     return sanitized;
   }
-  
+
   return obj;
 };
 
