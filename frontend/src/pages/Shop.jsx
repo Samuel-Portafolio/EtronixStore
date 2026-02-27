@@ -28,48 +28,38 @@ export default function Shop() {
   const navigate = useNavigate();
 
   // ✅ SOLUCIÓN: Agregar location.pathname como dependencia para refetch al navegar
-  useEffect(() => {
-    const controller = new AbortController();
-    
-    (async () => {
-      setLoading(true); // ← Resetear loading al refetch
-      try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/products`,
-          { 
-            signal: controller.signal,
-            cache: 'no-cache' // ← Bypass de caché HTTP
-          }
-        );
-        const data = await res.json();
-        const productsArray = Array.isArray(data) ? data : [];
-
-        setProducts(productsArray);
-        setFilteredProducts(productsArray);
-
-        // Filtrar carrito si los productos cambiaron
-        if (productsArray.length === 0) {
-          localStorage.removeItem('cart');
-        } else {
-          const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-          const validIds = new Set(productsArray.map(p => p._id));
-          const filteredCart = cart.filter(item => validIds.has(item._id));
-          localStorage.setItem('cart', JSON.stringify(filteredCart));
-        }
-      } catch (error) {
-        if (error.name !== 'AbortError') {
-          console.error("Error cargando productos:", error);
-        }
-        setProducts([]);
-        setFilteredProducts([]);
-        localStorage.removeItem('cart');
-      } finally {
-        setLoading(false);
+useEffect(() => {
+  const controller = new AbortController();
+  
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/products`,
+        { signal: controller.signal, cache: 'no-cache' }
+      );
+      const data = await res.json();
+      setProducts(Array.isArray(data) ? data : []);
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        console.error("Error:", error);
       }
-    })();
-
-    return () => controller.abort();
-  }, [location.pathname]); // ← CAMBIO CLAVE: agregar location.pathname
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Fetch inicial
+  fetchProducts();
+  
+  // ✅ Polling cada 30 segundos para stock actualizado
+  const interval = setInterval(fetchProducts, 30000);
+  
+  return () => {
+    controller.abort();
+    clearInterval(interval);
+  };
+}, [location.pathname]);
 
   useEffect(() => {
     const id = setTimeout(() => setDebouncedQuery(searchQuery), 300);
