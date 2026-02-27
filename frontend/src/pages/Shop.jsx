@@ -27,11 +27,20 @@ export default function Shop() {
   const [tempPriceRange, setTempPriceRange] = useState({ min: '', max: '' });
   const navigate = useNavigate();
 
-
+  // ✅ SOLUCIÓN: Agregar location.pathname como dependencia para refetch al navegar
   useEffect(() => {
+    const controller = new AbortController();
+    
     (async () => {
+      setLoading(true); // ← Resetear loading al refetch
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/products`,
+          { 
+            signal: controller.signal,
+            cache: 'no-cache' // ← Bypass de caché HTTP
+          }
+        );
         const data = await res.json();
         const productsArray = Array.isArray(data) ? data : [];
 
@@ -48,7 +57,9 @@ export default function Shop() {
           localStorage.setItem('cart', JSON.stringify(filteredCart));
         }
       } catch (error) {
-        console.error("Error cargando productos:", error);
+        if (error.name !== 'AbortError') {
+          console.error("Error cargando productos:", error);
+        }
         setProducts([]);
         setFilteredProducts([]);
         localStorage.removeItem('cart');
@@ -56,7 +67,9 @@ export default function Shop() {
         setLoading(false);
       }
     })();
-  }, []);
+
+    return () => controller.abort();
+  }, [location.pathname]); // ← CAMBIO CLAVE: agregar location.pathname
 
   useEffect(() => {
     const id = setTimeout(() => setDebouncedQuery(searchQuery), 300);
@@ -78,10 +91,10 @@ export default function Shop() {
     }
 
     // Filtrar por categoría
-      if (selectedCategory && selectedCategory !== 'all') {
-        const normalize = str => (str || '').toLowerCase().replace(/\s+/g, '');
-        filtered = filtered.filter(p => normalize(p.category) === normalize(selectedCategory));
-      }
+    if (selectedCategory && selectedCategory !== 'all') {
+      const normalize = str => (str || '').toLowerCase().replace(/\s+/g, '');
+      filtered = filtered.filter(p => normalize(p.category) === normalize(selectedCategory));
+    }
 
     filtered = filtered.filter(p =>
       p.price >= priceRange.min && p.price <= priceRange.max
