@@ -219,7 +219,7 @@ export default function ProductDetail() {
                   images={Array.isArray(product.images) ? product.images : product.image ? [product.image] : []}
                   videos={Array.isArray(product.videos) ? product.videos : []}
                   alt={product.title}
-                  aspect="aspect-square"
+                  aspect="aspect-4/5"
                 />
               </div>
             </div>
