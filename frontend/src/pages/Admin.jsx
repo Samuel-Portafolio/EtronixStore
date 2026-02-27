@@ -160,56 +160,39 @@ export default function Admin() {
       {/* Estilo para ocultar scrollbars */}
       <style>{`.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}</style>
 
-      {/* Header Adaptativo */}
-      <header className="sticky top-0 z-30 backdrop-blur-xl bg-slate-900/90 border-b border-white/10 shadow-2xl">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-cyan-400 text-2xl">shield_person</span>
-              <h1 className="font-black text-lg md:text-xl tracking-tighter bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                ETRONIX <span className="hidden sm:inline">ADMIN</span>
-              </h1>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <button onClick={fetchOrders} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-cyan-400 transition-colors">
-                <span className="material-symbols-outlined">refresh</span>
-              </button>
-              <Link to="/shop" className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-xl border border-white/10 text-xs font-bold">
-                <span className="material-symbols-outlined text-sm">store</span> Tienda
-              </Link>
-              <button onClick={handleLogout} className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white transition-all border border-red-500/20 text-xs font-bold flex items-center gap-1">
-                <span className="material-symbols-outlined text-sm">logout</span>
-                <span className="hidden sm:inline">Salir</span>
-              </button>
-            </div>
-          </div>
+      {/* Contenido Principal con padding superior para compensar la falta de header */}
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        
+        {/* Selector de Vista (Navegación Simple sin Header) */}
+        <nav className="flex gap-2 mb-8 overflow-x-auto no-scrollbar pb-2 border-b border-white/10">
+          {[
+            { id: "dashboard", label: "Dashboard", icon: "grid_view" },
+            { id: "orders", label: "Pedidos", icon: "receipt_long" },
+            { id: "products", label: "Productos", icon: "inventory_2" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setView(tab.id)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-black transition-all whitespace-nowrap ${
+                view === tab.id 
+                ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/30" 
+                : "text-slate-400 hover:bg-white/5 border border-white/5"
+              }`}
+            >
+              <span className="material-symbols-outlined text-lg">{tab.icon}</span>
+              {tab.label}
+            </button>
+          ))}
+          
+          <button 
+            onClick={handleLogout}
+            className="ml-auto flex items-center gap-2 px-4 py-2 text-red-400 text-xs font-bold hover:bg-red-500/10 rounded-xl transition-all"
+          >
+            <span className="material-symbols-outlined text-lg">logout</span>
+            Salir
+          </button>
+        </nav>
 
-          {/* Nav Pestañas - Scroll lateral en móvil */}
-          <nav className="flex gap-1 pb-2 overflow-x-auto no-scrollbar">
-            {[
-              { id: "dashboard", label: "Dashboard", icon: "grid_view" },
-              { id: "orders", label: "Pedidos", icon: "receipt_long" },
-              { id: "products", label: "Productos", icon: "inventory_2" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setView(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap ${
-                  view === tab.id 
-                  ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/20" 
-                  : "text-slate-400 hover:bg-white/5"
-                }`}
-              >
-                <span className="material-symbols-outlined text-lg">{tab.icon}</span>
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 py-6">
         {view === "dashboard" ? (
           <AdminDashboard adminCode={adminCode} />
         ) : view === "orders" ? (
@@ -217,7 +200,7 @@ export default function Admin() {
             {/* Stats Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
               {orderStats.map((stat) => (
-                <div key={stat.label} className="bg-white/5 border border-white/10 p-4 rounded-2xl flex flex-col items-center justify-center text-center">
+                <div key={stat.label} className="bg-white/5 border border-white/10 p-4 rounded-3xl flex flex-col items-center justify-center text-center">
                   <span className={`material-symbols-outlined bg-linear-to-br ${stat.color} bg-clip-text text-transparent text-2xl mb-1`}>
                     {stat.icon}
                   </span>
@@ -233,7 +216,7 @@ export default function Admin() {
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
-                  className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap border transition-all ${
+                  className={`px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap border transition-all ${
                     filter === f 
                     ? "bg-white text-slate-900 border-white" 
                     : "bg-transparent border-white/20 text-slate-400"
@@ -255,7 +238,6 @@ export default function Admin() {
               <div className="space-y-4">
                 {filteredOrders.map((order) => (
                   <div key={order._id} className="bg-slate-900/50 border border-white/10 rounded-3xl p-4 sm:p-6 hover:border-cyan-500/30 transition-colors shadow-xl">
-                    {/* ID y Status */}
                     <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400">
@@ -283,7 +265,6 @@ export default function Admin() {
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-6">
-                      {/* Cliente */}
                       <div className="space-y-3">
                         <h4 className="text-[10px] font-black text-cyan-500 uppercase tracking-widest flex items-center gap-2">
                           <span className="material-symbols-outlined text-sm">person</span> Datos de Entrega
@@ -302,16 +283,10 @@ export default function Admin() {
                             >
                               <span className="material-symbols-outlined text-xs">chat</span> WHATSAPP
                             </a>
-                            {order.buyer?.email && (
-                              <p className="text-[10px] bg-white/5 px-3 py-1.5 rounded-xl text-slate-400 truncate max-w-[150px]">
-                                {order.buyer.email}
-                              </p>
-                            )}
                           </div>
                         </div>
                       </div>
 
-                      {/* Resumen Productos */}
                       <div className="space-y-3">
                         <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-widest flex items-center gap-2">
                           <span className="material-symbols-outlined text-sm">inventory</span> Resumen de Compra
@@ -346,7 +321,6 @@ export default function Admin() {
         )}
       </main>
 
-      {/* Audio para notificaciones */}
       <audio ref={audioRef} src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjKM0/LRgzgKGGS46+mjUhENUKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0" />
     </div>
   );
