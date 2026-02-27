@@ -70,10 +70,10 @@ export default function CartDrawer({ open, onClose }) {
           open ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{
-          height: '100dvh',
-          maxHeight: '100dvh',
-          WebkitHeight: '100dvh',
-          WebkitMaxHeight: '100dvh',
+          height: '100svh',
+          maxHeight: '100svh',
+          WebkitHeight: '100svh',
+          WebkitMaxHeight: '100svh',
         }}
       >
         {/* Header - Responsive padding y tamaños */}
