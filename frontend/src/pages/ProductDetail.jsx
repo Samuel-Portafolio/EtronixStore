@@ -32,6 +32,18 @@ function getYouTubeEmbedUrl(url) {
 
 
 export default function ProductDetail() {
+    // Recarga automática de datos del producto cada 30 segundos
+    useEffect(() => {
+      if (!id) return;
+      const interval = setInterval(async () => {
+        try {
+          const res = await fetch(`${API_URL}/api/products/${id}`);
+          const data = await res.json();
+          setProduct(data);
+        } catch {}
+      }, 30000);
+      return () => clearInterval(interval);
+    }, [id]);
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);

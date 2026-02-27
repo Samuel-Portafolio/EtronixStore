@@ -7,6 +7,21 @@ import OptimizedImage from '../components/OptimizedImage';
 import ProductMediaCarousel from '../components/ProductMediaCarousel';
 
 export default function Shop() {
+    // Recarga automática cada 30 segundos
+    useEffect(() => {
+      const interval = setInterval(async () => {
+        try {
+          const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
+          const data = await res.json();
+          const productsArray = Array.isArray(data) ? data : [];
+          setProducts(productsArray);
+          setFilteredProducts(productsArray);
+        } catch (error) {
+          // No hacer nada, solo evitar crash
+        }
+      }, 30000); // 30 segundos
+      return () => clearInterval(interval);
+    }, []);
   const location = useLocation();
   // Obtener categoría desde query param
   const params = new URLSearchParams(location.search);

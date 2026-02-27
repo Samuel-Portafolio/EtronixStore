@@ -11,6 +11,26 @@ function resolveImageSrc(src) {
 }
 
 export default function CartDrawer({ open, onClose }) {
+    // Recarga automática de productos en el carrito cada 30 segundos
+    useEffect(() => {
+      const interval = setInterval(async () => {
+        const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
+        if (savedCart.length === 0) return;
+        try {
+          const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
+          const data = await res.json();
+          const productsArray = Array.isArray(data) ? data : [];
+          // Actualizar precios y stock en el carrito
+          const updatedCart = savedCart.map(item => {
+            const prod = productsArray.find(p => p._id === item._id);
+            return prod ? { ...item, price: prod.price, stock: prod.stock } : item;
+          });
+          localStorage.setItem('cart', JSON.stringify(updatedCart));
+          setCart(updatedCart);
+        } catch {}
+      }, 30000);
+      return () => clearInterval(interval);
+    }, []);
   const [cart, setCart] = useState([]);
 
   useEffect(() => {
