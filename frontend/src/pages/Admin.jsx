@@ -84,7 +84,7 @@ export default function Admin() {
       Notification.requestPermission();
     }
     fetchOrders();
-    const interval = setInterval(fetchOrders, 30000);
+    const interval = setInterval(fetchOrders, 120000);
     return () => clearInterval(interval);
   }, [isAuthenticated, adminCode]);
 

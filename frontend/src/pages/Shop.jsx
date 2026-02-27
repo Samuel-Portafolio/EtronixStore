@@ -34,30 +34,34 @@ useEffect(() => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/products`,
-        { signal: controller.signal, cache: 'no-cache' }
-      );
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`, {
+        signal: controller.signal,
+        cache: 'no-cache'
+      });
       const data = await res.json();
       setProducts(Array.isArray(data) ? data : []);
     } catch (error) {
-      if (error.name !== 'AbortError') {
-        console.error("Error:", error);
-      }
+      if (error.name !== 'AbortError') console.error("Error:", error);
     } finally {
       setLoading(false);
     }
   };
-  
-  // Fetch inicial
-  fetchProducts();
-  
-  // ✅ Polling cada 30 segundos para stock actualizado
-  const interval = setInterval(fetchProducts, 30000);
-  
+
+  fetchProducts(); // Solo al montar
+
+  // Refetch cuando el usuario vuelve a la pestaña
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === 'visible') fetchProducts();
+  };
+
+  // Refetch cuando recupera conexión
+  window.addEventListener('visibilitychange', handleVisibilityChange);
+  window.addEventListener('online', fetchProducts);
+
   return () => {
     controller.abort();
-    clearInterval(interval);
+    window.removeEventListener('visibilitychange', handleVisibilityChange);
+    window.removeEventListener('online', fetchProducts);
   };
 }, [location.pathname]);
 
