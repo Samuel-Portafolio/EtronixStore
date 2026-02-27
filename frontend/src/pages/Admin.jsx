@@ -274,11 +274,21 @@ export default function Admin() {
               </h1>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 w-full max-w-xs sm:max-w-none">
-              <div className="flex flex-col sm:flex-row gap-2 w-full">
+            {/* Botón menú hamburguesa solo en móvil */}
+            <button
+              className="sm:hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 text-cyan-400 focus:outline-none"
+              onClick={() => setSidebarOpen && setSidebarOpen((v) => !v)}
+              aria-label="Abrir menú"
+            >
+              <span className="material-symbols-outlined text-2xl">menu</span>
+            </button>
+
+            {/* Opciones horizontales solo desktop */}
+            <div className="hidden sm:flex items-center gap-3">
+              <div className="flex gap-2">
                 <button
                   onClick={() => setView("dashboard")}
-                  className={`w-full sm:w-auto px-4 py-2 rounded-xl font-black transition-all flex items-center gap-2 justify-center ${
+                  className={`px-4 py-2 rounded-xl font-black transition-all flex items-center gap-2 ${
                     view === "dashboard"
                       ? "bg-linear-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
                       : "bg-white/10 text-gray-300 hover:bg-white/20"
@@ -289,7 +299,7 @@ export default function Admin() {
                 </button>
                 <button
                   onClick={() => setView("orders")}
-                  className={`w-full sm:w-auto px-4 py-2 rounded-xl font-black transition-all flex items-center gap-2 justify-center ${
+                  className={`px-4 py-2 rounded-xl font-black transition-all flex items-center gap-2 ${
                     view === "orders"
                       ? "bg-linear-to-r from-green-500 to-teal-500 text-white shadow-lg"
                       : "bg-white/10 text-gray-300 hover:bg-white/20"
@@ -300,7 +310,7 @@ export default function Admin() {
                 </button>
                 <button
                   onClick={() => setView("products")}
-                  className={`w-full sm:w-auto px-4 py-2 rounded-xl font-black transition-all flex items-center gap-2 justify-center ${
+                  className={`px-4 py-2 rounded-xl font-black transition-all flex items-center gap-2 ${
                     view === "products"
                       ? "bg-linear-to-r from-purple-500 to-pink-500 text-white shadow-lg"
                       : "bg-white/10 text-gray-300 hover:bg-white/20"
@@ -342,7 +352,88 @@ export default function Admin() {
               </Link>
             </div>
           </div>
+
+          {/* Sidebar tipo drawer en móvil */}
+          {typeof window !== 'undefined' && (
+            <SidebarDrawer
+              open={sidebarOpen}
+              setOpen={setSidebarOpen}
+              view={view}
+              setView={setView}
+              fetchOrders={fetchOrders}
+              handleLogout={handleLogout}
+            />
+          )}
         </header>
+
+// --- SidebarDrawer COMPONENTE ---
+import React, { useState as useStateDrawer } from "react";
+function SidebarDrawer({ open, setOpen, view, setView, fetchOrders, handleLogout }) {
+  return (
+    <div
+      className={`fixed inset-0 z-40 bg-black/40 transition-opacity duration-200 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+      aria-hidden={!open}
+    >
+      <div
+        className={`fixed left-0 top-0 bottom-0 w-64 bg-gray-900 border-r border-cyan-500/20 shadow-2xl z-50 transform transition-transform duration-200 ${open ? "translate-x-0" : "-translate-x-full"}`}
+      >
+        <div className="flex flex-col gap-2 p-6 pt-8">
+          <button
+            onClick={() => { setView("dashboard"); setOpen(false); }}
+            className={`w-full px-4 py-3 rounded-xl font-black flex items-center gap-2 mb-2 ${view === "dashboard" ? "bg-linear-to-r from-cyan-500 to-blue-500 text-white shadow-lg" : "bg-white/10 text-gray-300 hover:bg-white/20"}`}
+          >
+            <span className="material-symbols-outlined text-lg">dashboard</span>
+            Dashboard
+          </button>
+          <button
+            onClick={() => { setView("orders"); setOpen(false); }}
+            className={`w-full px-4 py-3 rounded-xl font-black flex items-center gap-2 mb-2 ${view === "orders" ? "bg-linear-to-r from-green-500 to-teal-500 text-white shadow-lg" : "bg-white/10 text-gray-300 hover:bg-white/20"}`}
+          >
+            <span className="material-symbols-outlined text-lg">receipt_long</span>
+            Pedidos
+          </button>
+          <button
+            onClick={() => { setView("products"); setOpen(false); }}
+            className={`w-full px-4 py-3 rounded-xl font-black flex items-center gap-2 mb-2 ${view === "products" ? "bg-linear-to-r from-purple-500 to-pink-500 text-white shadow-lg" : "bg-white/10 text-gray-300 hover:bg-white/20"}`}
+          >
+            <span className="material-symbols-outlined text-lg">inventory_2</span>
+            Productos
+          </button>
+          <hr className="my-3 border-cyan-500/10" />
+          <button
+            onClick={() => { fetchOrders(); setOpen(false); }}
+            className="w-full px-4 py-3 rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 text-white font-black flex items-center gap-2 mb-2"
+          >
+            <span className="material-symbols-outlined text-lg">refresh</span>
+            Actualizar
+          </button>
+          <button
+            onClick={() => { handleLogout(); setOpen(false); }}
+            className="w-full px-4 py-3 rounded-xl border-2 border-red-500/50 text-red-400 font-black hover:bg-red-500 hover:text-white flex items-center gap-2 mb-2"
+          >
+            <span className="material-symbols-outlined text-lg">logout</span>
+            Cerrar
+          </button>
+          <Link
+            to="/shop"
+            className="w-full px-4 py-3 rounded-xl border-2 border-white/30 text-white font-black hover:bg-white/10 hover:border-cyan-400/50 flex items-center gap-2"
+            onClick={() => setOpen(false)}
+          >
+            <span className="material-symbols-outlined text-base">arrow_back</span>
+            Tienda
+          </Link>
+        </div>
+        <button
+          className="absolute top-2 right-2 p-2 rounded-full bg-white/10 hover:bg-white/20 text-cyan-400"
+          onClick={() => setOpen(false)}
+          aria-label="Cerrar menú"
+        >
+          <span className="material-symbols-outlined text-2xl">close</span>
+        </button>
+      </div>
+    </div>
+  );
+}
 
         <main className="max-w-7xl mx-auto px-4 pb-12">
           {view === "dashboard" ? (
