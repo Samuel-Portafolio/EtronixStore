@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { NoResults, ProductSkeleton } from "../components/EmptyState";
 import { CATEGORIES } from "../constants/categories";
 import { Helmet } from "react-helmet-async";
@@ -25,6 +25,8 @@ export default function Shop() {
   const [sortBy, setSortBy] = useState('newest');
   const [priceRange, setPriceRange] = useState({ min: 0, max: 999999999 });
   const [tempPriceRange, setTempPriceRange] = useState({ min: '', max: '' });
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     (async () => {
@@ -254,7 +256,7 @@ export default function Shop() {
                       } else {
                         params.set('category', value);
                       }
-                      window.history.replaceState({}, '', `${location.pathname}?${params.toString()}`);
+                      navigate(`${location.pathname}?${params.toString()}`, { replace: true });
                     }}
                     className="w-full px-4 py-3 rounded-xl bg-gray-900/80 border border-cyan-500/30 text-white placeholder-gray-400 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/30 transition-all"
                   >
