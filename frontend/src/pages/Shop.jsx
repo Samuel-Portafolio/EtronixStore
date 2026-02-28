@@ -349,7 +349,7 @@ useEffect(() => {
                         <Link to={`/products/${p._id}`}>
                           <div className=" relative aspect-4/5 rounded-xl bg-white/5 overflow-hidden mb-4 border border-white/10">
                             {p.stock > 0 && p.stock < 5 && (
-                              <span className="absolute top-2 right-2 px-2 py-1 rounded-lg bg-amber-500 text-white text-xs font-black">
+                              <span className="absolute top-2 right-2 z-30 px-2 py-1 rounded-lg bg-amber-500 text-white text-xs font-black">
                                 Últimas unidades
                               </span>
                             )}
